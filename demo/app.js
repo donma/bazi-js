@@ -141,6 +141,36 @@ function formatShenSha(list, limit = 14) {
   return `${names.join('、 ')}${suffix}`;
 }
 
+const SHENSHA_CATEGORY_LABELS = { auspicious: '吉', inauspicious: '凶', neutral: '中性' };
+const SHENSHA_CONFIDENCE_LABELS = {
+  classical: '經典',
+  traditional: '傳統',
+  'modern-common': '通行',
+  'school-specific': '流派',
+  folk: '民俗',
+  experimental: '實驗'
+};
+const HIDDEN_ROLE_LABELS = { primary: '本氣', secondary: '中氣', residual: '餘氣' };
+
+function renderPillarShenSha(items) {
+  if (!items || !items.length) return '<p class="responsive-shensha-empty">— 此柱無命中神煞</p>';
+  return `<ul class="responsive-pillar-shensha-list">${items.map((item) => {
+    const category = SHENSHA_CATEGORY_LABELS[item.category] || item.category || '—';
+    const confidence = SHENSHA_CONFIDENCE_LABELS[item.confidence] || item.confidence || '—';
+    const evidence = (item.evidence && item.evidence.details || []).map((detail) => {
+      const base = detail.baseValue ? `基準 ${detail.baseValue}` : '';
+      const target = detail.targetValue ? `命中 ${detail.targetValue}` : '';
+      return `<li>${displayText([base, target, detail.reason].filter(Boolean).join(' · '), '符合規則')}</li>`;
+    }).join('');
+    return `<li class="responsive-pillar-shensha-item">
+      <div class="responsive-shensha-name"><strong>${displayText(item.displayName || item.name)}</strong><span>${displayText(category)} · ${displayText(confidence)}</span></div>
+      <div class="responsive-shensha-meta">基準：${displayText((item.basedOn || []).join('、'))} · 規則：${displayText(item.ruleId)}</div>
+      <div class="responsive-shensha-reference">依據：${displayText(item.reference, '未提供')}</div>
+      ${evidence ? `<details><summary>判定證據（${(item.evidence.details || []).length} 筆）</summary><ul>${evidence}</ul></details>` : ''}
+    </li>`;
+  }).join('')}</ul>`;
+}
+
 function renderResponsivePreview(result, options) {
   const theme = Bazi.Renderer.themes[options.theme] || Bazi.Renderer.themes['modern-oriental'];
   const preset = Bazi.Renderer.presets[options.preset] || Bazi.Renderer.presets.full;
@@ -157,11 +187,12 @@ function renderResponsivePreview(result, options) {
   ].join(';');
 
   const p = result.pillars;
+  const shenShaByPillar = Bazi.ShenSha.groupShenShaByPillar(result.shenSha || []);
   const pillarCols = [
-    { title: '時柱', data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour },
-    { title: '日柱', data: p.day, tenGod: { full: '日主' }, hidden: result.tenGods.hidden.day, nayin: result.nayin.day, stage: result.twelveStages.byDayMaster.day },
-    { title: '月柱', data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month },
-    { title: '年柱', data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year }
+    { key: 'year', title: '年柱', data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year, selfStage: result.twelveStages.selfSeated.year },
+    { key: 'month', title: '月柱', data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month, selfStage: result.twelveStages.selfSeated.month },
+    { key: 'day', title: '日柱', data: p.day, tenGod: { full: '日主' }, hidden: result.tenGods.hidden.day, nayin: result.nayin.day, stage: result.twelveStages.byDayMaster.day, selfStage: result.twelveStages.selfSeated.day },
+    { key: 'hour', title: '時柱', data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour, selfStage: result.twelveStages.selfSeated.hour }
   ];
 
   const elementColors = theme.elementColors || {};
@@ -177,13 +208,16 @@ function renderResponsivePreview(result, options) {
 
   const pillars = pillarCols.map((col) => {
     const available = col.data && col.data.available !== false;
-    const hidden = (col.hidden || []).map((item) => `<li>${displayText(item.stem)} <small>(${displayText(item.tenGod && item.tenGod.short, '')})</small></li>`).join('');
+    const xunkong = available && Bazi.ShenSha.calculateXunKong(col.data.ganzhi).emptyBranches.join('') || '—';
+    const hidden = (col.hidden || []).map((item) => `<li><strong>${displayText(item.stem)}</strong> <small>${displayText(item.tenGod && item.tenGod.full, '')} · ${displayText(HIDDEN_ROLE_LABELS[item.role] || item.role, '')} · ${displayText(item.days, '')}日/${Math.round((Number(item.weight) || 0) * 100)}%</small></li>`).join('');
+    const shensha = shenShaByPillar[col.key] || [];
     return `<article class="responsive-pillar">
       <header>${displayText(col.title)}</header>
-      <div class="responsive-pillar-god">${displayText(col.tenGod && (col.tenGod.full || col.tenGod.short))}</div>
-      <div class="responsive-ganzhi">${available ? displayText(col.data.stem) : '？'}<br>${available ? displayText(col.data.branch) : '？'}</div>
-      <ul>${hidden || '<li>—</li>'}</ul>
-      <div class="responsive-pillar-meta">納音：${displayText(col.nayin)}<br>長生：${displayText(col.stage && col.stage.name)}</div>
+      <div class="responsive-pillar-primary"><span>主星</span><strong>${displayText(col.tenGod && (col.tenGod.full || col.tenGod.short))}</strong></div>
+      <div class="responsive-pillar-characters"><div><span>天干</span><strong>${available ? displayText(col.data.stem) : '？'}</strong></div><div><span>地支</span><strong>${available ? displayText(col.data.branch) : '？'}</strong></div></div>
+      <div class="responsive-pillar-field"><span>藏幹</span><ul>${hidden || '<li>—</li>'}</ul></div>
+      <div class="responsive-pillar-meta"><div><span>地勢</span>${displayText(col.stage && col.stage.name)}</div><div><span>自坐</span>${displayText(col.selfStage && col.selfStage.name)}</div><div><span>空亡</span>${displayText(xunkong)}</div><div><span>納音</span>${displayText(col.nayin)}</div></div>
+      <div class="responsive-pillar-shensha"><h5>神煞（${shensha.length}）</h5>${renderPillarShenSha(shensha)}</div>
     </article>`;
   }).join('');
 
@@ -195,7 +229,34 @@ function renderResponsivePreview(result, options) {
           <strong>${displayText(cycle.ganzhi)}</strong>
           <small>${displayText(cycle.tenGodStem && cycle.tenGodStem.short)}</small>
           <em>${displayText(cycle.fromYear)}年</em>
+          <small class="responsive-luck-shensha">神煞：${displayText(formatShenSha(cycle.shenSha, 5))}</small>
         </article>`).join('')}</div>
+      </section>`
+    : '';
+
+  const transitYear = result.transits && result.transits.year;
+  const transitShenSha = result.transits && (result.transits.shenShaYear || (transitYear && transitYear.shenSha)) || [];
+  const transitSection = preset.includeShenSha && transitYear
+    ? `<section class="responsive-section responsive-transit">
+        <h4>流年詳細</h4>
+        <div class="responsive-transit-grid">
+          <div><span>流年</span><strong>${displayText(transitYear.ganzhi)}</strong></div>
+          <div><span>十神</span><strong>${displayText(transitYear.tenGod && (transitYear.tenGod.full || transitYear.tenGod.short))}</strong></div>
+          <div><span>地勢</span><strong>${displayText(transitYear.stage && transitYear.stage.name)}</strong></div>
+          <div><span>納音</span><strong>${displayText(transitYear.nayin)}</strong></div>
+        </div>
+        <div class="responsive-transit-shensha"><strong>流年神煞（${transitShenSha.length}）</strong><p>${displayText(formatShenSha(transitShenSha, 20))}</p></div>
+      </section>`
+    : '';
+
+  const interactionItems = [
+    ...(result.interactions && result.interactions.stems || []).map((item) => `天干：${item.name}`),
+    ...(result.interactions && result.interactions.branches || []).map((item) => `地支：${item.name}`)
+  ];
+  const interactions = preset.includeInteractions && interactionItems.length
+    ? `<section class="responsive-section responsive-interactions">
+        <h4>天干地支互動</h4>
+        <ul>${interactionItems.map((item) => `<li>${displayText(item)}</li>`).join('')}</ul>
       </section>`
     : '';
 
@@ -226,24 +287,44 @@ function renderResponsivePreview(result, options) {
   const dayMasterStem = result.pillars.day.stem;
   const stem = (Bazi.Constants.STEMS || []).find((item) => item.char === dayMasterStem);
   const dayMaster = `${dayMasterStem}${stem ? stem.element : ''}`;
+  const zodiacNames = { 子: '鼠', 丑: '牛', 寅: '虎', 卯: '兔', 辰: '龍', 巳: '蛇', 午: '馬', 未: '羊', 申: '猴', 酉: '雞', 戌: '狗', 亥: '豬' };
+  const seasonNames = { 寅: '春', 卯: '春', 辰: '春', 巳: '夏', 午: '夏', 未: '夏', 申: '秋', 酉: '秋', 戌: '秋', 亥: '冬', 子: '冬', 丑: '冬' };
+  const yearStemInfo = (Bazi.Constants.STEMS || []).find((item) => item.char === result.pillars.year.stem) || {};
+  const prevJie = result.calendar.solarTerms && result.calendar.solarTerms.prevJie;
+  const infoItems = [
+    ['公曆', `${result.calendar.solar.year}年${result.calendar.solar.month}月${result.calendar.solar.day}日 ${result.input.birthTime || '未知'}`],
+    ['農曆', `${result.calendar.lunar.monthName}${result.calendar.lunar.dayName}`],
+    ['乾造', result.input.gender === 'male' ? '男' : '女'],
+    ['陰陽', yearStemInfo.yinYang === 'yang' ? '陽' : '陰'],
+    ['生肖', zodiacNames[result.pillars.year.branch] || '—'],
+    ['節氣', prevJie ? prevJie.name : '—'],
+    ['季節', seasonNames[result.pillars.month.branch] || '—'],
+    ['日主', `${dayMaster}（${result.strength.level}）`],
+    ['月令格局', `${result.tenGods.stems.month ? result.tenGods.stems.month.full : '—'}格`],
+    ['強弱分數', `${result.strength.score} 分`],
+    ['命宮', result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : '—'],
+    ['身宮', result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : '—'],
+    ['胎元', result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : '—'],
+    ['胎息', result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : '—'],
+    ['起運', result.luckCycles && result.luckCycles.startAge ? `${result.luckCycles.startAge.display}${result.luckCycles.startAge.startDate ? `（${result.luckCycles.startAge.startDate}）` : ''}` : '—'],
+    ['規則版本', `ShenSha ${result.meta.shenShaRuleVersion || '—'}`]
+  ];
+  const basicInfo = infoItems.map(([label, value]) => `<div><span>${displayText(label)}</span><strong>${displayText(value)}</strong></div>`).join('');
 
   return `<div class="responsive-chart" style="${styles}">
     <header class="responsive-chart-header">
       <h3>八字命盤 · 子平四柱</h3>
       <p>BaziJS Metaphysical Engine v${displayText(result.meta.engineVersion)} · 規範流派：${displayText(result.meta.profileName)}</p>
     </header>
-    <section class="responsive-info-grid">
-      <div><span>公曆</span><strong>${displayText(result.calendar.solar.year)}年${displayText(result.calendar.solar.month)}月${displayText(result.calendar.solar.day)}日 ${displayText(result.input.birthTime, '未知')}</strong></div>
-      <div><span>農曆</span><strong>${displayText(result.calendar.lunar.monthName)}${displayText(result.calendar.lunar.dayName)}</strong></div>
-      <div><span>性別</span><strong>${result.input.gender === 'male' ? '乾造（男）' : '坤造（女）'}</strong></div>
-      <div><span>日主</span><strong>${displayText(dayMaster)}（${displayText(result.strength.level)}）</strong></div>
-    </section>
+    <section class="responsive-info-grid">${basicInfo}</section>
     <section class="responsive-section responsive-pillars-section">
       <h4>四柱主盤</h4>
       <div class="responsive-pillar-grid">${pillars}</div>
     </section>
     ${strength}
     ${luckCycles}
+    ${transitSection}
+    ${interactions}
     ${shenSha}
     <footer>Produced by BaziJS Open Source Metaphysical Engine · Apache-2.0 License</footer>
   </div>`;
