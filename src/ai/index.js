@@ -5,6 +5,49 @@
 // 保留：四柱、十神、藏干、五行、強弱、合沖刑害、神煞、大運、流運、ruleId、evidence、profile、version。
 // 專供大型語言模型 (LLM) 作為 system prompt 或 context 注入，嚴禁直接讓 LLM 自行猜算八字。
 
+import { groupShenShaByPillar } from '../shensha/index.js';
+
+function buildShenShaItem(item, options = {}) {
+  const { includeRules = true, includeEvidence = true } = options;
+  return {
+    id: item.id,
+    name: item.name,
+    displayName: item.displayName || item.name,
+    aliases: item.aliases || [],
+    category: item.category,
+    tags: item.tags || [],
+    tier: item.tier,
+    priority: item.priority,
+    confidence: item.confidence,
+    schools: item.schools || [],
+    hitOn: item.hitOn || [],
+    basedOn: item.basedOn || [],
+    target: item.target,
+    ...(includeRules ? { ruleId: item.ruleId, version: item.version } : {}),
+    reference: item.reference,
+    ...(Array.isArray(item.references) ? { references: item.references } : {}),
+    ...(item.description ? { description: item.description } : {}),
+    ...(item.variants ? { variants: item.variants } : {}),
+    ...(item.researchNotes ? { researchNotes: item.researchNotes } : {}),
+    ...(includeEvidence ? { evidence: item.evidence } : {})
+  };
+}
+
+export function toShenShaContext(result, options = {}) {
+  const items = (result.shenSha || []).map((item) => buildShenShaItem(item, options));
+  const grouped = groupShenShaByPillar(result.shenSha || []);
+  const context = {
+    preset: result.meta.shenshaPreset || 'classical',
+    ruleVersion: result.meta.shenShaRuleVersion || '2.0.0',
+    all: items,
+    byPillar: Object.fromEntries(Object.entries(grouped).map(([pillar, list]) => [
+      pillar,
+      list.map((item) => buildShenShaItem(item, options))
+    ]))
+  };
+  return options.compact ? JSON.stringify(context) : context;
+}
+
 export function toContext(result, options = {}) {
   const {
     compact = true,
@@ -21,7 +64,9 @@ export function toContext(result, options = {}) {
       engine: 'BaziJS',
       engineVersion: result.meta.engineVersion,
       ruleSetVersion: result.meta.ruleSetVersion,
-      profileId: result.meta.profileId
+      profileId: result.meta.profileId,
+      shenshaPreset: result.meta.shenshaPreset || 'classical',
+      shenShaRuleVersion: result.meta.shenShaRuleVersion || '2.0.0'
     },
 
     inputSummary: {
@@ -90,13 +135,16 @@ export function toContext(result, options = {}) {
       shenGong: result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : null
     },
 
-    shenShaList: result.shenSha.map(s => ({
-      name: s.name,
-      category: s.category,
-      hitOn: s.hitOn,
-      ruleId: includeRules ? s.ruleId : undefined,
-      reference: s.reference,
-      ...(includeShenShaEvidence ? { evidence: s.evidence } : {})
+    shenSha: toShenShaContext(result, {
+      includeRules,
+      includeEvidence: includeShenShaEvidence,
+      compact: false
+    }),
+
+    // 舊欄位保留，讓既有整合不必同步升級；新程式請使用 shenSha。
+    shenShaList: result.shenSha.map(s => buildShenShaItem(s, {
+      includeRules,
+      includeEvidence: includeShenShaEvidence
     })),
 
     ...(includeInteractions ? {

@@ -15,7 +15,7 @@ import { calculateChartKongWang } from '../core/constants/kongwang-calc.js';
 import { calculateChartAuxiliary } from '../auxiliary/index.js';
 import { calculateInteractions } from '../interactions/index.js';
 import { calculateStrength } from '../strength/index.js';
-import { calculateShenSha, calculateShenShaOnPillar } from '../shensha/index.js';
+import { calculateShenSha, calculateShenShaOnPillar, calculateTransitShenSha } from '../shensha/index.js';
 import { calculateLuckCycles } from '../luck/index.js';
 import { calculateTransit } from '../transit/index.js';
 import { calculateTrueSolarTime } from '../calendar/true-solar-time.js';
@@ -122,7 +122,8 @@ export function calculate(input, options = {}) {
   const auxiliary = calculateChartAuxiliary(pillars);
   const interactions = calculateInteractions(pillars);
   const strength = calculateStrength(pillars, interactions);
-  const shenSha = calculateShenSha(pillars);
+  const shenshaPreset = input.shenshaPreset || input.shenShaPreset || options.shenshaPreset || options.shenShaPreset || 'classical';
+  const shenSha = calculateShenSha(pillars, { preset: shenshaPreset, gender: input.gender });
 
   // 9. 大運計算
   const luckCycles = calculateLuckCycles({
@@ -142,22 +143,24 @@ export function calculate(input, options = {}) {
   // 11. 大運神煞：每步大運干支以原局為基準觸發的神煞（catalog scope: luck）
   if (luckCycles && Array.isArray(luckCycles.cycles)) {
     luckCycles.cycles.forEach((cyc, idx) => {
-      cyc.shenSha = calculateShenShaOnPillar(pillars, cyc.stem, cyc.branch, `luck-${idx + 1}`);
+      cyc.shenSha = calculateShenShaOnPillar(pillars, cyc.stem, cyc.branch, `luck-${idx + 1}`, { preset: shenshaPreset, gender: input.gender });
     });
   }
 
   // 12. 流年神煞：當期流年干支以原局為基準觸發的神煞（catalog scope: transit）
   if (transits && transits.year) {
-    transits.shenShaYear = calculateShenShaOnPillar(
-      pillars, transits.year.stem, transits.year.branch, 'transit-year'
-    );
+    const transitShenSha = calculateTransitShenSha(pillars, transits, { preset: shenshaPreset, gender: input.gender });
+    transits.shenShaYear = transitShenSha.shenSha;
+    transits.shenSha = transitShenSha;
+    transits.year.shenSha = transitShenSha.shenSha;
   }
 
   const result = {
     meta: {
       ...VERSIONS,
       profileId: profile.id,
-      profileName: profile.name
+      profileName: profile.name,
+      shenshaPreset
     },
 
     input: {

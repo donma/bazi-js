@@ -3,7 +3,7 @@
 export const ENGINE_VERSION = '1.0.2';
 export const RULE_SET_VERSION = '2026.09';
 export const CALENDAR_RULE_VERSION = '1.0.0';
-export const SHENSHA_RULE_VERSION = '1.1.0';
+export const SHENSHA_RULE_VERSION = '2.0.0';
 export const STRENGTH_RULE_VERSION = '1.0.0';
 export const INTERACTION_RULE_VERSION = '1.0.0';
 export const LUCK_RULE_VERSION = '1.0.0';

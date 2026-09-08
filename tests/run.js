@@ -117,6 +117,37 @@ async function runUnit() {
   assert(!jiSvg.includes('己木'), 'UT-SVG-NO-JIMU', '');
 }
 
+// ---------- ShenSha vNext ----------
+async function runShenShaVNext() {
+  console.log('== ShenSha vNext ==');
+  const fixture = JSON.parse(fs.readFileSync(new URL('./fixtures/shensha/vnext-golden.json', import.meta.url), 'utf8'));
+  const chart = Bazi.calculate(fixture.input);
+  const expectedPillars = fixture.expected.pillars;
+  assert(chart.pillars.year.ganzhi === expectedPillars.year && chart.pillars.month.ganzhi === expectedPillars.month && chart.pillars.day.ganzhi === expectedPillars.day && chart.pillars.hour.ganzhi === expectedPillars.hour, fixture.caseId + '-PILLARS', JSON.stringify(chart.pillars));
+  assert(chart.meta.shenshaPreset === 'classical' && chart.meta.shenShaRuleVersion === '2.0.0', fixture.caseId + '-META', JSON.stringify(chart.meta));
+
+  const registryCheck = Bazi.ShenSha.validateShenShaRegistry();
+  assert(registryCheck.valid && registryCheck.count >= 45, 'UT-SHENSHA-REGISTRY', JSON.stringify(registryCheck));
+  const byPillar = Bazi.ShenSha.groupShenShaByPillar(chart.shenSha);
+  for (const [pillar, ids] of Object.entries(fixture.expected.byPillarAtLeast)) {
+    const actual = new Set(byPillar[pillar].map((item) => item.id));
+    assert(ids.every((id) => actual.has(id)), `${fixture.caseId}-${pillar}`, `缺少 ${ids.filter((id) => !actual.has(id)).join(',')}`);
+    assert(byPillar[pillar].every((item) => item.hitOn.length === 1 && item.hitOn[0] === pillar), `${fixture.caseId}-${pillar}-GROUP`, 'hitOn 必須是單一柱位');
+  }
+
+  const aiShenSha = Bazi.AI.toShenShaContext(chart);
+  const aiContext = Bazi.AI.toContext(chart, { compact: false });
+  assert(Array.isArray(aiShenSha.all) && Array.isArray(aiShenSha.byPillar.hour) && aiShenSha.byPillar.hour.some((item) => item.id === 'xue_ren'), 'UT-AI-SHENSHA-CONTEXT', '');
+  assert(aiContext.shenSha && aiContext.shenSha.all.length === chart.shenSha.length && Array.isArray(aiContext.shenShaList), 'UT-AI-SHENSHA-BACKWARD', '');
+
+  const xunkong = Bazi.ShenSha.calculateXunKong('己亥');
+  assert(xunkong.xun === '甲午旬' && JSON.stringify(xunkong.emptyBranches) === JSON.stringify(['辰', '巳']), 'UT-XUNKONG-JIHAI', JSON.stringify(xunkong));
+  const transit = Bazi.ShenSha.calculateTransitShenSha(chart, chart.transits);
+  assert(Array.isArray(transit.shenSha) && transit.target === chart.transits.year.ganzhi, 'UT-TRANSIT-SHENSHA-VNEXT', JSON.stringify(transit));
+  const minimal = Bazi.calculate(fixture.input, { shenshaPreset: 'minimal' });
+  assert(!minimal.shenSha.some((item) => item.id === 'fei_ren'), 'UT-SHENSHA-PRESET-MINIMAL', 'P0 extended rule 不應出現在 minimal');
+}
+
 // ---------- Golden Cases ----------
 async function runGolden() {
   console.log('== Golden Cases ==');
@@ -181,6 +212,7 @@ async function runBoundary() {
 }
 
 await runUnit();
+await runShenShaVNext();
 await runGolden();
 await runBoundary();
 

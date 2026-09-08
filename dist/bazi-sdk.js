@@ -1071,13 +1071,13 @@ var Bazi = (() => {
     "\u7678": { startBranch: "\u536F", forward: false }
   };
   function getTwelveStage(stemChar, branchChar) {
-    const rule = STEM_CHANGSHENG_MAP[stemChar];
-    if (!rule) return null;
-    const startIdx = BRANCH_INDEX[rule.startBranch];
+    const rule2 = STEM_CHANGSHENG_MAP[stemChar];
+    if (!rule2) return null;
+    const startIdx = BRANCH_INDEX[rule2.startBranch];
     const targetIdx = BRANCH_INDEX[branchChar];
     if (targetIdx === void 0) return null;
     let step;
-    if (rule.forward) {
+    if (rule2.forward) {
       step = (targetIdx - startIdx + 12) % 12;
     } else {
       step = (startIdx - targetIdx + 12) % 12;
@@ -1716,9 +1716,43 @@ var Bazi = (() => {
   // src/shensha/index.js
   var shensha_exports = {};
   __export(shensha_exports, {
+    SHENSHA_CATALOG: () => SHENSHA_CATALOG,
+    SHENSHA_CATEGORIES: () => SHENSHA_CATEGORIES,
+    SHENSHA_CONFIDENCES: () => SHENSHA_CONFIDENCES,
+    SHENSHA_PRESETS: () => SHENSHA_PRESETS,
+    SHENSHA_REGISTRY: () => SHENSHA_REGISTRY,
+    SHENSHA_TIERS: () => SHENSHA_TIERS,
     calculateShenSha: () => calculateShenSha,
-    calculateShenShaOnPillar: () => calculateShenShaOnPillar
+    calculateShenShaOnPillar: () => calculateShenShaOnPillar,
+    calculateTransitShenSha: () => calculateTransitShenSha,
+    calculateXunKong: () => calculateXunKong,
+    getShenShaCatalog: () => getShenShaCatalog,
+    getShenShaPreset: () => getShenShaPreset,
+    getShenShaRule: () => getShenShaRule,
+    groupShenShaByPillar: () => groupShenShaByPillar,
+    validateShenShaRegistry: () => validateShenShaRegistry
   });
+
+  // src/shensha/constants.js
+  var SHENSHA_CATEGORIES = Object.freeze(["auspicious", "inauspicious", "neutral"]);
+  var SHENSHA_TIERS = Object.freeze(["core", "extended", "optional"]);
+  var SHENSHA_CONFIDENCES = Object.freeze([
+    "classical",
+    "traditional",
+    "modern-common",
+    "school-specific",
+    "folk",
+    "experimental"
+  ]);
+  var PILLAR_KEYS = Object.freeze(["year", "month", "day", "hour"]);
+  var SHENSHA_PRESETS = Object.freeze({
+    minimal: Object.freeze({ id: "minimal", tiers: ["core"], excludeExperimental: true }),
+    classical: Object.freeze({ id: "classical", tiers: ["core", "extended"], excludeExperimental: true }),
+    full: Object.freeze({ id: "full", tiers: ["core", "extended", "optional"], excludeExperimental: true })
+  });
+  function getShenShaPreset(name = "classical") {
+    return SHENSHA_PRESETS[name] || SHENSHA_PRESETS.classical;
+  }
 
   // src/shensha/catalog.js
   var SHENSHA_CATALOG = [
@@ -2306,135 +2340,354 @@ var Bazi = (() => {
     }
   ];
 
-  // src/shensha/index.js
-  function calculateShenSha(pillars) {
+  // src/shensha/utils/xunkong.js
+  var STEM_CHARS2 = "\u7532\u4E59\u4E19\u4E01\u620A\u5DF1\u5E9A\u8F9B\u58EC\u7678";
+  var BRANCH_CHARS2 = "\u5B50\u4E11\u5BC5\u536F\u8FB0\u5DF3\u5348\u672A\u7533\u9149\u620C\u4EA5";
+  function parseGanzhi(value) {
+    if (typeof value === "string") return { stem: value[0], branch: value[1] };
+    if (value && value.stem && value.branch) return value;
+    return null;
+  }
+  function calculateXunKong(ganzhi) {
+    const parsed = parseGanzhi(ganzhi);
+    if (!parsed) return { xun: null, emptyBranches: [], index: -1 };
+    const index = sexagenaryIndex(STEM_CHARS2.indexOf(parsed.stem), BRANCH_CHARS2.indexOf(parsed.branch));
+    if (index < 0) return { xun: null, emptyBranches: [], index: -1 };
+    const start = Math.floor(index / 10) * 10;
+    return {
+      xun: `${STEM_CHARS2[start % 10]}${BRANCH_CHARS2[start % 12]}\u65EC`,
+      emptyBranches: [BRANCH_CHARS2[(start + 10) % 12], BRANCH_CHARS2[(start + 11) % 12]],
+      index
+    };
+  }
+
+  // src/shensha/utils/context.js
+  function toPillar(pillar, key) {
+    const available = pillar && pillar.available !== false && pillar.stem && pillar.branch;
+    if (!available) return { pillar: key, available: false, stem: null, branch: null, ganzhi: null };
+    const ganzhi = pillar.ganzhi || `${pillar.stem}${pillar.branch}`;
+    return {
+      pillar: key,
+      available: true,
+      stem: pillar.stem,
+      branch: pillar.branch,
+      ganzhi,
+      sexagenaryIndex: pillar.sexagenaryIndex ?? null,
+      nayin: pillar.sexagenaryIndex === void 0 ? null : getNayin(pillar.sexagenaryIndex)
+    };
+  }
+  function createShenShaContext(pillars, options = {}) {
+    const normalized = {
+      year: toPillar(pillars.year, "year"),
+      month: toPillar(pillars.month, "month"),
+      day: toPillar(pillars.day, "day"),
+      hour: toPillar(pillars.hour, "hour")
+    };
+    const yearStemInfo = STEMS[STEM_INDEX[normalized.year.stem]] || {};
+    const bases = {
+      yearStem: normalized.year.stem,
+      monthStem: normalized.month.stem,
+      dayStem: normalized.day.stem,
+      yearBranch: normalized.year.branch,
+      monthBranch: normalized.month.branch,
+      dayBranch: normalized.day.branch,
+      dayPillar: normalized.day.ganzhi,
+      yearPillar: normalized.year,
+      dayPillarData: normalized.day
+    };
+    return {
+      pillars: normalized,
+      bases,
+      gender: options.gender || null,
+      yearStemYinYang: yearStemInfo.yinYang || null,
+      dayXunKong: calculateXunKong(normalized.day.ganzhi),
+      target: null
+    };
+  }
+  function getBaseValue(context, baseKey) {
+    const value = context.bases[baseKey];
+    if (value && typeof value === "object") return value.ganzhi || value.branch || null;
+    return value ?? null;
+  }
+  function getPillarEntries(pillars) {
+    return ["year", "month", "day", "hour"].map((key) => toPillar(pillars[key], key)).filter((item) => item.available);
+  }
+  function isBaseActive(context, baseKey) {
+    return !context.activeBase || context.activeBase === baseKey;
+  }
+
+  // src/shensha/catalogs/extended/vnext.js
+  var branches = "\u5B50\u4E11\u5BC5\u536F\u8FB0\u5DF3\u5348\u672A\u7533\u9149\u620C\u4EA5";
+  var branchAt2 = (branch, offset) => branches[(branches.indexOf(branch) + offset + 12) % 12];
+  var matchMap = (context, baseKey, map) => {
+    if (!isBaseActive(context, baseKey)) return false;
+    const base = context.bases[baseKey];
+    const expected = map[base];
+    const values = Array.isArray(expected) ? expected : [expected];
+    return values.includes(context.target.branch);
+  };
+  var matchStemMap = (context, baseKeys, map) => baseKeys.some((key) => {
+    if (!isBaseActive(context, key)) return false;
+    const expected = map[context.bases[key]];
+    return (Array.isArray(expected) ? expected : [expected]).includes(context.target.branch);
+  });
+  var matchPillarSet = (context, baseKey, set) => isBaseActive(context, baseKey) && context.target.pillar === "day" && set.includes(context.target.ganzhi);
+  var refs = (title, note) => [{ type: "classical", title, note }];
+  var rule = (definition) => ({
+    aliases: [],
+    tags: [],
+    schools: ["classical"],
+    priority: 50,
+    version: "2.0.0",
+    ...definition
+  });
+  var YANG_REN = { \u7532: "\u536F", \u4E59: "\u5BC5", \u4E19: "\u5348", \u4E01: "\u5DF3", \u620A: "\u5348", \u5DF1: "\u5DF3", \u5E9A: "\u9149", \u8F9B: "\u7533", \u58EC: "\u5B50", \u7678: "\u4EA5" };
+  var GUO_YIN = { \u7532: "\u620C", \u4E59: "\u4EA5", \u4E19: "\u4E11", \u4E01: "\u5BC5", \u620A: "\u4E11", \u5DF1: "\u5BC5", \u5E9A: "\u8FB0", \u8F9B: "\u5DF3", \u58EC: "\u672A", \u7678: "\u7533" };
+  var XUE_TANG_BY_NAYIN = { \u91D1: "\u5DF3", \u6728: "\u4EA5", \u6C34: "\u7533", \u706B: "\u5BC5", \u571F: "\u7533" };
+  var CI_GUAN_BY_NAYIN = { \u91D1: "\u7533", \u6728: "\u5BC5", \u6C34: "\u4EA5", \u706B: "\u5DF3", \u571F: "\u4EA5" };
+  var CI_GUAN_COMMON = { \u7532: "\u5E9A\u5BC5", \u4E59: "\u8F9B\u536F", \u4E19: "\u4E59\u5DF3", \u4E01: "\u620A\u5348", \u620A: "\u4E01\u5DF3", \u5DF1: "\u5E9A\u5348", \u5E9A: "\u58EC\u7533", \u8F9B: "\u7678\u9149", \u58EC: "\u7678\u4EA5", \u7678: "\u58EC\u620C" };
+  var XUE_TANG_COMMON = { \u7532: "\u4E19\u5BC5", \u4E59: "\u4E01\u536F", \u4E19: "\u620A\u7533", \u4E01: "\u5DF1\u9149", \u620A: "\u5E9A\u7533", \u5DF1: "\u8F9B\u9149", \u5E9A: "\u58EC\u5BC5", \u8F9B: "\u7678\u536F", \u58EC: "\u7532\u7533", \u7678: "\u4E59\u9149" };
+  var YIN_YANG_CHA_CUO = ["\u4E19\u5B50", "\u4E01\u4E11", "\u620A\u5BC5", "\u8F9B\u536F", "\u58EC\u8FB0", "\u7678\u5DF3", "\u4E19\u5348", "\u4E01\u672A", "\u620A\u7533", "\u8F9B\u9149", "\u58EC\u620C", "\u7678\u4EA5"];
+  var GU_LUAN = ["\u4E59\u5DF3", "\u4E01\u5DF3", "\u8F9B\u4EA5", "\u620A\u7533", "\u7532\u5BC5"];
+  var FU_XING = { \u7532: ["\u5BC5", "\u5B50"], \u4E59: ["\u536F", "\u4EA5"], \u4E19: ["\u5BC5", "\u5B50"], \u4E01: ["\u9149", "\u4EA5"], \u620A: ["\u536F"], \u5DF1: ["\u5DF3"], \u5E9A: ["\u5348"], \u8F9B: ["\u7533"], \u58EC: ["\u8FB0"], \u7678: ["\u4EA5"] };
+  var TIAN_CHU = { \u7532: "\u5DF3", \u4E59: "\u5348", \u4E19: "\u5DF3", \u4E01: "\u5348", \u620A: "\u7533", \u5DF1: "\u9149", \u5E9A: "\u4EA5", \u8F9B: "\u5B50", \u58EC: "\u5BC5", \u7678: "\u536F" };
+  var TIAN_GUAN = { \u7532: "\u672A", \u4E59: "\u8FB0", \u4E19: "\u5DF3", \u4E01: "\u9149", \u620A: "\u620C", \u5DF1: "\u536F", \u5E9A: "\u4EA5", \u8F9B: "\u7533", \u58EC: "\u5BC5", \u7678: "\u5348" };
+  var TIAN_FU = { \u7532: "\u9149", \u4E59: "\u7533", \u4E19: "\u5B50", \u4E01: "\u4EA5", \u620A: "\u536F", \u5DF1: "\u5BC5", \u5E9A: "\u5348", \u8F9B: "\u5DF3", \u58EC: "\u5348", \u7678: "\u5DF3" };
+  var ZAI_SHA = { \u7533: "\u5348", \u5B50: "\u5348", \u8FB0: "\u5348", \u5BC5: "\u5B50", \u5348: "\u5B50", \u620C: "\u5B50", \u5DF3: "\u536F", \u9149: "\u536F", \u4E11: "\u536F", \u4EA5: "\u9149", \u536F: "\u9149", \u672A: "\u9149" };
+  var BAI_HU = { \u7533: "\u620C", \u5B50: "\u620C", \u8FB0: "\u620C", \u5BC5: "\u8FB0", \u5348: "\u8FB0", \u620C: "\u8FB0", \u5DF3: "\u4E11", \u9149: "\u4E11", \u4E11: "\u4E11", \u4EA5: "\u672A", \u536F: "\u672A", \u672A: "\u672A" };
+  var EXTENDED_SHENSHA = [
+    rule({ id: "fei_ren", name: "\u98DB\u5203", displayName: "\u98DB\u5203", category: "inauspicious", tags: ["blade"], tier: "extended", priority: 25, confidence: "traditional", baseOn: ["dayStem"], target: "branch", ruleId: "SS_FEIREN_023", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B", "\u4EE5\u7F8A\u5203\u5C0D\u6C96\u4F4D\u8AD6\u98DB\u5203"), description: "\u4EE5\u65E5\u5E72\u7F8A\u5203\u4E4B\u5C0D\u6C96\u652F\u5224\u5B9A\u3002", match: (c) => matchStemMap(c, ["dayStem"], Object.fromEntries(Object.entries(YANG_REN).map(([k, v]) => [k, branchAt2(v, 6)]))) }),
+    rule({ id: "liu_jia_kong_wang", name: "\u7A7A\u4EA1", displayName: "\u7A7A\u4EA1\uFF08\u516D\u7532\u7A7A\u4EA1\uFF09", aliases: ["\u65EC\u7A7A", "\u516D\u7532\u7A7A\u4EA1"], category: "neutral", tags: ["xunkong"], tier: "extended", priority: 20, confidence: "classical", baseOn: ["dayPillar"], target: "branch", ruleId: "SS_XUNKONG_024", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B", "\u516D\u7532\u65EC\u4E2D\u7A7A\u4EA1\u5169\u652F"), description: "\u4EE5\u65E5\u67F1\u6240\u5728\u65EC\u8A08\u7B97\u5169\u500B\u7A7A\u4EA1\u5730\u652F\u3002", match: (c) => isBaseActive(c, "dayPillar") && c.dayXunKong.emptyBranches.includes(c.target.branch) }),
+    rule({ id: "ci_guan", name: "\u8A5E\u9928", displayName: "\u8A5E\u9928", aliases: ["\u5B78\u9928\u8A5E\u9928"], category: "auspicious", tags: ["nayin", "literary"], tier: "extended", priority: 34, confidence: "school-specific", baseOn: ["dayStem", "yearPillar"], target: "branch", ruleId: "SS_CIGUAN_025", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u76F8\u95DC\u8A5E\u9928\u8A23", "\u7D0D\u97F3\u6D3E\u8207\u5E72\u652F\u5B9A\u67F1\u6CD5\u4E26\u5B58"), variants: [{ id: "nayin", description: "\u4EE5\u5E74\u67F1\u7D0D\u97F3\u4E94\u884C\u53D6\u8A5E\u9928\u652F\u3002" }, { id: "stem-pillar", description: "\u4EE5\u65E5\u5E72\u53D6\u56FA\u5B9A\u8A5E\u9928\u5E72\u652F\u3002" }], researchNotes: { conflict: true, note: "\u8A5E\u9928\u5404\u66F8\u53D6\u6CD5\u4E0D\u4E00\uFF0C\u4FDD\u7559\u5169\u7A2E\u6BD4\u5C0D\u8B49\u64DA\u3002" }, description: "\u540C\u6642\u4FDD\u7559\u7D0D\u97F3\u6D3E\u8207\u56FA\u5B9A\u5E72\u652F\u6D3E\uFF0C\u907F\u514D\u8986\u84CB\u6D41\u6D3E\u5DEE\u7570\u3002", match: (c) => {
+      if (c.target.pillar === "year") return false;
+      if (isBaseActive(c, "yearPillar") && CI_GUAN_BY_NAYIN[c.bases.yearPillar.nayin && c.bases.yearPillar.nayin.slice(-1)] === c.target.branch) return true;
+      if (isBaseActive(c, "dayStem") && CI_GUAN_COMMON[c.bases.dayStem] === c.target.ganzhi) return true;
+      return false;
+    } }),
+    rule({ id: "guo_yin_gui_ren", name: "\u570B\u5370\u8CB4\u4EBA", displayName: "\u570B\u5370\u8CB4\u4EBA", category: "auspicious", tags: ["noble"], tier: "extended", priority: 35, confidence: "traditional", baseOn: ["dayStem", "yearStem"], target: "branch", ruleId: "SS_GYGR_026", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B", "\u4EE5\u65E5\u5E72\u6216\u5E74\u5E72\u67E5\u570B\u5370\u8CB4\u4EBA"), description: "\u4EE5\u65E5\u5E72\u3001\u5E74\u5E72\u67E5\u570B\u5370\u8CB4\u4EBA\u652F\u3002", match: (c) => matchStemMap(c, ["dayStem", "yearStem"], GUO_YIN) }),
+    rule({ id: "xue_tang", name: "\u5B78\u5802", displayName: "\u5B78\u5802", category: "auspicious", tags: ["nayin", "literary"], tier: "extended", priority: 36, confidence: "school-specific", baseOn: ["dayStem", "yearPillar"], target: "branch", ruleId: "SS_XUETANG_027", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u76F8\u95DC\u5B78\u5802\u8A23", "\u7D0D\u97F3\u6D3E\u8207\u56FA\u5B9A\u5E72\u652F\u6CD5\u4E26\u5B58"), variants: [{ id: "nayin", description: "\u4EE5\u5E74\u67F1\u7D0D\u97F3\u4E94\u884C\u53D6\u5B78\u5802\u652F\u3002" }, { id: "stem-pillar", description: "\u4EE5\u65E5\u5E72\u53D6\u56FA\u5B9A\u5B78\u5802\u5E72\u652F\u3002" }], researchNotes: { conflict: true, note: "\u5B78\u5802\u5404\u5BB6\u6709\u7D0D\u97F3\u3001\u5E72\u652F\u5169\u5957\u5E38\u7528\u6CD5\u3002" }, description: "\u540C\u6642\u652F\u63F4\u7D0D\u97F3\u6D3E\u8207\u56FA\u5B9A\u5E72\u652F\u6D3E\u3002", match: (c) => {
+      if (isBaseActive(c, "yearPillar") && XUE_TANG_BY_NAYIN[c.bases.yearPillar.nayin && c.bases.yearPillar.nayin.slice(-1)] === c.target.branch) return true;
+      return isBaseActive(c, "dayStem") && XUE_TANG_COMMON[c.bases.dayStem] === c.target.ganzhi;
+    } }),
+    rule({ id: "pi_ma", name: "\u62AB\u9EBB", displayName: "\u62AB\u9EBB", category: "inauspicious", tags: ["mourning"], tier: "extended", priority: 38, confidence: "traditional", baseOn: ["yearBranch", "dayBranch"], target: "branch", ruleId: "SS_PIMA_028", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B", "\u62AB\u9EBB\u4EE5\u5E74\u652F\u6216\u65E5\u652F\u4E09\u5408\u5C40\u53D6\u6CD5"), description: "\u4EE5\u5E74\u652F\u3001\u65E5\u652F\u53D6\u62AB\u9EBB\u652F\u3002", match: (c) => matchMap(c, "yearBranch", { \u5B50: "\u9149", \u4E11: "\u620C", \u5BC5: "\u4EA5", \u536F: "\u5B50", \u8FB0: "\u4E11", \u5DF3: "\u5BC5", \u5348: "\u536F", \u672A: "\u8FB0", \u7533: "\u5DF3", \u9149: "\u5348", \u620C: "\u672A", \u4EA5: "\u7533" }) || matchMap(c, "dayBranch", { \u5B50: "\u9149", \u4E11: "\u620C", \u5BC5: "\u4EA5", \u536F: "\u5B50", \u8FB0: "\u4E11", \u5DF3: "\u5BC5", \u5348: "\u536F", \u672A: "\u8FB0", \u7533: "\u5DF3", \u9149: "\u5348", \u620C: "\u672A", \u4EA5: "\u7533" }) }),
+    rule({ id: "xue_ren", name: "\u8840\u5203", displayName: "\u8840\u5203", category: "inauspicious", tags: ["injury"], tier: "extended", priority: 39, confidence: "traditional", baseOn: ["dayStem", "monthBranch"], target: "branch", ruleId: "SS_XUEREN_029", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u76F8\u95DC\u8840\u5203\u8A23", "\u65E5\u5E72\u3001\u6708\u4EE4\u5169\u7A2E\u5E38\u898B\u53D6\u6CD5\u4E26\u5217"), researchNotes: { conflict: true, note: "\u8840\u5203\u5E38\u898B\u6309\u65E5\u5E72\u6216\u6309\u6708\u652F\u8D77\u4F8B\uFF0C\u5169\u8005\u4E0D\u4E92\u76F8\u8986\u84CB\u3002" }, match: (c) => matchStemMap(c, ["dayStem"], { \u7532: "\u536F", \u4E59: "\u8FB0", \u4E19: "\u5348", \u4E01: "\u672A", \u620A: "\u5348", \u5DF1: "\u672A", \u5E9A: "\u9149", \u8F9B: "\u620C", \u58EC: "\u5B50", \u7678: "\u4E11" }) || matchMap(c, "monthBranch", { \u5BC5: "\u4E11", \u536F: "\u672A", \u8FB0: "\u5BC5", \u5DF3: "\u7533", \u5348: "\u536F", \u672A: "\u9149", \u7533: "\u8FB0", \u9149: "\u620C", \u620C: "\u5DF3", \u4EA5: "\u4EA5", \u5B50: "\u5348", \u4E11: "\u5B50" }) }),
+    rule({ id: "fu_xing_gui_ren", name: "\u798F\u661F\u8CB4\u4EBA", displayName: "\u798F\u661F\u8CB4\u4EBA", category: "auspicious", tags: ["noble"], tier: "extended", priority: 45, confidence: "traditional", baseOn: ["dayStem", "yearStem"], target: "branch", ruleId: "SS_FXGR_030", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u798F\u661F\u8CB4\u4EBA\u8A23", "\u7532\u4E19\u5BC5\u5B50\u3001\u4E59\u7678\u536F\u4EA5\u7B49\u53D6\u6CD5"), match: (c) => matchStemMap(c, ["dayStem", "yearStem"], FU_XING) }),
+    rule({ id: "tian_chu_gui_ren", name: "\u5929\u5EDA\u8CB4\u4EBA", displayName: "\u5929\u5EDA\u8CB4\u4EBA", category: "auspicious", tags: ["noble"], tier: "extended", priority: 46, confidence: "traditional", baseOn: ["dayStem", "yearStem"], target: "branch", ruleId: "SS_TCGR_031", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u5EDA\u8CB4\u4EBA\u8A23", "\u4EE5\u65E5\u5E72\u3001\u5E74\u5E72\u67E5\u5929\u5EDA"), match: (c) => matchStemMap(c, ["dayStem", "yearStem"], TIAN_CHU) }),
+    rule({ id: "tian_guan_gui_ren", name: "\u5929\u5B98\u8CB4\u4EBA", displayName: "\u5929\u5B98\u8CB4\u4EBA", category: "auspicious", tags: ["noble"], tier: "extended", priority: 47, confidence: "traditional", baseOn: ["dayStem", "yearStem"], target: "branch", ruleId: "SS_TGGR_032", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u5B98\u8CB4\u4EBA\u8A23", "\u7532\u672A\u4E59\u8FB0\u4E19\u5DF3\u4E01\u9149\u7B49\u53D6\u6CD5"), match: (c) => matchStemMap(c, ["dayStem", "yearStem"], TIAN_GUAN) }),
+    rule({ id: "tian_fu_gui_ren", name: "\u5929\u798F\u8CB4\u4EBA", displayName: "\u5929\u798F\u8CB4\u4EBA", category: "auspicious", tags: ["noble"], tier: "extended", priority: 48, confidence: "traditional", baseOn: ["dayStem", "yearStem"], target: "branch", ruleId: "SS_TFGR_033", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u798F\u8CB4\u4EBA\u8A23", "\u4EE5\u6B63\u5B98\u6240\u81E8\u797F\u4F4D\u53D6\u6CD5"), match: (c) => matchStemMap(c, ["dayStem", "yearStem"], TIAN_FU) }),
+    rule({ id: "zai_sha", name: "\u707D\u715E", displayName: "\u707D\u715E", category: "inauspicious", tags: ["sha"], tier: "extended", priority: 52, confidence: "traditional", baseOn: ["yearBranch", "dayBranch"], target: "branch", ruleId: "SS_ZAISHA_034", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u795E\u715E\u4E09\u5408\u5C40\u8A23", "\u4E09\u5408\u5C40\u5C0D\u6C96\u4F4D\u53D6\u707D\u715E"), match: (c) => matchMap(c, "yearBranch", ZAI_SHA) || matchMap(c, "dayBranch", ZAI_SHA) }),
+    rule({ id: "yuan_chen", name: "\u5143\u8FB0", displayName: "\u5143\u8FB0", category: "inauspicious", tags: ["sha", "gender-dependent"], tier: "extended", priority: 53, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_YUANCHEN_035", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5143\u8FB0\u8A23", "\u9670\u967D\u7537\u5973\u5206\u9806\u9006\u53D6\u5143\u8FB0"), researchNotes: { conflict: true, note: "\u5143\u8FB0\u9806\u9006\u8207\u7537\u5973\u3001\u5E74\u5E72\u9670\u967D\u7D81\u5B9A\uFF1B\u672C\u7248\u4FDD\u7559\u660E\u78BA\u7537\u5973\u5206\u652F\u3002" }, match: (c) => {
+      if (!isBaseActive(c, "yearBranch")) return false;
+      const offset = c.yearStemYinYang === "yang" === (c.gender === "male") ? 7 : 5;
+      return c.target.branch === branchAt2(c.bases.yearBranch, offset);
+    } }),
+    rule({ id: "gou_shen", name: "\u52FE\u795E", displayName: "\u52FE\u795E", category: "inauspicious", tags: ["sha"], tier: "extended", priority: 54, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_GOUSHEN_036", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u52FE\u795E\u7D5E\u715E\u8A23", "\u5E74\u652F\u9806\u6578\u4E09\u4F4D"), match: (c) => isBaseActive(c, "yearBranch") && c.target.branch === branchAt2(c.bases.yearBranch, 3) }),
+    rule({ id: "jiao_sha", name: "\u7D5E\u715E", displayName: "\u7D5E\u715E", category: "inauspicious", tags: ["sha"], tier: "extended", priority: 55, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_JIAOSHA_037", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u52FE\u795E\u7D5E\u715E\u8A23", "\u5E74\u652F\u9806\u6578\u4E94\u4F4D"), match: (c) => isBaseActive(c, "yearBranch") && c.target.branch === branchAt2(c.bases.yearBranch, 5) }),
+    rule({ id: "sang_men", name: "\u55AA\u9580", displayName: "\u55AA\u9580", category: "inauspicious", tags: ["mourning"], tier: "extended", priority: 56, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_SANGMEN_038", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u6B72\u715E\u8A23", "\u5E74\u652F\u9806\u6578\u4E8C\u4F4D"), match: (c) => isBaseActive(c, "yearBranch") && c.target.branch === branchAt2(c.bases.yearBranch, 2) }),
+    rule({ id: "diao_ke", name: "\u540A\u5BA2", displayName: "\u540A\u5BA2", category: "inauspicious", tags: ["mourning"], tier: "extended", priority: 57, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_DIAOKE_039", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u6B72\u715E\u8A23", "\u5E74\u652F\u9006\u6578\u4E8C\u4F4D"), match: (c) => isBaseActive(c, "yearBranch") && c.target.branch === branchAt2(c.bases.yearBranch, 10) }),
+    rule({ id: "bai_hu", name: "\u767D\u864E", displayName: "\u767D\u864E", category: "inauspicious", tags: ["sha"], tier: "extended", priority: 58, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_BAIHU_040", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u767D\u864E\u6B72\u715E\u8A23", "\u4E09\u5408\u5C40\u53D6\u767D\u864E\u4F4D"), match: (c) => matchMap(c, "yearBranch", BAI_HU) }),
+    rule({ id: "tian_luo", name: "\u5929\u7F85", displayName: "\u5929\u7F85", category: "inauspicious", tags: ["net"], tier: "extended", priority: 59, confidence: "traditional", baseOn: ["dayStem"], target: "branch", ruleId: "SS_TIANLUO_041", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u7F85\u5730\u7DB2\u8A23", "\u706B\u547D\u620C\u4EA5\u70BA\u5929\u7F85"), description: "\u706B\u65E5\u4E3B\u898B\u620C\u3001\u4EA5\u70BA\u5929\u7F85\u3002", match: (c) => isBaseActive(c, "dayStem") && ["\u4E19", "\u4E01"].includes(c.bases.dayStem) && ["\u620C", "\u4EA5"].includes(c.target.branch) }),
+    rule({ id: "di_wang", name: "\u5730\u7DB2", displayName: "\u5730\u7DB2", category: "inauspicious", tags: ["net"], tier: "extended", priority: 60, confidence: "traditional", baseOn: ["dayStem"], target: "branch", ruleId: "SS_DIWANG_042", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u7F85\u5730\u7DB2\u8A23", "\u6C34\u547D\u8FB0\u5DF3\u70BA\u5730\u7DB2"), description: "\u6C34\u65E5\u4E3B\u898B\u8FB0\u3001\u5DF3\u70BA\u5730\u7DB2\u3002", match: (c) => isBaseActive(c, "dayStem") && ["\u58EC", "\u7678"].includes(c.bases.dayStem) && ["\u8FB0", "\u5DF3"].includes(c.target.branch) }),
+    rule({ id: "gu_luan", name: "\u5B64\u9E1E", displayName: "\u5B64\u9E1E", category: "inauspicious", tags: ["marriage"], tier: "extended", priority: 61, confidence: "school-specific", baseOn: ["dayPillar"], target: "pillar", ruleId: "SS_GULUAN_043", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5B64\u9E1E\u715E\u65E5\u4F8B", "\u56FA\u5B9A\u65E5\u67F1\u6E05\u55AE\u5404\u5BB6\u7565\u6709\u5DEE\u7570"), researchNotes: { conflict: true, note: "\u56FA\u5B9A\u65E5\u67F1\u6E05\u55AE\u5B58\u5728\u589E\u6E1B\uFF0C\u672C\u7248\u63A1\u4FDD\u5B88\u5E38\u898B\u4E94\u67F1\u3002" }, match: (c) => matchPillarSet(c, "dayPillar", GU_LUAN) }),
+    rule({ id: "yin_yang_cha_cuo", name: "\u9670\u967D\u5DEE\u932F", displayName: "\u9670\u967D\u5DEE\u932F", category: "inauspicious", tags: ["marriage"], tier: "extended", priority: 62, confidence: "traditional", baseOn: ["dayPillar"], target: "pillar", ruleId: "SS_YYCC_044", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u9670\u967D\u5DEE\u932F\u65E5\u4F8B", "\u56FA\u5B9A\u65E5\u67F1\u6E05\u55AE"), match: (c) => matchPillarSet(c, "dayPillar", YIN_YANG_CHA_CUO) }),
+    rule({ id: "si_fei", name: "\u56DB\u5EE2", displayName: "\u56DB\u5EE2", category: "inauspicious", tags: ["seasonal"], tier: "extended", priority: 63, confidence: "traditional", baseOn: ["monthBranch", "dayPillar"], target: "pillar", ruleId: "SS_SIFEI_045", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u56DB\u5EE2\u65E5\u4F8B", "\u6309\u6625\u590F\u79CB\u51AC\u6708\u4EE4\u53D6\u56DB\u5EE2\u65E5"), match: (c) => {
+      if (!isBaseActive(c, "dayPillar") || c.target.pillar !== "day" || !c.target.ganzhi) return false;
+      const sets = {
+        spring: ["\u5E9A\u7533", "\u8F9B\u9149"],
+        summer: ["\u58EC\u5B50", "\u7678\u4EA5"],
+        autumn: ["\u7532\u5BC5", "\u4E59\u536F"],
+        winter: ["\u4E19\u5348", "\u4E01\u5DF3"]
+      };
+      const season = ["\u5BC5", "\u536F", "\u8FB0"].includes(c.bases.monthBranch) ? "spring" : ["\u5DF3", "\u5348", "\u672A"].includes(c.bases.monthBranch) ? "summer" : ["\u7533", "\u9149", "\u620C"].includes(c.bases.monthBranch) ? "autumn" : "winter";
+      return sets[season].includes(c.target.ganzhi);
+    } })
+  ];
+
+  // src/shensha/registry.js
+  var LEGACY_DISPLAY = {
+    tao_hua: { displayName: "\u6843\u82B1\uFF08\u54B8\u6C60\uFF09", aliases: ["\u54B8\u6C60"] },
+    tian_xi: { name: "\u5929\u559C", displayName: "\u5929\u559C", aliases: ["\u5929\u559C\u661F"] },
+    tian_yi_star: { name: "\u5929\u91AB", displayName: "\u5929\u91AB", aliases: ["\u5929\u91AB\u661F"] },
+    hong_luan: { name: "\u7D05\u9E1E", displayName: "\u7D05\u9E1E", aliases: ["\u7D05\u9E1E\u661F"] },
+    shi_e_da_bai: { name: "\u5341\u60E1\u5927\u6557", displayName: "\u5341\u60E1\u5927\u6557", aliases: ["\u5341\u60E1\u5927\u6557\u65E5"] }
+  };
+  function legacyMatcher(rule2, context) {
+    if (rule2.matchChart) return context.target.pillar === "day" && rule2.matchChart(context.pillars);
+    const baseKey = context.activeBase;
+    if (baseKey === "dayStem") return rule2.match({ baseStem: context.bases.dayStem, targetBranch: context.target.branch, targetStem: context.target.stem });
+    if (baseKey === "yearStem") return rule2.match({ baseStem: context.bases.yearStem, targetBranch: context.target.branch, targetStem: context.target.stem });
+    if (baseKey === "monthBranch") return rule2.match({ monthBranch: context.bases.monthBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
+    if (baseKey === "dayBranch") return rule2.match({ baseBranch: context.bases.dayBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
+    if (baseKey === "yearBranch") return rule2.match({ baseBranch: context.bases.yearBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
+    return false;
+  }
+  function normalizeLegacyRule(rule2) {
+    const override = LEGACY_DISPLAY[rule2.id] || {};
+    const isPillarRule = Boolean(rule2.matchChart || rule2.baseOn.includes("dayPillar"));
+    return {
+      ...rule2,
+      name: override.name || rule2.name,
+      displayName: override.displayName || rule2.name,
+      aliases: override.aliases || [],
+      tags: ["legacy", rule2.category === "auspicious" ? "noble" : rule2.category],
+      tier: "core",
+      priority: 100,
+      confidence: "classical",
+      schools: ["canonical", "legacy-catalog"],
+      target: isPillarRule ? "pillar" : "branch",
+      description: `\u7531 BaziJS v1 catalog adapter \u4FDD\u7559\u7684${rule2.name}\u898F\u5247\u3002`,
+      references: [{ type: "classical", title: rule2.reference, note: "Legacy catalog adapter\uFF1B\u4FDD\u7559\u539F\u59CB\u5224\u5B9A\u51FD\u6578\u3002" }],
+      match: (context) => legacyMatcher(rule2, context)
+    };
+  }
+  var SHENSHA_REGISTRY = Object.freeze([
+    ...SHENSHA_CATALOG.map(normalizeLegacyRule),
+    ...EXTENDED_SHENSHA
+  ]);
+  function validateShenShaRegistry(registry = SHENSHA_REGISTRY) {
+    const errors = [];
+    const ids = /* @__PURE__ */ new Set();
+    const ruleIds = /* @__PURE__ */ new Set();
+    for (const rule2 of registry) {
+      if (!rule2.id || ids.has(rule2.id)) errors.push(`duplicate id: ${rule2.id || "(empty)"}`);
+      ids.add(rule2.id);
+      if (!rule2.ruleId || ruleIds.has(rule2.ruleId)) errors.push(`duplicate ruleId: ${rule2.ruleId || "(empty)"}`);
+      ruleIds.add(rule2.ruleId);
+      if (!rule2.name || !rule2.displayName) errors.push(`${rule2.id}: name/displayName is required`);
+      if (!SHENSHA_CATEGORIES.includes(rule2.category)) errors.push(`${rule2.id}: invalid category`);
+      if (!SHENSHA_TIERS.includes(rule2.tier)) errors.push(`${rule2.id}: invalid tier`);
+      if (!SHENSHA_CONFIDENCES.includes(rule2.confidence)) errors.push(`${rule2.id}: invalid confidence`);
+      if (!Array.isArray(rule2.baseOn) || rule2.baseOn.length === 0) errors.push(`${rule2.id}: baseOn is required`);
+      if (typeof rule2.match !== "function") errors.push(`${rule2.id}: match must be a function`);
+      if (!rule2.version) errors.push(`${rule2.id}: version is required`);
+      if (!Array.isArray(rule2.references) || rule2.references.length === 0) errors.push(`${rule2.id}: references is required`);
+    }
+    return { valid: errors.length === 0, errors, count: registry.length };
+  }
+  var validation = validateShenShaRegistry();
+  if (!validation.valid) throw new Error(`ShenSha registry invalid: ${validation.errors.join("; ")}`);
+  function getShenShaRule(id) {
+    return SHENSHA_REGISTRY.find((rule2) => rule2.id === id) || null;
+  }
+  function getShenShaCatalog() {
+    return SHENSHA_REGISTRY.slice();
+  }
+
+  // src/shensha/engine.js
+  function isRuleEnabled(rule2, preset) {
+    return preset.tiers.includes(rule2.tier) && !(preset.excludeExperimental && rule2.confidence === "experimental");
+  }
+  function matchedValue(value) {
+    if (typeof value === "object" && value !== null) return value.matched !== false;
+    return Boolean(value);
+  }
+  function matchNote(value, rule2) {
+    if (value && typeof value === "object") return value.evidence || value.reason || rule2.description;
+    return rule2.description;
+  }
+  function normalizeTarget(target) {
+    return {
+      pillar: target.pillar,
+      available: target.available !== false,
+      stem: target.stem || null,
+      branch: target.branch || null,
+      ganzhi: target.ganzhi || (target.stem && target.branch ? `${target.stem}${target.branch}` : null),
+      sexagenaryIndex: target.sexagenaryIndex ?? null
+    };
+  }
+  function resultFor(rule2, hits, evidence) {
+    const references = rule2.references || [];
+    return {
+      id: rule2.id,
+      name: rule2.name,
+      displayName: rule2.displayName || rule2.name,
+      aliases: rule2.aliases || [],
+      category: rule2.category,
+      tags: rule2.tags || [],
+      tier: rule2.tier,
+      priority: rule2.priority,
+      confidence: rule2.confidence,
+      schools: rule2.schools || [],
+      hitOn: [...new Set(hits)],
+      basedOn: rule2.baseOn,
+      target: rule2.target,
+      ruleId: rule2.ruleId,
+      version: rule2.version,
+      reference: references[0] ? references[0].title : void 0,
+      references,
+      description: rule2.description || "",
+      ...rule2.variants ? { variants: rule2.variants } : {},
+      ...rule2.researchNotes ? { researchNotes: rule2.researchNotes } : {},
+      evidence: { details: evidence }
+    };
+  }
+  function evaluateRules(pillars, targets, options = {}) {
+    const preset = getShenShaPreset(options.preset || options.shenshaPreset || options.shenShaPreset || "classical");
+    const baseContext = createShenShaContext(pillars, { gender: options.gender });
+    const external = options.external === true;
     const results = [];
-    const pillarEntries = [
-      { pillar: "year", stem: pillars.year.stem, branch: pillars.year.branch },
-      { pillar: "month", stem: pillars.month.stem, branch: pillars.month.branch },
-      { pillar: "day", stem: pillars.day.stem, branch: pillars.day.branch },
-      ...pillars.hour.available ? [{ pillar: "hour", stem: pillars.hour.stem, branch: pillars.hour.branch }] : []
-    ];
-    for (const rule of SHENSHA_CATALOG) {
-      if (rule.matchChart) {
-        if (rule.matchChart(pillars)) {
-          results.push({
-            id: rule.id,
-            name: rule.name,
-            category: rule.category,
-            hitOn: ["day"],
-            basedOn: rule.baseOn,
-            ruleId: rule.ruleId,
-            version: rule.version,
-            reference: rule.reference,
-            evidence: {
-              reason: `\u65E5\u67F1\u70BA\u3010${pillars.day.stem}${pillars.day.branch}\u3011\uFF0C\u7B26\u5408${rule.name}\u689D\u4EF6`
-            }
+    for (const rule2 of SHENSHA_REGISTRY) {
+      if (!isRuleEnabled(rule2, preset)) continue;
+      if (external && rule2.baseOn.includes("dayPillar")) continue;
+      const hits = [];
+      const evidence = [];
+      for (const rawTarget of targets) {
+        const target = normalizeTarget(rawTarget);
+        if (!target.available) continue;
+        for (const baseKey of rule2.baseOn) {
+          const context = { ...baseContext, target, activeBase: baseKey };
+          let value = false;
+          try {
+            value = rule2.match(context);
+          } catch (error) {
+            evidence.push({ basedOn: baseKey, matched: false, error: error.message });
+            continue;
+          }
+          if (!matchedValue(value)) continue;
+          if (!hits.includes(target.pillar)) hits.push(target.pillar);
+          evidence.push({
+            basedOn: baseKey,
+            baseValue: getBaseValue(context, baseKey),
+            targetPillar: target.pillar,
+            targetValue: target.ganzhi || target.branch,
+            matched: true,
+            reason: matchNote(value, rule2)
           });
         }
-        continue;
       }
-      const hitPillars = [];
-      const baseUsed = [];
-      let evidenceText = "";
-      for (const target of pillarEntries) {
-        if (rule.baseOn.includes("dayStem")) {
-          if (rule.match({ baseStem: pillars.day.stem, targetBranch: target.branch })) {
-            hitPillars.push(target.pillar);
-            baseUsed.push(`\u4EE5\u65E5\u5E72\u3010${pillars.day.stem}\u3011\u67E5\u5F97\u3010${target.branch}\u3011\u65BC ${target.pillar} \u652F`);
-          }
-        }
-        if (rule.baseOn.includes("yearStem")) {
-          if (rule.match({ baseStem: pillars.year.stem, targetBranch: target.branch })) {
-            if (!hitPillars.includes(target.pillar)) hitPillars.push(target.pillar);
-            baseUsed.push(`\u4EE5\u5E74\u5E72\u3010${pillars.year.stem}\u3011\u67E5\u5F97\u3010${target.branch}\u3011\u65BC ${target.pillar} \u652F`);
-          }
-        }
-        if (rule.baseOn.includes("monthBranch")) {
-          if (rule.match({ monthBranch: pillars.month.branch, targetStem: target.stem, targetBranch: target.branch })) {
-            if (!hitPillars.includes(target.pillar)) hitPillars.push(target.pillar);
-            baseUsed.push(`\u4EE5\u6708\u4EE4\u3010${pillars.month.branch}\u3011\u67E5\u5F97 ${target.pillar} \u67F1`);
-          }
-        }
-        if (rule.baseOn.includes("dayBranch")) {
-          if (rule.match({ baseBranch: pillars.day.branch, targetBranch: target.branch })) {
-            if (!hitPillars.includes(target.pillar)) hitPillars.push(target.pillar);
-            baseUsed.push(`\u4EE5\u65E5\u652F\u3010${pillars.day.branch}\u3011\u67E5\u5F97\u3010${target.branch}\u3011\u65BC ${target.pillar} \u652F`);
-          }
-        }
-        if (rule.baseOn.includes("yearBranch")) {
-          if (rule.match({ baseBranch: pillars.year.branch, targetBranch: target.branch })) {
-            if (!hitPillars.includes(target.pillar)) hitPillars.push(target.pillar);
-            baseUsed.push(`\u4EE5\u5E74\u652F\u3010${pillars.year.branch}\u3011\u67E5\u5F97\u3010${target.branch}\u3011\u65BC ${target.pillar} \u652F`);
-          }
-        }
-      }
-      if (hitPillars.length > 0) {
-        results.push({
-          id: rule.id,
-          name: rule.name,
-          category: rule.category,
-          hitOn: hitPillars,
-          basedOn: rule.baseOn,
-          ruleId: rule.ruleId,
-          version: rule.version,
-          reference: rule.reference,
-          evidence: {
-            details: baseUsed
-          }
-        });
-      }
+      if (hits.length > 0) results.push(resultFor(rule2, hits, evidence));
     }
     return results;
   }
-  function calculateShenShaOnPillar(natalPillars, stemChar, branchChar, pillarLabel) {
-    const results = [];
-    if (!stemChar || !branchChar) return results;
-    for (const rule of SHENSHA_CATALOG) {
-      if (rule.matchChart) continue;
-      const baseUsed = [];
-      if (rule.baseOn.includes("dayStem")) {
-        if (rule.match({ baseStem: natalPillars.day.stem, targetBranch: branchChar })) {
-          baseUsed.push(`\u4EE5\u65E5\u5E72\u3010${natalPillars.day.stem}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
-        }
-      }
-      if (rule.baseOn.includes("yearStem")) {
-        if (rule.match({ baseStem: natalPillars.year.stem, targetBranch: branchChar })) {
-          baseUsed.push(`\u4EE5\u5E74\u5E72\u3010${natalPillars.year.stem}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
-        }
-      }
-      if (rule.baseOn.includes("monthBranch")) {
-        if (rule.match({ monthBranch: natalPillars.month.branch, targetStem: stemChar, targetBranch: branchChar })) {
-          baseUsed.push(`\u4EE5\u6708\u4EE4\u3010${natalPillars.month.branch}\u3011\u67E5\u5F97`);
-        }
-      }
-      if (rule.baseOn.includes("dayBranch")) {
-        if (rule.match({ baseBranch: natalPillars.day.branch, targetBranch: branchChar })) {
-          baseUsed.push(`\u4EE5\u65E5\u652F\u3010${natalPillars.day.branch}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
-        }
-      }
-      if (rule.baseOn.includes("yearBranch")) {
-        if (rule.match({ baseBranch: natalPillars.year.branch, targetBranch: branchChar })) {
-          baseUsed.push(`\u4EE5\u5E74\u652F\u3010${natalPillars.year.branch}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
-        }
-      }
-      if (baseUsed.length > 0) {
-        results.push({
-          id: rule.id,
-          name: rule.name,
-          category: rule.category,
-          hitOn: [pillarLabel],
-          basedOn: rule.baseOn,
-          ruleId: rule.ruleId,
-          version: rule.version,
-          reference: rule.reference,
+  function calculateShenSha(pillars, options = {}) {
+    return evaluateRules(pillars, getPillarEntries(pillars), options);
+  }
+  function calculateShenShaOnPillar(natalPillars, stemChar, branchChar, pillarLabel, options = {}) {
+    if (!stemChar || !branchChar) return [];
+    return evaluateRules(natalPillars, [{ pillar: pillarLabel, stem: stemChar, branch: branchChar, available: true }], { ...options, external: true });
+  }
+  function calculateTransitShenSha(natalChart, transit, options = {}) {
+    const pillar = transit && (transit.year || transit);
+    if (!pillar || !pillar.stem || !pillar.branch) return { year: null, shenSha: [] };
+    const results = calculateShenShaOnPillar(natalChart.pillars || natalChart, pillar.stem, pillar.branch, "transit-year", options);
+    return { year: transit && typeof transit.year === "number" ? transit.year : null, target: pillar.ganzhi || `${pillar.stem}${pillar.branch}`, shenSha: results };
+  }
+  function groupShenShaByPillar(results = []) {
+    const grouped = { year: [], month: [], day: [], hour: [] };
+    for (const item of results) {
+      for (const pillar of item.hitOn || []) {
+        if (!grouped[pillar]) continue;
+        grouped[pillar].push({
+          ...item,
+          hitOn: [pillar],
           evidence: {
-            details: baseUsed
+            ...item.evidence || {},
+            details: (item.evidence && item.evidence.details ? item.evidence.details : []).filter((detail) => detail.targetPillar === pillar)
           }
         });
       }
     }
-    return results;
+    return grouped;
   }
 
   // src/luck/index.js
@@ -3253,8 +3506,48 @@ var Bazi = (() => {
   // src/ai/index.js
   var ai_exports = {};
   __export(ai_exports, {
-    toContext: () => toContext
+    toContext: () => toContext,
+    toShenShaContext: () => toShenShaContext
   });
+  function buildShenShaItem(item, options = {}) {
+    const { includeRules = true, includeEvidence = true } = options;
+    return {
+      id: item.id,
+      name: item.name,
+      displayName: item.displayName || item.name,
+      aliases: item.aliases || [],
+      category: item.category,
+      tags: item.tags || [],
+      tier: item.tier,
+      priority: item.priority,
+      confidence: item.confidence,
+      schools: item.schools || [],
+      hitOn: item.hitOn || [],
+      basedOn: item.basedOn || [],
+      target: item.target,
+      ...includeRules ? { ruleId: item.ruleId, version: item.version } : {},
+      reference: item.reference,
+      ...Array.isArray(item.references) ? { references: item.references } : {},
+      ...item.description ? { description: item.description } : {},
+      ...item.variants ? { variants: item.variants } : {},
+      ...item.researchNotes ? { researchNotes: item.researchNotes } : {},
+      ...includeEvidence ? { evidence: item.evidence } : {}
+    };
+  }
+  function toShenShaContext(result, options = {}) {
+    const items = (result.shenSha || []).map((item) => buildShenShaItem(item, options));
+    const grouped = groupShenShaByPillar(result.shenSha || []);
+    const context = {
+      preset: result.meta.shenshaPreset || "classical",
+      ruleVersion: result.meta.shenShaRuleVersion || "2.0.0",
+      all: items,
+      byPillar: Object.fromEntries(Object.entries(grouped).map(([pillar, list]) => [
+        pillar,
+        list.map((item) => buildShenShaItem(item, options))
+      ]))
+    };
+    return options.compact ? JSON.stringify(context) : context;
+  }
   function toContext(result, options = {}) {
     const {
       compact = true,
@@ -3270,7 +3563,9 @@ var Bazi = (() => {
         engine: "BaziJS",
         engineVersion: result.meta.engineVersion,
         ruleSetVersion: result.meta.ruleSetVersion,
-        profileId: result.meta.profileId
+        profileId: result.meta.profileId,
+        shenshaPreset: result.meta.shenshaPreset || "classical",
+        shenShaRuleVersion: result.meta.shenShaRuleVersion || "2.0.0"
       },
       inputSummary: {
         birthDate: result.input.birthDate,
@@ -3332,13 +3627,15 @@ var Bazi = (() => {
         mingGong: result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : null,
         shenGong: result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : null
       },
-      shenShaList: result.shenSha.map((s) => ({
-        name: s.name,
-        category: s.category,
-        hitOn: s.hitOn,
-        ruleId: includeRules ? s.ruleId : void 0,
-        reference: s.reference,
-        ...includeShenShaEvidence ? { evidence: s.evidence } : {}
+      shenSha: toShenShaContext(result, {
+        includeRules,
+        includeEvidence: includeShenShaEvidence,
+        compact: false
+      }),
+      // 舊欄位保留，讓既有整合不必同步升級；新程式請使用 shenSha。
+      shenShaList: result.shenSha.map((s) => buildShenShaItem(s, {
+        includeRules,
+        includeEvidence: includeShenShaEvidence
       })),
       ...includeInteractions ? {
         interactions: {
@@ -3369,7 +3666,7 @@ var Bazi = (() => {
   var ENGINE_VERSION = "1.0.2";
   var RULE_SET_VERSION = "2026.09";
   var CALENDAR_RULE_VERSION = "1.0.0";
-  var SHENSHA_RULE_VERSION = "1.1.0";
+  var SHENSHA_RULE_VERSION = "2.0.0";
   var STRENGTH_RULE_VERSION = "1.0.0";
   var INTERACTION_RULE_VERSION = "1.0.0";
   var LUCK_RULE_VERSION = "1.0.0";
@@ -3454,7 +3751,8 @@ var Bazi = (() => {
     const auxiliary = calculateChartAuxiliary(pillars);
     const interactions = calculateInteractions(pillars);
     const strength = calculateStrength(pillars, interactions);
-    const shenSha = calculateShenSha(pillars);
+    const shenshaPreset = input.shenshaPreset || input.shenShaPreset || options.shenshaPreset || options.shenShaPreset || "classical";
+    const shenSha = calculateShenSha(pillars, { preset: shenshaPreset, gender: input.gender });
     const luckCycles = calculateLuckCycles({
       pillars,
       gender: input.gender,
@@ -3468,22 +3766,21 @@ var Bazi = (() => {
     const transits = calculateTransit(pillars, { datetime: transitDate });
     if (luckCycles && Array.isArray(luckCycles.cycles)) {
       luckCycles.cycles.forEach((cyc, idx) => {
-        cyc.shenSha = calculateShenShaOnPillar(pillars, cyc.stem, cyc.branch, `luck-${idx + 1}`);
+        cyc.shenSha = calculateShenShaOnPillar(pillars, cyc.stem, cyc.branch, `luck-${idx + 1}`, { preset: shenshaPreset, gender: input.gender });
       });
     }
     if (transits && transits.year) {
-      transits.shenShaYear = calculateShenShaOnPillar(
-        pillars,
-        transits.year.stem,
-        transits.year.branch,
-        "transit-year"
-      );
+      const transitShenSha = calculateTransitShenSha(pillars, transits, { preset: shenshaPreset, gender: input.gender });
+      transits.shenShaYear = transitShenSha.shenSha;
+      transits.shenSha = transitShenSha;
+      transits.year.shenSha = transitShenSha.shenSha;
     }
     const result = {
       meta: {
         ...VERSIONS,
         profileId: profile.id,
-        profileName: profile.name
+        profileName: profile.name,
+        shenshaPreset
       },
       input: {
         ...input,
@@ -3761,6 +4058,7 @@ var Bazi = (() => {
     const { width, height } = preset;
     const p = chartResult.pillars;
     const res = chartResult;
+    const shenShaByPillar = groupShenShaByPillar(res.shenSha || []);
     const pillarCols = [
       { title: "\u6642\u67F1", data: p.hour, tenGod: res.tenGods.stems.hour, hidden: res.tenGods.hidden.hour, nayin: res.nayin.hour, stage: res.twelveStages.byDayMaster.hour },
       { title: "\u65E5\u67F1", data: p.day, tenGod: { full: "\u65E5\u4E3B" }, hidden: res.tenGods.hidden.day, nayin: res.nayin.day, stage: res.twelveStages.byDayMaster.day },
@@ -3772,13 +4070,15 @@ var Bazi = (() => {
   <defs>
     <style>
       .title { font-size: 26px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
-      .subtitle { font-size: 13px; fill: ${theme.textSecondary}; font-weight: 500; }
+      /* SVG \u5167\u7684\u5C0F\u5B57\u5728\u4E0D\u540C DPR/\u7E2E\u653E\u4E0B\u5BB9\u6613\u8B8A\u6DE1\uFF0C\u4FDD\u7559\u5411\u91CF\u5C3A\u5BF8\u4E26\u63D0\u9AD8\u53EF\u8B80\u6027 */
+      .subtitle { font-size: 15px; fill: ${theme.textPrimary}; font-weight: 600; letter-spacing: 0.1px; }
       .meta-label { font-size: 13px; fill: ${theme.textMuted}; font-weight: 500; }
       .meta-value { font-size: 14px; fill: ${theme.textPrimary}; font-weight: 700; }
       .col-header { font-size: 15px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 700; }
       .tengod { font-size: 15px; fill: ${theme.gold}; text-anchor: middle; font-weight: 700; }
       .ganzhi { font-size: 38px; font-weight: 700; text-anchor: middle; }
       .hidden-stem { font-size: 13px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 500; }
+      .pillar-shen-sha { font-size: 11px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 600; }
       .badge-text { font-size: 12px; fill: ${theme.cardBg}; font-weight: 700; text-anchor: middle; }
       .section-title { font-size: 17px; font-weight: 700; fill: ${theme.accent}; letter-spacing: 1px; }
       .card { fill: ${theme.cardBg}; stroke: ${theme.border}; stroke-width: 1; rx: 6px; }
@@ -3816,7 +4116,7 @@ var Bazi = (() => {
 
   <!-- \u56DB\u67F1\u4E3B\u76E4\u8868\u683C -->
   <g transform="translate(40, 195)">
-    <rect x="0" y="0" width="${width - 80}" height="280" class="card" />
+    <rect x="0" y="0" width="${width - 80}" height="320" class="card" />
 `;
     const colWidth = (width - 80) / 4;
     pillarCols.forEach((col, idx) => {
@@ -3827,6 +4127,21 @@ var Bazi = (() => {
       const tengodName = col.tenGod ? col.tenGod.full || col.tenGod.short : "\u2014";
       const nayinName = col.nayin || "\u2014";
       const stageName = col.stage ? col.stage.name : "\u2014";
+      const pillarShenSha = shenShaByPillar[["hour", "day", "month", "year"][idx]] || [];
+      const directNames = pillarShenSha.slice(0, 8).map((item) => item.displayName || item.name);
+      if (pillarShenSha.length > 8) directNames.push(`+${pillarShenSha.length - 8}`);
+      const shenShaLines = [];
+      let shenShaLine = "";
+      directNames.forEach((name) => {
+        const piece = shenShaLine ? `\u3001${name}` : name;
+        if (shenShaLine && (shenShaLine + piece).length > 18) {
+          shenShaLines.push(shenShaLine);
+          shenShaLine = name;
+        } else {
+          shenShaLine += piece;
+        }
+      });
+      if (shenShaLine) shenShaLines.push(shenShaLine);
       svg += `
     <!-- \u67F1\u4F4D Header: ${col.title} -->
     <rect x="${x}" y="0" width="${colWidth}" height="36" class="grid-box" />
@@ -3841,8 +4156,13 @@ var Bazi = (() => {
     <!-- \u5730\u652F\u5B57\u5143 -->
     <text x="${centerX}" y="152" class="ganzhi" fill="${theme.textPrimary}">${branchChar}</text>
 
+    <!-- \u6BCF\u67F1\u795E\u715E\uFF08\u756B\u9762\u53EA\u986F\u793A\u524D 8 \u7B46\uFF1B\u5B8C\u6574\u8CC7\u6599\u4ECD\u4FDD\u7559\u5728 JSON/SVG \u5916\u7684\u5F15\u64CE\u7D50\u679C\uFF09 -->
+    <g transform="translate(${centerX}, 174)">
+    ${shenShaLines.length ? shenShaLines.slice(0, 3).map((line, lineIdx) => `<text x="0" y="${lineIdx * 14}" class="pillar-shen-sha">${line}</text>`).join("") : '<text x="0" y="0" class="pillar-shen-sha">\u2014</text>'}
+    </g>
+
     <!-- \u85CF\u5E72\u5217\u8868 -->
-    <g transform="translate(${centerX}, 180)">
+    <g transform="translate(${centerX}, 218)">
     `;
       if (col.hidden && col.hidden.length > 0) {
         col.hidden.forEach((h, hIdx) => {
@@ -3856,16 +4176,16 @@ var Bazi = (() => {
     </g>
 
     <!-- \u7D0D\u97F3\u8207\u9577\u751F -->
-    <text x="${centerX}" y="248" class="meta-label" text-anchor="middle">\u7D0D\u97F3: ${nayinName}</text>
-    <text x="${centerX}" y="266" class="meta-label" text-anchor="middle">\u9577\u751F: ${stageName}</text>
+    <text x="${centerX}" y="286" class="meta-label" text-anchor="middle">\u7D0D\u97F3: ${nayinName}</text>
+    <text x="${centerX}" y="304" class="meta-label" text-anchor="middle">\u9577\u751F: ${stageName}</text>
     `;
       if (idx > 0) {
-        svg += `<line x1="${x}" y1="0" x2="${x}" y2="280" stroke="${theme.border}" stroke-width="1" />`;
+        svg += `<line x1="${x}" y1="0" x2="${x}" y2="320" stroke="${theme.border}" stroke-width="1" />`;
       }
     });
     svg += `  </g>`;
     if (preset.includeStrength) {
-      const yOffset = 490;
+      const yOffset = 530;
       svg += `
     <!-- \u4E94\u884C\u5F37\u5F31\u5206\u6790\u5340\u584A -->
     <g transform="translate(40, ${yOffset})">
@@ -3905,7 +4225,7 @@ var Bazi = (() => {
     `;
     }
     if (preset.includeLuckCycles && res.luckCycles) {
-      const yOffset = 635;
+      const yOffset = 665;
       const cardW = width - 80;
       const stepW = Math.min(80, (cardW - 40) / Math.min(8, res.luckCycles.cycles.length));
       svg += `
@@ -3932,7 +4252,7 @@ var Bazi = (() => {
     `;
     }
     if (preset.includeShenSha && height >= 900) {
-      const yOffset = 800;
+      const yOffset = 830;
       const cardW = width - 80;
       const maxCharsPerLine = Math.max(18, Math.floor((cardW - 130) / 13.5));
       const cap = (lines, total, maxL) => {

@@ -1,0 +1,24 @@
+{
+  "caseId": "SS-VNEXT-001",
+  "description": "P0 神煞施工規格首例：癸亥 丁巳 己亥 壬申",
+  "input": {
+    "birthDate": "1983-05-11",
+    "birthTime": "16:19",
+    "gender": "male",
+    "trueSolarTime": false
+  },
+  "expected": {
+    "pillars": {
+      "year": "癸亥",
+      "month": "丁巳",
+      "day": "己亥",
+      "hour": "壬申"
+    },
+    "byPillarAtLeast": {
+      "year": ["fei_ren"],
+      "month": ["tai_ji_gui_ren", "tian_yi_gui_ren", "liu_jia_kong_wang", "yi_ma", "yang_ren"],
+      "day": ["ci_guan", "fei_ren"],
+      "hour": ["tai_ji_gui_ren", "tian_yi_gui_ren", "guo_yin_gui_ren", "jin_yu", "xue_tang", "jie_sha", "pi_ma", "xue_ren"]
+    }
+  }
+}

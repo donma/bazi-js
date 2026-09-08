@@ -1,0 +1,10 @@
+{
+  "caseId": "SS-DIFF-001",
+  "engine": "BaziJS ShenSha vNext",
+  "status": "documented",
+  "note": "本 fixture 僅記錄差異審核入口；詞館、學堂、血刃、孤鸞等在不同古籍／流派有異表，外部結果不得覆寫本引擎的 variants/researchNotes。",
+  "external": {
+    "source": "待接入可追溯的外部實作",
+    "result": null
+  }
+}

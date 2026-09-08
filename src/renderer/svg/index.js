@@ -8,6 +8,7 @@
 import { getTheme } from '../themes/index.js';
 import { getPreset } from '../presets/index.js';
 import { STEMS, STEM_INDEX } from '../../core/constants/stems.js';
+import { groupShenShaByPillar } from '../../shensha/index.js';
 
 export function renderSvg(chartResult, options = {}) {
   const theme = getTheme(options.theme || 'modern-oriental');
@@ -16,6 +17,7 @@ export function renderSvg(chartResult, options = {}) {
   const { width, height } = preset;
   const p = chartResult.pillars;
   const res = chartResult;
+  const shenShaByPillar = groupShenShaByPillar(res.shenSha || []);
 
   // 四柱資料陣列（年、月、日、時）
   const pillarCols = [
@@ -33,13 +35,15 @@ export function renderSvg(chartResult, options = {}) {
   <defs>
     <style>
       .title { font-size: 26px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
-      .subtitle { font-size: 13px; fill: ${theme.textSecondary}; font-weight: 500; }
+      /* SVG 內的小字在不同 DPR/縮放下容易變淡，保留向量尺寸並提高可讀性 */
+      .subtitle { font-size: 15px; fill: ${theme.textPrimary}; font-weight: 600; letter-spacing: 0.1px; }
       .meta-label { font-size: 13px; fill: ${theme.textMuted}; font-weight: 500; }
       .meta-value { font-size: 14px; fill: ${theme.textPrimary}; font-weight: 700; }
       .col-header { font-size: 15px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 700; }
       .tengod { font-size: 15px; fill: ${theme.gold}; text-anchor: middle; font-weight: 700; }
       .ganzhi { font-size: 38px; font-weight: 700; text-anchor: middle; }
       .hidden-stem { font-size: 13px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 500; }
+      .pillar-shen-sha { font-size: 11px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 600; }
       .badge-text { font-size: 12px; fill: ${theme.cardBg}; font-weight: 700; text-anchor: middle; }
       .section-title { font-size: 17px; font-weight: 700; fill: ${theme.accent}; letter-spacing: 1px; }
       .card { fill: ${theme.cardBg}; stroke: ${theme.border}; stroke-width: 1; rx: 6px; }
@@ -77,7 +81,7 @@ export function renderSvg(chartResult, options = {}) {
 
   <!-- 四柱主盤表格 -->
   <g transform="translate(40, 195)">
-    <rect x="0" y="0" width="${width - 80}" height="280" class="card" />
+    <rect x="0" y="0" width="${width - 80}" height="320" class="card" />
 `;
 
   // 四欄寬度
@@ -92,6 +96,21 @@ export function renderSvg(chartResult, options = {}) {
     const tengodName = col.tenGod ? (col.tenGod.full || col.tenGod.short) : '—';
     const nayinName = col.nayin || '—';
     const stageName = col.stage ? col.stage.name : '—';
+    const pillarShenSha = shenShaByPillar[['hour', 'day', 'month', 'year'][idx]] || [];
+    const directNames = pillarShenSha.slice(0, 8).map((item) => item.displayName || item.name);
+    if (pillarShenSha.length > 8) directNames.push(`+${pillarShenSha.length - 8}`);
+    const shenShaLines = [];
+    let shenShaLine = '';
+    directNames.forEach((name) => {
+      const piece = shenShaLine ? `、${name}` : name;
+      if (shenShaLine && (shenShaLine + piece).length > 18) {
+        shenShaLines.push(shenShaLine);
+        shenShaLine = name;
+      } else {
+        shenShaLine += piece;
+      }
+    });
+    if (shenShaLine) shenShaLines.push(shenShaLine);
 
     svg += `
     <!-- 柱位 Header: ${col.title} -->
@@ -107,8 +126,13 @@ export function renderSvg(chartResult, options = {}) {
     <!-- 地支字元 -->
     <text x="${centerX}" y="152" class="ganzhi" fill="${theme.textPrimary}">${branchChar}</text>
 
+    <!-- 每柱神煞（畫面只顯示前 8 筆；完整資料仍保留在 JSON/SVG 外的引擎結果） -->
+    <g transform="translate(${centerX}, 174)">
+    ${shenShaLines.length ? shenShaLines.slice(0, 3).map((line, lineIdx) => `<text x="0" y="${lineIdx * 14}" class="pillar-shen-sha">${line}</text>`).join('') : '<text x="0" y="0" class="pillar-shen-sha">—</text>'}
+    </g>
+
     <!-- 藏干列表 -->
-    <g transform="translate(${centerX}, 180)">
+    <g transform="translate(${centerX}, 218)">
     `;
 
     if (col.hidden && col.hidden.length > 0) {
@@ -124,13 +148,13 @@ export function renderSvg(chartResult, options = {}) {
     </g>
 
     <!-- 納音與長生 -->
-    <text x="${centerX}" y="248" class="meta-label" text-anchor="middle">納音: ${nayinName}</text>
-    <text x="${centerX}" y="266" class="meta-label" text-anchor="middle">長生: ${stageName}</text>
+    <text x="${centerX}" y="286" class="meta-label" text-anchor="middle">納音: ${nayinName}</text>
+    <text x="${centerX}" y="304" class="meta-label" text-anchor="middle">長生: ${stageName}</text>
     `;
 
     // 垂直分隔線
     if (idx > 0) {
-      svg += `<line x1="${x}" y1="0" x2="${x}" y2="280" stroke="${theme.border}" stroke-width="1" />`;
+      svg += `<line x1="${x}" y1="0" x2="${x}" y2="320" stroke="${theme.border}" stroke-width="1" />`;
     }
   });
 
@@ -138,7 +162,7 @@ export function renderSvg(chartResult, options = {}) {
 
   // 若 preset 包含強弱與五行
   if (preset.includeStrength) {
-    const yOffset = 490;
+    const yOffset = 530;
     svg += `
     <!-- 五行強弱分析區塊 -->
     <g transform="translate(40, ${yOffset})">
@@ -182,7 +206,7 @@ export function renderSvg(chartResult, options = {}) {
 
   // 大運區塊（若 preset 包含）
   if (preset.includeLuckCycles && res.luckCycles) {
-    const yOffset = 635;
+    const yOffset = 665;
     const cardW = width - 80;
     const stepW = Math.min(80, (cardW - 40) / Math.min(8, res.luckCycles.cycles.length));
 
@@ -215,7 +239,7 @@ export function renderSvg(chartResult, options = {}) {
   // 神煞與四宮胎命區塊（若空間允許）
   // 神煞名以「、」連接並按卡片寬度自動換行，避免長串溢出卡片
   if (preset.includeShenSha && height >= 900) {
-    const yOffset = 800;
+    const yOffset = 830;
     const cardW = width - 80;
     const maxCharsPerLine = Math.max(18, Math.floor((cardW - 130) / 13.5));
     // 行數上限：保證卡片不超出版面，超出的以「等共X顆」收尾（完整清單見 Lab）

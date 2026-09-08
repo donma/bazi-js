@@ -102,9 +102,16 @@ p.hero-subtitle {
 /* Main Layout: Desktop 雙欄、平板/手機單欄自適應 */
 .main-grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  /* 命盤需要完整寬度，輸入面板置於上方避免右欄被壓縮 */
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+}
+
+.main-grid > aside,
+.main-grid > main {
+  width: 100%;
+  min-width: 0;
 }
 
 /* Card */
@@ -278,26 +285,332 @@ input:focus, select:focus {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  display: block;
   width: 100%;
+  min-width: 0;
   box-shadow: var(--shadow-sm);
   overflow-x: auto;
   overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
-/* Desktop：SVG 恆以 1:1 原生 960px 顯示，空間不足時橫向捲動而非縮小（見施工文件 §六/§十一）。
-   用 margin:0 auto 置中，過窄時自動退回 flex-start，屆時左緣仍可捲動不被裁切。 */
+.chart-hint {
+  display: none;
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/*
+ * SVG 使用自身的 width 屬性（full=960、mobile-share=640、a4=800、compact=600）。
+ * 容器足夠時置中，容器不足時由 block layout 自動從左緣開始並在容器內捲動。
+ * 不把所有 preset 強制拉成 960px，也不在窄螢幕做 fractional scale，避免 SVG 文字糊掉。
+ */
 .chart-viewer svg {
   display: block;
-  flex: 0 0 auto;
-  width: 960px !important;
-  min-width: 960px !important;
-  max-width: 960px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
   height: auto !important;
   margin: 0 auto;
   transform: none !important;
+}
+
+/* 平板/手機預覽：改用 HTML 直式排版，避免把整張 SVG 壓小後造成小字失真 */
+.chart-viewer.is-responsive-preview {
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.responsive-chart,
+.responsive-chart * {
+  min-width: 0;
+}
+
+.responsive-chart {
+  width: 100%;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid var(--responsive-border);
+  border-radius: 8px;
+  background: var(--responsive-bg);
+  color: var(--responsive-text);
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.responsive-chart-header {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--responsive-border);
+}
+
+.responsive-chart-header h3 {
+  color: var(--responsive-text);
+  font-size: clamp(21px, 4vw, 28px);
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1.35;
+}
+
+.responsive-chart-header p {
+  margin-top: 6px;
+  color: var(--responsive-text);
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.responsive-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--responsive-border);
+  border-radius: 6px;
+  background: var(--responsive-card);
+}
+
+.responsive-info-grid div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+
+.responsive-info-grid span,
+.responsive-detail-list strong {
+  color: var(--responsive-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.responsive-info-grid strong {
+  color: var(--responsive-text);
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.responsive-section {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--responsive-border);
+  border-radius: 6px;
+  background: var(--responsive-card);
+}
+
+.responsive-section h4 {
+  margin-bottom: 13px;
+  color: var(--responsive-accent);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.responsive-section h4 span {
+  color: var(--responsive-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.responsive-pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.responsive-pillar {
+  min-width: 0;
+  padding: 12px 10px;
+  border: 1px solid var(--responsive-border);
+  border-radius: 5px;
+  background: var(--responsive-grid);
+  text-align: center;
+}
+
+.responsive-pillar header {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--responsive-border);
+  color: var(--responsive-secondary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.responsive-pillar-god {
+  margin-top: 8px;
+  color: var(--responsive-gold);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.responsive-ganzhi {
+  margin: 3px 0 7px;
+  color: var(--responsive-text);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.responsive-pillar ul {
+  min-height: 54px;
+  padding: 7px 0;
+  border-top: 1px solid var(--responsive-border);
+  border-bottom: 1px solid var(--responsive-border);
+  list-style: none;
+  color: var(--responsive-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.responsive-pillar li {
+  overflow-wrap: anywhere;
+}
+
+.responsive-pillar li small {
+  color: var(--responsive-muted);
+  font-size: 12px;
+}
+
+.responsive-pillar-meta {
+  margin-top: 8px;
+  color: var(--responsive-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.responsive-strength-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.responsive-strength-summary p {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px;
+  border-radius: 5px;
+  background: var(--responsive-grid);
+  overflow-wrap: anywhere;
+}
+
+.responsive-strength-summary strong {
+  color: var(--responsive-secondary);
+  font-size: 13px;
+}
+
+.responsive-strength-summary span {
+  color: var(--responsive-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.responsive-element-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.responsive-element-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.responsive-element-name {
+  font-weight: 700;
+}
+
+.responsive-element-track {
+  display: block;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--responsive-grid);
+}
+
+.responsive-element-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.responsive-element-row strong {
+  color: var(--responsive-secondary);
+  font-size: 13px;
+  text-align: right;
+}
+
+.responsive-luck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: 8px;
+}
+
+.responsive-luck-grid article {
+  display: grid;
+  gap: 2px;
+  padding: 8px 5px;
+  border: 1px solid var(--responsive-border);
+  border-radius: 4px;
+  background: var(--responsive-grid);
+  text-align: center;
+}
+
+.responsive-luck-grid span,
+.responsive-luck-grid small,
+.responsive-luck-grid em {
+  color: var(--responsive-secondary);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.responsive-luck-grid strong {
+  color: var(--responsive-text);
+  font-size: 18px;
+}
+
+.responsive-shensha .responsive-detail-list {
+  display: grid;
+  gap: 13px;
+}
+
+.responsive-detail-list > div {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.responsive-detail-list p {
+  color: var(--responsive-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.responsive-chart footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--responsive-border);
+  color: var(--responsive-secondary);
+  font-size: 12px;
+  text-align: center;
 }
 
 /* Drawer / Collapsible for JSON */
@@ -344,13 +657,8 @@ footer {
   h1.hero-title {
     font-size: 28px;
   }
-  /* Tablet / Mobile：允許 SVG 等比縮放（放下固定 960 限制） */
-  .chart-viewer svg {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    flex: 0 0 auto;
+  .chart-hint {
+    display: block;
   }
 }
 
