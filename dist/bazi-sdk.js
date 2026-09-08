@@ -3779,6 +3779,15 @@ var Bazi = (() => {
   }
 
   // src/transit/index.js
+  var PILLAR_LABELS = Object.freeze({
+    year: "\u5E74",
+    month: "\u6708",
+    day: "\u65E5",
+    hour: "\u6642"
+  });
+  function formatPillarLabel(pillar) {
+    return PILLAR_LABELS[pillar] || pillar || "\u2014";
+  }
   function daysInMonth2(year, month) {
     return new Date(Date.UTC(year, month, 0)).getUTCDate();
   }
@@ -3893,9 +3902,10 @@ var Bazi = (() => {
           type: "transit_clash",
           target: "year",
           natalPillar: natal.pillar,
+          natalPillarLabel: `${formatPillarLabel(natal.pillar)}\u67F1`,
           transitBranch: yearTransit.branch,
           natalBranch: natal.branch,
-          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u6C96\u539F\u5C40${natal.pillar}\u652F\u3010${natal.branch}\u3011`
+          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u6C96\u539F\u5C40${formatPillarLabel(natal.pillar)}\u652F\u3010${natal.branch}\u3011`
         });
       }
       if (HE_MAP[yearTransit.branch] === natal.branch) {
@@ -3903,9 +3913,10 @@ var Bazi = (() => {
           type: "transit_combine",
           target: "year",
           natalPillar: natal.pillar,
+          natalPillarLabel: `${formatPillarLabel(natal.pillar)}\u67F1`,
           transitBranch: yearTransit.branch,
           natalBranch: natal.branch,
-          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u5408\u539F\u5C40${natal.pillar}\u652F\u3010${natal.branch}\u3011`
+          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u5408\u539F\u5C40${formatPillarLabel(natal.pillar)}\u652F\u3010${natal.branch}\u3011`
         });
       }
     }
@@ -5307,7 +5318,7 @@ var Bazi = (() => {
   }
 
   // src/renderer/svg/index.js
-  var PILLAR_LABELS = {
+  var PILLAR_LABELS2 = {
     year: "\u5E74\u67F1",
     month: "\u6708\u67F1",
     day: "\u65E5\u67F1",
@@ -5344,20 +5355,20 @@ var Bazi = (() => {
       "'": "&apos;"
     })[char]);
   }
-  function formatPillarLabel(value) {
-    if (PILLAR_LABELS[value]) return PILLAR_LABELS[value];
+  function formatPillarLabel2(value) {
+    if (PILLAR_LABELS2[value]) return PILLAR_LABELS2[value];
     const luckMatch = String(value ?? "").match(/^luck-(\d+)$/);
     if (luckMatch) return `\u521D\u904B\u7B2C${luckMatch[1]}\u6B65`;
     return value || "\u2014";
   }
   function formatBasedOn(values = []) {
-    return values.map((value) => BASE_LABELS[value] || formatPillarLabel(value)).join("\u3001");
+    return values.map((value) => BASE_LABELS[value] || formatPillarLabel2(value)).join("\u3001");
   }
   function displayName(item) {
     return item && (item.displayName || item.name) || "\u2014";
   }
   function formatHitOn(hitOn = []) {
-    return hitOn.map(formatPillarLabel).join("\uFF0F");
+    return hitOn.map(formatPillarLabel2).join("\uFF0F");
   }
   function formatShenShaName(item) {
     const hitOn = item && item.hitOn && item.hitOn.length ? `\uFF08${formatHitOn(item.hitOn)}\uFF09` : "";
@@ -5659,7 +5670,10 @@ var Bazi = (() => {
             annual.xunKong && annual.xunKong.emptyBranches ? `\u65EC\u7A7A ${annual.xunKong.emptyBranches.join("")}` : ""
           ].filter(Boolean).join(" \xB7 ");
           cy = wrappedText(annualNodes, detail || "\u2014", { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: "meta" });
-          cy = wrappedText(annualNodes, `\u4E92\u52D5\uFF1A${(annual.interactions || []).map((item) => item.description || item.name).join("\u3001") || "\u2014"}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: "body" });
+          const interactionText = (annual.interactions || []).map((item) => item.description || item.name).filter(Boolean).join("\u3001");
+          if (interactionText) {
+            cy = wrappedText(annualNodes, `\u4E92\u52D5\uFF1A${interactionText}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: "body" });
+          }
           cy = wrappedText(annualNodes, `\u795E\u715E\uFF1A${formatShenShaList(annual.shenSha || [])}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: "body" });
           if (isCurrentYear) {
             const annualHeight = cy - annualStartY + 14;
@@ -5761,7 +5775,7 @@ var Bazi = (() => {
     if (preset.includeShenSha) addSection("\u795E\u715E\u5409\u51F6\u8207\u547D\u5BAE\u8EAB\u5BAE", (innerWidth) => renderShenShaSummary(result, innerWidth, theme));
     y += 10;
     const height = y + 42;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="BaziJS \u5B8C\u6574\u516B\u5B57\u547D\u76E4">
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" preserveAspectRatio="xMidYMin meet" overflow="visible" style="display:block;width:${width}px;max-width:100%;height:auto;" role="img" aria-label="BaziJS \u5B8C\u6574\u516B\u5B57\u547D\u76E4">
   <defs>
     <style>
       .title { font-size: 28px; font-weight: 800; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }

@@ -443,7 +443,12 @@ function renderResponsivePreview(result, options) {
           <small class="responsive-luck-shensha">神煞：${displayText(formatShenSha(cycle.shenSha, 5))}</small>
           ${Array.isArray(cycle.annuals) ? `<details class="responsive-luck-annuals"${isCurrentCycle ? ' open' : ''}><summary>${isCurrentCycle ? `${currentYear}年所在大運 · ` : ''}展開逐年資料（${cycle.annuals.length} 年）</summary><div class="responsive-annual-list">${cycle.annuals.map((annual) => {
             const isCurrentYear = Number(annual.year) === currentYear;
-            return `<div class="responsive-annual-item${isCurrentYear ? ' is-current-year' : ''}"${isCurrentYear ? ` aria-label="${currentYear}年流年"` : ''}><div><strong>${displayText(annual.age)}歲 · ${displayText(annual.year)}年 · ${displayText(annual.ganzhi)}</strong>${isCurrentYear ? '<span class="responsive-current-badge">今年</span>' : ''}<span>${displayText(annual.tenGod && (annual.tenGod.full || annual.tenGod.short))} · ${displayText(annual.stage && annual.stage.name)} · ${displayText(annual.nayin)}</span></div><p>互動：${displayText((annual.interactions || []).map((item) => item.description || item.name).join('、'))}<br>神煞：${displayText(formatShenSha(annual.shenSha, 8))}</p></div>`;
+            const interactionText = (annual.interactions || []).map((item) => item.description || item.name).filter(Boolean).join('、');
+            const annualDetails = [
+              interactionText ? `互動：${displayText(interactionText)}` : '',
+              `神煞：${displayText(formatShenSha(annual.shenSha, 8))}`
+            ].filter(Boolean).join('<br>');
+            return `<div class="responsive-annual-item${isCurrentYear ? ' is-current-year' : ''}"${isCurrentYear ? ` aria-label="${currentYear}年流年"` : ''}><div><strong>${displayText(annual.age)}歲 · ${displayText(annual.year)}年 · ${displayText(annual.ganzhi)}</strong>${isCurrentYear ? '<span class="responsive-current-badge">今年</span>' : ''}<span>${displayText(annual.tenGod && (annual.tenGod.full || annual.tenGod.short))} · ${displayText(annual.stage && annual.stage.name)} · ${displayText(annual.nayin)}</span></div><p>${annualDetails}</p></div>`;
           }).join('')}</div></details>` : ''}
         </article>`;
         }).join('')}</div>

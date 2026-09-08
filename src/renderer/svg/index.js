@@ -360,7 +360,10 @@ function renderLuckCycles(result, width, theme) {
           annual.xunKong && annual.xunKong.emptyBranches ? `旬空 ${annual.xunKong.emptyBranches.join('')}` : ''
         ].filter(Boolean).join(' · ');
         cy = wrappedText(annualNodes, detail || '—', { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: 'meta' });
-        cy = wrappedText(annualNodes, `互動：${(annual.interactions || []).map((item) => item.description || item.name).join('、') || '—'}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: 'body' });
+        const interactionText = (annual.interactions || []).map((item) => item.description || item.name).filter(Boolean).join('、');
+        if (interactionText) {
+          cy = wrappedText(annualNodes, `互動：${interactionText}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: 'body' });
+        }
         cy = wrappedText(annualNodes, `神煞：${formatShenShaList(annual.shenSha || [])}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: 'body' });
         if (isCurrentYear) {
           const annualHeight = cy - annualStartY + 14;
@@ -470,7 +473,7 @@ export function renderSvg(chartResult, options = {}) {
 
   y += 10;
   const height = y + 42;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="BaziJS 完整八字命盤">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" preserveAspectRatio="xMidYMin meet" overflow="visible" style="display:block;width:${width}px;max-width:100%;height:auto;" role="img" aria-label="BaziJS 完整八字命盤">
   <defs>
     <style>
       .title { font-size: 28px; font-weight: 800; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }

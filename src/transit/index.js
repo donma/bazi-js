@@ -17,6 +17,17 @@ import { getTenGod } from '../core/constants/ten-gods-data.js';
 import { getNayin } from '../core/constants/nayin-data.js';
 import { getTwelveStage } from '../core/constants/twelve-stages-data.js';
 
+const PILLAR_LABELS = Object.freeze({
+  year: '年',
+  month: '月',
+  day: '日',
+  hour: '時'
+});
+
+function formatPillarLabel(pillar) {
+  return PILLAR_LABELS[pillar] || pillar || '—';
+}
+
 function daysInMonth(year, month) {
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
@@ -128,9 +139,10 @@ export function calculateTransit(chartPillars, options = {}) {
         type: 'transit_clash',
         target: 'year',
         natalPillar: natal.pillar,
+        natalPillarLabel: `${formatPillarLabel(natal.pillar)}柱`,
         transitBranch: yearTransit.branch,
         natalBranch: natal.branch,
-        description: `流年支【${yearTransit.branch}】沖原局${natal.pillar}支【${natal.branch}】`
+        description: `流年支【${yearTransit.branch}】沖原局${formatPillarLabel(natal.pillar)}支【${natal.branch}】`
       });
     }
     if (HE_MAP[yearTransit.branch] === natal.branch) {
@@ -138,9 +150,10 @@ export function calculateTransit(chartPillars, options = {}) {
         type: 'transit_combine',
         target: 'year',
         natalPillar: natal.pillar,
+        natalPillarLabel: `${formatPillarLabel(natal.pillar)}柱`,
         transitBranch: yearTransit.branch,
         natalBranch: natal.branch,
-        description: `流年支【${yearTransit.branch}】合原局${natal.pillar}支【${natal.branch}】`
+        description: `流年支【${yearTransit.branch}】合原局${formatPillarLabel(natal.pillar)}支【${natal.branch}】`
       });
     }
   }

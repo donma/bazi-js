@@ -100,6 +100,11 @@ async function runUnit() {
   assert(westTransit.timezoneOffsetHours === -5 && westTransit.targetDatetime === '2026-09-08 12:00', 'UT-TRANSIT-NEGATIVE-TZ', JSON.stringify(westTransit));
   const utcTransit = Bazi.Transit.calculateTransit(d1.pillars, { datetime: '2026-09-08T12:00:00Z' });
   assert(utcTransit.timezoneOffsetHours === 0, 'UT-TRANSIT-UTC', JSON.stringify(utcTransit));
+  const readableTransitChart = Bazi.calculate({ birthDate: '1983-06-21', birthTimeMode: 'branch', birthHourBranch: '午', gender: 'male' });
+  const readableTransit = Bazi.Transit.calculateTransit(readableTransitChart.pillars, { datetime: '2027-09-08T12:00:00+08:00' });
+  const readableDescriptions = readableTransit.interactions.map((item) => item.description || '');
+  assert(readableDescriptions.some((description) => description.includes('原局月支')) && readableDescriptions.some((description) => description.includes('原局時支')), 'UT-TRANSIT-CHINESE-PILLAR-LABELS', readableDescriptions.join('、'));
+  assert(!readableDescriptions.some((description) => /原局(?:year|month|day|hour)支/.test(description)), 'UT-TRANSIT-NO-INTERNAL-PILLAR-LABEL', readableDescriptions.join('、'));
   let invalidTransitDate = false;
   try { Bazi.Transit.parseTransitDatetime(new Date('invalid')); } catch (error) { invalidTransitDate = error.code === 'BAZI_VALIDATION_ERROR'; }
   assert(invalidTransitDate, 'UT-TRANSIT-INVALID-DATE', 'invalid Date 必須回傳穩定驗證錯誤');
@@ -205,8 +210,10 @@ async function runUnit() {
   const completeSvg = Bazi.Renderer.render(sample1, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
   const completeViewBox = completeSvg.match(/viewBox="0 0 960 (\d+)"/);
   assert(completeViewBox && Number(completeViewBox[1]) > 3000, 'UT-SVG-COMPLETE-DYNAMIC-HEIGHT', completeViewBox && completeViewBox[1]);
+  assert(completeSvg.includes('preserveAspectRatio="xMidYMin meet"') && completeSvg.includes('max-width:100%;height:auto;'), 'UT-SVG-RESPONSIVE-VIEWBOX', '下載 SVG 應保留向量尺寸並能在窄視窗完整縮放');
   assert(completeSvg.includes('基本資料') && completeSvg.includes('四柱主盤') && completeSvg.includes('神煞（'), 'UT-SVG-COMPLETE-SECTIONS', '完整 SVG 缺少主盤或神煞區塊');
   assert(completeSvg.includes('逐年資料') && completeSvg.includes('1985') && completeSvg.includes('乙丑'), 'UT-SVG-COMPLETE-ANNUALS', '完整 SVG 缺少大運逐年資料');
+  assert(!completeSvg.includes('互動：—'), 'UT-SVG-HIDE-EMPTY-INTERACTIONS', '沒有互動的流年不應顯示互動佔位文字');
   assert(completeSvg.includes('胎元命宮') && completeSvg.includes('天干地支互動'), 'UT-SVG-COMPLETE-AUXILIARY', '完整 SVG 缺少附宮或互動區塊');
   assert(!completeSvg.includes('SS_'), 'UT-SVG-NO-INTERNAL-RULE-ID', '下載 SVG 不應顯示內部 rule id');
   assert(completeSvg.includes('當麻實驗室') && completeSvg.includes('github.com/donma/bazi-js'), 'UT-SVG-WATERMARK', '下載 SVG 應包含低調浮水印');
