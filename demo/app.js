@@ -5,7 +5,116 @@ let currentResult = null;
 // file:// 與 http:// 預覽共用同一個 DOM 渲染路徑，避免依 viewport 切換造成兩種畫面。
 let responsivePreview = true;
 
+const LAST_INPUT_STORAGE_KEY = 'bazijs.demo.last-input.v1';
+const VALID_TIME_MODES = ['exact', 'branch', 'unknown'];
+
+function setStorageStatus(message, isError = false) {
+  const status = document.getElementById('storage-status');
+  if (!status) return;
+  status.textContent = message;
+  status.classList.toggle('is-error', isError);
+}
+
+function getLocalStorage() {
+  try {
+    return window.localStorage;
+  } catch (error) {
+    return null;
+  }
+}
+
+function loadLastInput() {
+  const storage = getLocalStorage();
+  if (!storage) {
+    setStorageStatus('此瀏覽器未允許使用儲存空間，資料不會被保存。', true);
+    return null;
+  }
+
+  try {
+    const raw = storage.getItem(LAST_INPUT_STORAGE_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw);
+    if (!saved || typeof saved !== 'object') return null;
+    if (typeof saved.birthDate !== 'string' || !['male', 'female'].includes(saved.gender)) return null;
+    if (!VALID_TIME_MODES.includes(saved.birthTimeMode)) return null;
+    return saved;
+  } catch (error) {
+    try {
+      storage.removeItem(LAST_INPUT_STORAGE_KEY);
+    } catch (removeError) {
+      // 儲存空間不可寫入時，維持預設表單即可。
+    }
+    return null;
+  }
+}
+
+function saveLastInput(input) {
+  const storage = getLocalStorage();
+  if (!storage) {
+    setStorageStatus('此瀏覽器未允許使用儲存空間，資料不會被保存。', true);
+    return false;
+  }
+
+  const payload = {
+    birthDate: input.birthDate,
+    gender: input.gender,
+    birthTimeMode: input.birthTimeMode,
+    birthTime: input.birthTime || '',
+    birthHourBranch: input.birthHourBranch || '',
+    timezone: input.timezone,
+    trueSolarTime: Boolean(input.trueSolarTime),
+    longitude: input.location && Number.isFinite(input.location.longitude) ? input.location.longitude : 121.5654
+  };
+
+  try {
+    storage.setItem(LAST_INPUT_STORAGE_KEY, JSON.stringify(payload));
+    setStorageStatus('已儲存本次輸入，下次開啟此頁面會自動帶入。');
+    return true;
+  } catch (error) {
+    setStorageStatus('無法儲存本次輸入，可能是瀏覽器儲存空間已被停用。', true);
+    return false;
+  }
+}
+
+function restoreLastInput(saved) {
+  if (!saved) return;
+
+  const birthDate = document.getElementById('birthDate');
+  const birthTime = document.getElementById('birthTime');
+  const birthHourBranch = document.getElementById('birthHourBranch');
+  const timezone = document.getElementById('timezone');
+  const longitude = document.getElementById('longitude');
+  const trueSolarTime = document.getElementById('trueSolarTime');
+
+  if (saved.birthDate) birthDate.value = saved.birthDate;
+  if (saved.birthTime) birthTime.value = saved.birthTime;
+  if (saved.birthHourBranch && [...birthHourBranch.options].some((option) => option.value === saved.birthHourBranch)) {
+    birthHourBranch.value = saved.birthHourBranch;
+  }
+  if (saved.timezone && [...timezone.options].some((option) => option.value === saved.timezone)) {
+    timezone.value = saved.timezone;
+  }
+  if (Number.isFinite(Number(saved.longitude))) longitude.value = saved.longitude;
+  trueSolarTime.checked = saved.trueSolarTime === true;
+
+  document.querySelectorAll('#gender-control button').forEach((button) => {
+    button.classList.toggle('active', button.getAttribute('data-val') === saved.gender);
+  });
+  document.getElementById('gender').value = saved.gender;
+
+  const mode = VALID_TIME_MODES.includes(saved.birthTimeMode) ? saved.birthTimeMode : 'exact';
+  document.querySelectorAll('#time-mode-control button').forEach((button) => {
+    button.classList.toggle('active', button.getAttribute('data-val') === mode);
+  });
+  document.getElementById('exact-time-group').style.display = mode === 'exact' ? 'block' : 'none';
+  document.getElementById('branch-time-group').style.display = mode === 'branch' ? 'block' : 'none';
+  document.getElementById('location-group').style.display = saved.trueSolarTime === true ? 'block' : 'none';
+}
+
 function init() {
+  const savedInput = loadLastInput();
+  restoreLastInput(savedInput);
+
   // 性別切換
   const genderBtns = document.querySelectorAll('#gender-control button');
   genderBtns.forEach(btn => {
@@ -89,6 +198,7 @@ function runCalculation() {
   }
 
   currentResult = res.data;
+  saveLastInput(input);
   updateRender();
 }
 
