@@ -10,3 +10,6 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+
+# AI 協作暫存文件（不進版控）
+ai-guide/
