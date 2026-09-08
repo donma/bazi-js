@@ -85,7 +85,7 @@ async function runUnit() {
   void ss24;
   // 年支為子的命：四柱見卯即紅鸞、見酉即天喜（以 2000-01-01 己卯年子月？改用直接引擎驗）
   const { SHENSHA_CATALOG } = await import('../src/shensha/catalog.js');
-  assert(SHENSHA_CATALOG.length === 22, 'UT-SHENSHACOUNT-22', String(SHENSHA_CATALOG.length));
+  assert(SHENSHA_CATALOG.length === 20, 'UT-SHENSHACOUNT-20', String(SHENSHA_CATALOG.length));
   const hl = SHENSHA_CATALOG.find((s) => s.id === 'hong_luan');
   assert(hl.match({ baseBranch: '子', targetBranch: '卯' }) === true, 'UT-HONGLUAN-ZIMAO', '');
   assert(hl.match({ baseBranch: '亥', targetBranch: '辰' }) === true, 'UT-HONGLUAN-HAICHEN', '');
@@ -96,9 +96,40 @@ async function runUnit() {
   assert(ty.match({ monthBranch: '巳', targetBranch: '辰' }) === true, 'UT-TIANYI-SICHEN', '');
   const hy = SHENSHA_CATALOG.find((s) => s.id === 'hong_yan');
   assert(hy.match({ baseStem: '己', targetBranch: '辰' }) === true, 'UT-HONGYAN-JICHEN', '');
-  const se = SHENSHA_CATALOG.find((s) => s.id === 'shi_e_da_bai');
-  assert(se.matchChart({ day: { stem: '戊', branch: '戌' } }) === true, 'UT-SHIEDABAI-WUXU', '');
-  assert(se.matchChart({ day: { stem: '己', branch: '亥' } }) === false, 'UT-SHIEDABAI-NEG', '');
+  assert(!SHENSHA_CATALOG.some((s) => ['kui_gang', 'shi_e_da_bai'].includes(s.id)), 'UT-SHENSHA-NO-SPECIAL-PILLARS', '固定日柱不可留在一般 ShenSha catalog');
+
+  // SpecialPillar / SeasonalSpecial：固定柱位與季節條件獨立於 ShenSha。
+  const specialRules = Bazi.SpecialRules;
+  const specialRegistry = specialRules.validateSpecialRuleRegistry();
+  assert(specialRegistry.valid && specialRegistry.count === 11, 'UT-SPECIAL-REGISTRY-11', JSON.stringify(specialRegistry));
+  for (const rule of specialRules.SPECIAL_RULE_REGISTRY) {
+    const required = ['id', 'name', 'aliases', 'tradition', 'conceptType', 'ruleFamily', 'baseOn', 'scope', 'category', 'confidence', 'ruleId', 'version', 'references', 'description', 'match', 'evidence'];
+    assert(required.every((field) => field in rule), `UT-SPECIAL-SCHEMA-${rule.id}`, '缺少規格欄位');
+  }
+  const specialCase = (day, hour = '甲子', month = '甲寅') => ({
+    year: { stem: '甲', branch: '子', ganzhi: '甲子' },
+    month: { stem: month[0], branch: month[1], ganzhi: month },
+    day: { stem: day[0], branch: day[1], ganzhi: day },
+    hour: { stem: hour[0], branch: hour[1], ganzhi: hour, available: true }
+  });
+  const checkSpecial = (id, pillars, label) => assert(specialRules.calculateSpecialRules(pillars).some((item) => item.id === id), label, id);
+  checkSpecial('kui_gang', specialCase('戊戌'), 'UT-SPECIAL-KUIGANG');
+  checkSpecial('shi_e_da_bai', specialCase('甲辰'), 'UT-SPECIAL-SHIEDABAI');
+  checkSpecial('ri_gui', specialCase('丁酉'), 'UT-SPECIAL-RIGUI');
+  checkSpecial('ri_de', specialCase('甲寅'), 'UT-SPECIAL-RIDE');
+  checkSpecial('ba_zhuan', specialCase('癸丑'), 'UT-SPECIAL-BAZHUAN');
+  checkSpecial('jiu_chou', specialCase('乙卯'), 'UT-SPECIAL-JIUCHOU');
+  checkSpecial('gu_luan', specialCase('丙午'), 'UT-SPECIAL-GULUAN');
+  checkSpecial('yin_yang_cha_cuo', specialCase('癸亥'), 'UT-SPECIAL-YYCC');
+  checkSpecial('jin_shen', specialCase('甲子', '癸酉'), 'UT-SPECIAL-JINSHEN');
+  assert(!specialRules.calculateSpecialRules(specialCase('己亥', '甲子')).some((item) => item.id === 'shi_e_da_bai'), 'UT-SPECIAL-NEGATIVE', '不應誤判固定日柱');
+  const springWaste = specialRules.calculateSeasonalSpecialRules(specialCase('庚申', '甲子', '甲寅'));
+  assert(springWaste.some((item) => item.id === 'si_fei' && item.evidence.season === 'spring'), 'UT-SEASONAL-SIFEI-SPRING', JSON.stringify(springWaste));
+  const summerWaste = specialRules.calculateSeasonalSpecialRules(specialCase('庚申', '甲子', '甲午'));
+  assert(!summerWaste.some((item) => item.id === 'si_fei'), 'UT-SEASONAL-SIFEI-SEASON-GUARD', JSON.stringify(summerWaste));
+  const summerPardon = specialRules.calculateSeasonalSpecialRules(specialCase('甲午', '甲子', '甲午'));
+  assert(summerPardon.some((item) => item.id === 'tian_she' && item.evidence.season === 'summer'), 'UT-SEASONAL-TIANSHE-SUMMER', JSON.stringify(summerPardon));
+  assert(Bazi.calculate({ birthDate: '2000-01-01', birthTime: '12:00', gender: 'male' }).specialRules.every((item) => item.conceptType !== 'shensha'), 'UT-CHART-SPECIAL-RULES', 'chart.specialRules 應為獨立分類');
 
   // 大運 / 流年神煞結構（v1.0.1）
   assert(Array.isArray(d1.luckCycles.cycles[0].shenSha), 'UT-LUCK-SHENSHATYPE', '');
@@ -124,10 +155,12 @@ async function runShenShaVNext() {
   const chart = Bazi.calculate(fixture.input);
   const expectedPillars = fixture.expected.pillars;
   assert(chart.pillars.year.ganzhi === expectedPillars.year && chart.pillars.month.ganzhi === expectedPillars.month && chart.pillars.day.ganzhi === expectedPillars.day && chart.pillars.hour.ganzhi === expectedPillars.hour, fixture.caseId + '-PILLARS', JSON.stringify(chart.pillars));
-  assert(chart.meta.shenshaPreset === 'classical' && chart.meta.shenShaRuleVersion === '2.0.0', fixture.caseId + '-META', JSON.stringify(chart.meta));
+  assert(chart.meta.shenshaPreset === 'classical' && chart.meta.shenShaRuleVersion === '2.1.0' && chart.meta.specialRuleVersion === '1.0.0', fixture.caseId + '-META', JSON.stringify(chart.meta));
 
   const registryCheck = Bazi.ShenSha.validateShenShaRegistry();
-  assert(registryCheck.valid && registryCheck.count >= 45, 'UT-SHENSHA-REGISTRY', JSON.stringify(registryCheck));
+  assert(registryCheck.valid && registryCheck.count === 40, 'UT-SHENSHA-REGISTRY-40', JSON.stringify(registryCheck));
+  assert(Bazi.ShenSha.getShenShaRule('kui_gang') === null && Bazi.ShenSha.getShenShaRule('shi_e_da_bai') === null, 'UT-SHENSHA-SPECIAL-MIGRATED', '特殊柱規則不可由 ShenSha registry 取得');
+  assert(Bazi.Patterns.validateSpecialPatternRegistry().valid && Bazi.Patterns.SPECIAL_PATTERN_REGISTRY.every((item) => item.implemented === false), 'UT-PATTERNS-RESEARCH-ONLY', '整局格局目前只登錄架構');
   const byPillar = Bazi.ShenSha.groupShenShaByPillar(chart.shenSha);
   for (const [pillar, ids] of Object.entries(fixture.expected.byPillarAtLeast)) {
     const actual = new Set(byPillar[pillar].map((item) => item.id));
@@ -139,6 +172,7 @@ async function runShenShaVNext() {
   const aiContext = Bazi.AI.toContext(chart, { compact: false });
   assert(Array.isArray(aiShenSha.all) && Array.isArray(aiShenSha.byPillar.hour) && aiShenSha.byPillar.hour.some((item) => item.id === 'xue_ren'), 'UT-AI-SHENSHA-CONTEXT', '');
   assert(aiContext.shenSha && aiContext.shenSha.all.length === chart.shenSha.length && Array.isArray(aiContext.shenShaList), 'UT-AI-SHENSHA-BACKWARD', '');
+  assert(aiContext.specialRules && aiContext.specialRules.ruleVersion === '1.0.0' && Array.isArray(aiContext.specialRules.all), 'UT-AI-SPECIAL-RULES', '');
 
   const xunkong = Bazi.ShenSha.calculateXunKong('己亥');
   assert(xunkong.xun === '甲午旬' && JSON.stringify(xunkong.emptyBranches) === JSON.stringify(['辰', '巳']), 'UT-XUNKONG-JIHAI', JSON.stringify(xunkong));

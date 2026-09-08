@@ -17,15 +17,15 @@ const matchStemMap = (context, baseKeys, map) => baseKeys.some((key) => {
   const expected = map[context.bases[key]];
   return (Array.isArray(expected) ? expected : [expected]).includes(context.target.branch);
 });
-const matchPillarSet = (context, baseKey, set) => (
-  isBaseActive(context, baseKey) && context.target.pillar === 'day' && set.includes(context.target.ganzhi)
-);
-
 const refs = (title, note) => [{ type: 'classical', title, note }];
 const rule = (definition) => ({
   aliases: [],
   tags: [],
   schools: ['classical'],
+  tradition: 'classical-ziping',
+  conceptType: 'shensha',
+  ruleFamily: 'general-shensha',
+  scope: 'natal',
   priority: 50,
   version: '2.0.0',
   ...definition
@@ -37,9 +37,6 @@ const XUE_TANG_BY_NAYIN = { 金: '巳', 木: '亥', 水: '申', 火: '寅', 土:
 const CI_GUAN_BY_NAYIN = { 金: '申', 木: '寅', 水: '亥', 火: '巳', 土: '亥' };
 const CI_GUAN_COMMON = { 甲: '庚寅', 乙: '辛卯', 丙: '乙巳', 丁: '戊午', 戊: '丁巳', 己: '庚午', 庚: '壬申', 辛: '癸酉', 壬: '癸亥', 癸: '壬戌' };
 const XUE_TANG_COMMON = { 甲: '丙寅', 乙: '丁卯', 丙: '戊申', 丁: '己酉', 戊: '庚申', 己: '辛酉', 庚: '壬寅', 辛: '癸卯', 壬: '甲申', 癸: '乙酉' };
-const YIN_YANG_CHA_CUO = ['丙子', '丁丑', '戊寅', '辛卯', '壬辰', '癸巳', '丙午', '丁未', '戊申', '辛酉', '壬戌', '癸亥'];
-const GU_LUAN = ['乙巳', '丁巳', '辛亥', '戊申', '甲寅'];
-
 const FU_XING = { 甲: ['寅', '子'], 乙: ['卯', '亥'], 丙: ['寅', '子'], 丁: ['酉', '亥'], 戊: ['卯'], 己: ['巳'], 庚: ['午'], 辛: ['申'], 壬: ['辰'], 癸: ['亥'] };
 const TIAN_CHU = { 甲: '巳', 乙: '午', 丙: '巳', 丁: '午', 戊: '申', 己: '酉', 庚: '亥', 辛: '子', 壬: '寅', 癸: '卯' };
 const TIAN_GUAN = { 甲: '未', 乙: '辰', 丙: '巳', 丁: '酉', 戊: '戌', 己: '卯', 庚: '亥', 辛: '申', 壬: '寅', 癸: '午' };
@@ -80,14 +77,4 @@ export const EXTENDED_SHENSHA = [
   rule({ id: 'bai_hu', name: '白虎', displayName: '白虎', category: 'inauspicious', tags: ['sha'], tier: 'extended', priority: 58, confidence: 'traditional', baseOn: ['yearBranch'], target: 'branch', ruleId: 'SS_BAIHU_040', references: refs('《三命通會》白虎歲煞訣', '三合局取白虎位'), match: (c) => matchMap(c, 'yearBranch', BAI_HU) }),
   rule({ id: 'tian_luo', name: '天羅', displayName: '天羅', category: 'inauspicious', tags: ['net'], tier: 'extended', priority: 59, confidence: 'traditional', baseOn: ['dayStem'], target: 'branch', ruleId: 'SS_TIANLUO_041', references: refs('《三命通會》天羅地網訣', '火命戌亥為天羅'), description: '火日主見戌、亥為天羅。', match: (c) => isBaseActive(c, 'dayStem') && ['丙', '丁'].includes(c.bases.dayStem) && ['戌', '亥'].includes(c.target.branch) }),
   rule({ id: 'di_wang', name: '地網', displayName: '地網', category: 'inauspicious', tags: ['net'], tier: 'extended', priority: 60, confidence: 'traditional', baseOn: ['dayStem'], target: 'branch', ruleId: 'SS_DIWANG_042', references: refs('《三命通會》天羅地網訣', '水命辰巳為地網'), description: '水日主見辰、巳為地網。', match: (c) => isBaseActive(c, 'dayStem') && ['壬', '癸'].includes(c.bases.dayStem) && ['辰', '巳'].includes(c.target.branch) }),
-  rule({ id: 'gu_luan', name: '孤鸞', displayName: '孤鸞', category: 'inauspicious', tags: ['marriage'], tier: 'extended', priority: 61, confidence: 'school-specific', baseOn: ['dayPillar'], target: 'pillar', ruleId: 'SS_GULUAN_043', references: refs('《三命通會》孤鸞煞日例', '固定日柱清單各家略有差異'), researchNotes: { conflict: true, note: '固定日柱清單存在增減，本版採保守常見五柱。' }, match: (c) => matchPillarSet(c, 'dayPillar', GU_LUAN) }),
-  rule({ id: 'yin_yang_cha_cuo', name: '陰陽差錯', displayName: '陰陽差錯', category: 'inauspicious', tags: ['marriage'], tier: 'extended', priority: 62, confidence: 'traditional', baseOn: ['dayPillar'], target: 'pillar', ruleId: 'SS_YYCC_044', references: refs('《三命通會》陰陽差錯日例', '固定日柱清單'), match: (c) => matchPillarSet(c, 'dayPillar', YIN_YANG_CHA_CUO) }),
-  rule({ id: 'si_fei', name: '四廢', displayName: '四廢', category: 'inauspicious', tags: ['seasonal'], tier: 'extended', priority: 63, confidence: 'traditional', baseOn: ['monthBranch', 'dayPillar'], target: 'pillar', ruleId: 'SS_SIFEI_045', references: refs('《三命通會》四廢日例', '按春夏秋冬月令取四廢日'), match: (c) => {
-    if (!isBaseActive(c, 'dayPillar') || c.target.pillar !== 'day' || !c.target.ganzhi) return false;
-    const sets = {
-      spring: ['庚申', '辛酉'], summer: ['壬子', '癸亥'], autumn: ['甲寅', '乙卯'], winter: ['丙午', '丁巳']
-    };
-    const season = ['寅', '卯', '辰'].includes(c.bases.monthBranch) ? 'spring' : ['巳', '午', '未'].includes(c.bases.monthBranch) ? 'summer' : ['申', '酉', '戌'].includes(c.bases.monthBranch) ? 'autumn' : 'winter';
-    return sets[season].includes(c.target.ganzhi);
-  } })
 ];

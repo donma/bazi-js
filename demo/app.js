@@ -140,7 +140,9 @@ const BASE_LABELS = {
   monthBranch: '月支',
   dayBranch: '日支',
   yearPillar: '年柱',
-  dayPillar: '日柱'
+  dayPillar: '日柱',
+  hourPillar: '時柱',
+  wholeChart: '整局'
 };
 
 function formatPillarLabel(value) {
@@ -168,6 +170,17 @@ function formatShenSha(list, limit = 14) {
   if (!names.length) return '—';
   const suffix = (list || []).length > limit ? `……（共${list.length}顆）` : '';
   return `${names.join('、 ')}${suffix}`;
+}
+
+function formatSpecialRules(list) {
+  if (!list || !list.length) return '— 本命盤沒有命中特殊柱位或季節條件';
+  return list.map((item) => {
+    const evidence = item.evidence || {};
+    const basis = formatBasedOn(item.baseOn || item.basedOn);
+    const season = evidence.season ? `季節：${evidence.season === 'spring' ? '春' : evidence.season === 'summer' ? '夏' : evidence.season === 'autumn' ? '秋' : '冬'}（月令${evidence.monthBranch || '—'}）` : '';
+    const target = evidence.targetValue ? `命中：${evidence.targetValue}` : '';
+    return `${item.name || item.displayName || ''}（${basis}）${[target, season].filter(Boolean).join('，')}`;
+  }).join('、 ');
 }
 
 const SHENSHA_CATEGORY_LABELS = { auspicious: '吉', inauspicious: '凶', neutral: '中性' };
@@ -301,6 +314,26 @@ function renderResponsivePreview(result, options) {
       </section>`
     : '';
 
+  const specialRules = preset.includeShenSha
+    ? `<section class="responsive-section responsive-special-rules">
+        <h4>特殊柱位與季節條件</h4>
+        <div class="responsive-detail-list">
+          <div><strong>命中結果</strong><p>${escapeHtml(formatSpecialRules(result.specialRules))}</p></div>
+          ${(result.specialRules || []).map((item) => {
+            const evidence = item.evidence || {};
+            const season = evidence.season ? `季節：${evidence.season === 'spring' ? '春' : evidence.season === 'summer' ? '夏' : evidence.season === 'autumn' ? '秋' : '冬'}（月令${evidence.monthBranch || '—'}）` : '';
+            const evidenceText = [
+              `基準：${formatBasedOn(item.baseOn)}`,
+              evidence.targetValue ? `命中：${evidence.targetValue}` : '',
+              season,
+              item.ruleId ? `規則：${item.ruleId}` : ''
+            ].filter(Boolean).join(' · ');
+            return `<div><strong>${displayText(item.name || item.displayName)}</strong><p>${displayText(evidenceText)}<br><small>${displayText(item.description, '—')}</small></p></div>`;
+          }).join('')}
+        </div>
+      </section>`
+    : '';
+
   const strength = preset.includeStrength
     ? `<section class="responsive-section">
         <h4>五行氣數與強弱平衡</h4>
@@ -350,6 +383,7 @@ function renderResponsivePreview(result, options) {
       <h4>四柱主盤</h4>
       <div class="responsive-pillar-grid">${pillars}</div>
     </section>
+    ${specialRules}
     ${strength}
     ${luckCycles}
     ${transitSection}

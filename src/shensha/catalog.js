@@ -354,23 +354,7 @@ export const SHENSHA_CATALOG = [
     }
   },
 
-  // 17. 魁罡貴人
-  // 戊戌、庚戌、庚辰、壬辰四日出生者為魁罡。
-  {
-    id: 'kui_gang',
-    name: '魁罡貴人',
-    category: 'neutral',
-    baseOn: ['dayPillar'],
-    ruleId: 'SS_KUIGANG_017',
-    version: '1.0.0',
-    reference: '《三命通會》卷五、《淵海子平》',
-    matchChart: (pillars) => {
-      const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
-      return ['戊戌', '庚戌', '庚辰', '壬辰'].includes(ganzhi);
-    }
-  },
-
-  // 18. 紅鸞星
+  // 17. 紅鸞星
   // 以年支查：子見卯、丑見寅、寅見丑、卯見子、辰見亥、巳見戌、
   // 午見酉、未見申、申見未、酉見午、戌見巳、亥見辰。
   {
@@ -391,7 +375,7 @@ export const SHENSHA_CATALOG = [
     }
   },
 
-  // 19. 天喜星（紅鸞對沖位）
+  // 18. 天喜星（紅鸞對沖位）
   // 以年支查：子見酉、丑見申、寅見未、卯見午、辰見巳、巳見辰、
   // 午見卯、未見寅、申見丑、酉見子、戌見亥、亥見戌。
   {
@@ -412,7 +396,7 @@ export const SHENSHA_CATALOG = [
     }
   },
 
-  // 20. 天醫星
+  // 19. 天醫星
   // 以月支查：正月生見丑、二月見寅、三月見卯、四月見辰、五月見巳、六月見午、
   // 七月見未、八月見申、九月見酉、十月見戌、十一月見亥、十二月見子。
   {
@@ -433,7 +417,7 @@ export const SHENSHA_CATALOG = [
     }
   },
 
-  // 21. 紅艷煞
+  // 20. 紅艷煞
   // 以年干或日干查：甲乙見午、丙見寅、丁見未、戊己見辰、庚見戌、辛見酉、壬見子、癸見申。
   {
     id: 'hong_yan',
@@ -453,19 +437,4 @@ export const SHENSHA_CATALOG = [
     }
   },
 
-  // 22. 十惡大敗日
-  // 甲辰、乙巳、丙申、丁亥、戊戌、己丑、庚辰、辛巳、壬申、癸亥十日為十惡大敗日。
-  {
-    id: 'shi_e_da_bai',
-    name: '十惡大敗日',
-    category: 'inauspicious',
-    baseOn: ['dayPillar'],
-    ruleId: 'SS_SHIEDABAI_022',
-    version: '1.0.0',
-    reference: '《三命通會》卷五',
-    matchChart: (pillars) => {
-      const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
-      return ['甲辰', '乙巳', '丙申', '丁亥', '戊戌', '己丑', '庚辰', '辛巳', '壬申', '癸亥'].includes(ganzhi);
-    }
-  }
 ];

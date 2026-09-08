@@ -14,6 +14,10 @@ function buildShenShaItem(item, options = {}) {
     name: item.name,
     displayName: item.displayName || item.name,
     aliases: item.aliases || [],
+    tradition: item.tradition,
+    conceptType: item.conceptType,
+    ruleFamily: item.ruleFamily,
+    scope: item.scope,
     category: item.category,
     tags: item.tags || [],
     tier: item.tier,
@@ -21,8 +25,35 @@ function buildShenShaItem(item, options = {}) {
     confidence: item.confidence,
     schools: item.schools || [],
     hitOn: item.hitOn || [],
+    baseOn: item.baseOn || item.basedOn || [],
     basedOn: item.basedOn || [],
     target: item.target,
+    ...(includeRules ? { ruleId: item.ruleId, version: item.version } : {}),
+    reference: item.reference,
+    ...(Array.isArray(item.references) ? { references: item.references } : {}),
+    ...(item.description ? { description: item.description } : {}),
+    ...(item.variants ? { variants: item.variants } : {}),
+    ...(item.researchNotes ? { researchNotes: item.researchNotes } : {}),
+    ...(includeEvidence ? { evidence: item.evidence } : {})
+  };
+}
+
+function buildSpecialRuleItem(item, options = {}) {
+  const { includeRules = true, includeEvidence = true } = options;
+  return {
+    id: item.id,
+    name: item.name,
+    displayName: item.displayName || item.name,
+    aliases: item.aliases || [],
+    tradition: item.tradition,
+    conceptType: item.conceptType,
+    ruleFamily: item.ruleFamily,
+    baseOn: item.baseOn || [],
+    scope: item.scope,
+    category: item.category,
+    tags: item.tags || [],
+    confidence: item.confidence,
+    hitOn: item.hitOn || [],
     ...(includeRules ? { ruleId: item.ruleId, version: item.version } : {}),
     reference: item.reference,
     ...(Array.isArray(item.references) ? { references: item.references } : {}),
@@ -38,12 +69,27 @@ export function toShenShaContext(result, options = {}) {
   const grouped = groupShenShaByPillar(result.shenSha || []);
   const context = {
     preset: result.meta.shenshaPreset || 'classical',
-    ruleVersion: result.meta.shenShaRuleVersion || '2.0.0',
+    ruleVersion: result.meta.shenShaRuleVersion || '2.1.0',
     all: items,
     byPillar: Object.fromEntries(Object.entries(grouped).map(([pillar, list]) => [
       pillar,
       list.map((item) => buildShenShaItem(item, options))
     ]))
+  };
+  return options.compact ? JSON.stringify(context) : context;
+}
+
+export function toSpecialRulesContext(result, options = {}) {
+  const items = (result.specialRules || []).map((item) => buildSpecialRuleItem(item, options));
+  const byConceptType = items.reduce((grouped, item) => {
+    const key = item.conceptType || 'unknown';
+    (grouped[key] ||= []).push(item);
+    return grouped;
+  }, {});
+  const context = {
+    ruleVersion: result.meta.specialRuleVersion || '1.0.0',
+    all: items,
+    byConceptType
   };
   return options.compact ? JSON.stringify(context) : context;
 }
@@ -66,7 +112,8 @@ export function toContext(result, options = {}) {
       ruleSetVersion: result.meta.ruleSetVersion,
       profileId: result.meta.profileId,
       shenshaPreset: result.meta.shenshaPreset || 'classical',
-      shenShaRuleVersion: result.meta.shenShaRuleVersion || '2.0.0'
+      shenShaRuleVersion: result.meta.shenShaRuleVersion || '2.1.0',
+      specialRuleVersion: result.meta.specialRuleVersion || '1.0.0'
     },
 
     inputSummary: {
@@ -136,6 +183,12 @@ export function toContext(result, options = {}) {
     },
 
     shenSha: toShenShaContext(result, {
+      includeRules,
+      includeEvidence: includeShenShaEvidence,
+      compact: false
+    }),
+
+    specialRules: toSpecialRulesContext(result, {
       includeRules,
       includeEvidence: includeShenShaEvidence,
       compact: false

@@ -16,6 +16,7 @@ import { calculateChartAuxiliary } from '../auxiliary/index.js';
 import { calculateInteractions } from '../interactions/index.js';
 import { calculateStrength } from '../strength/index.js';
 import { calculateShenSha, calculateShenShaOnPillar, calculateTransitShenSha } from '../shensha/index.js';
+import { calculateSpecialRules } from '../special-rules/index.js';
 import { calculateLuckCycles } from '../luck/index.js';
 import { calculateTransit } from '../transit/index.js';
 import { calculateTrueSolarTime } from '../calendar/true-solar-time.js';
@@ -124,6 +125,7 @@ export function calculate(input, options = {}) {
   const strength = calculateStrength(pillars, interactions);
   const shenshaPreset = input.shenshaPreset || input.shenShaPreset || options.shenshaPreset || options.shenShaPreset || 'classical';
   const shenSha = calculateShenSha(pillars, { preset: shenshaPreset, gender: input.gender });
+  const specialRules = calculateSpecialRules(pillars, { gender: input.gender, input });
 
   // 9. 大運計算
   const luckCycles = calculateLuckCycles({
@@ -246,6 +248,7 @@ export function calculate(input, options = {}) {
     interactions,
     strength,
     shenSha,
+    specialRules,
     luckCycles,
     transits,
 
@@ -300,6 +303,10 @@ export class Chart {
 
   getShenSha() {
     return this.result.shenSha;
+  }
+
+  getSpecialRules() {
+    return this.result.specialRules;
   }
 
   getStrength() {

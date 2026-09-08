@@ -9,8 +9,7 @@ const LEGACY_DISPLAY = {
   tao_hua: { displayName: '桃花（咸池）', aliases: ['咸池'] },
   tian_xi: { name: '天喜', displayName: '天喜', aliases: ['天喜星'] },
   tian_yi_star: { name: '天醫', displayName: '天醫', aliases: ['天醫星'] },
-  hong_luan: { name: '紅鸞', displayName: '紅鸞', aliases: ['紅鸞星'] },
-  shi_e_da_bai: { name: '十惡大敗', displayName: '十惡大敗', aliases: ['十惡大敗日'] }
+  hong_luan: { name: '紅鸞', displayName: '紅鸞', aliases: ['紅鸞星'] }
 };
 
 function legacyMatcher(rule, context) {
@@ -32,6 +31,10 @@ function normalizeLegacyRule(rule) {
     name: override.name || rule.name,
     displayName: override.displayName || rule.name,
     aliases: override.aliases || [],
+    tradition: 'classical-ziping',
+    conceptType: 'shensha',
+    ruleFamily: 'general-shensha',
+    scope: 'natal',
     tags: ['legacy', rule.category === 'auspicious' ? 'noble' : rule.category],
     tier: 'core',
     priority: 100,
@@ -59,6 +62,9 @@ export function validateShenShaRegistry(registry = SHENSHA_REGISTRY) {
     if (!rule.ruleId || ruleIds.has(rule.ruleId)) errors.push(`duplicate ruleId: ${rule.ruleId || '(empty)'}`);
     ruleIds.add(rule.ruleId);
     if (!rule.name || !rule.displayName) errors.push(`${rule.id}: name/displayName is required`);
+    for (const field of ['tradition', 'conceptType', 'ruleFamily', 'scope']) {
+      if (!rule[field]) errors.push(`${rule.id}: ${field} is required`);
+    }
     if (!SHENSHA_CATEGORIES.includes(rule.category)) errors.push(`${rule.id}: invalid category`);
     if (!SHENSHA_TIERS.includes(rule.tier)) errors.push(`${rule.id}: invalid tier`);
     if (!SHENSHA_CONFIDENCES.includes(rule.confidence)) errors.push(`${rule.id}: invalid confidence`);

@@ -1,6 +1,6 @@
 # 官方神煞目錄（shensha-catalog.md）
 
-> v1 完整性定義（規範 §11.1）：以下所列 22 條即 BaziJS v1.1 官方神煞全集，
+> v1 完整性定義（規範 §11.1）：以下所列 20 條即 BaziJS v1.1 官方一般神煞全集，
 > 均已實作、測試、附文獻來源。不得在 README 宣稱涵蓋所有流派神煞。
 
 | # | id | 名稱 | 吉凶 | 查法基準 | ruleId | 出處 |
@@ -21,14 +21,15 @@
 | 14 | gu_chen | 孤辰 | 凶 | 年支→支 | SS_GUCHEN_014 | 《三命通會》卷三 |
 | 15 | gua_su | 寡宿 | 凶 | 年支→支 | SS_GUASU_015 | 《三命通會》卷三 |
 | 16 | jin_yu | 金輿 | 吉 | 日干→支 | SS_JINYU_016 | 《三命通會》卷三 |
-| 17 | kui_gang | 魁罡貴人 | 中 | 日柱整柱 | SS_KUIGANG_017 | 《三命通會》卷五、《淵海子平》 |
-| 18 | hong_luan | 紅鸞星 | 吉 | 年支→支 | SS_HONGLUAN_018 | 《三命通會》卷三 |
-| 19 | tian_xi | 天喜星 | 吉 | 年支→支（紅鸞對沖） | SS_TIANXI_019 | 《三命通會》卷三 |
-| 20 | tian_yi_star | 天醫星 | 吉 | 月支→支 | SS_TIANYI_020 | 《三命通會》卷三 |
-| 21 | hong_yan | 紅艷煞 | 凶 | 年干/日干→支 | SS_HONGYAN_021 | 《三命通會》卷三 |
-| 22 | shi_e_da_bai | 十惡大敗日 | 凶 | 日柱整柱 | SS_SHIEDABAI_022 | 《三命通會》卷五 |
+| 17 | hong_luan | 紅鸞星 | 吉 | 年支→支 | SS_HONGLUAN_018 | 《三命通會》卷三 |
+| 18 | tian_xi | 天喜星 | 吉 | 年支→支（紅鸞對沖） | SS_TIANXI_019 | 《三命通會》卷三 |
+| 19 | tian_yi_star | 天醫星 | 吉 | 月支→支 | SS_TIANYI_020 | 《三命通會》卷三 |
+| 20 | hong_yan | 紅艷煞 | 凶 | 年干/日干→支 | SS_HONGYAN_021 | 《三命通會》卷三 |
 
 查法口訣與判定式見 `src/shensha/catalog.js`（每條含 match 函數與 evidence 輸出）。
+
+魁罡、十惡大敗、孤鸞、陰陽差錯、四廢等特殊條件不再列入一般 ShenSha；請見
+`docs/references/classical-special-rules.md` 與 `src/special-rules/`。
 
 ## 大運 / 流年神煞（scope: luck / transit）
 - 自 v1.0.1 起，每步大運干支（`luckCycles.cycles[i].shenSha`）與當期流年干支

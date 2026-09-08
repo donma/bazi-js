@@ -28,10 +28,12 @@ var Bazi = (() => {
     Julian: () => julian_exports,
     Luck: () => luck_exports,
     Lunar: () => lunar_exports,
+    Patterns: () => patterns_exports,
     Renderer: () => Renderer,
     Rules: () => rule_registry_exports,
     ShenSha: () => shensha_exports,
     Solar: () => solar_exports,
+    SpecialRules: () => special_rules_exports,
     Strength: () => strength_exports,
     Transit: () => transit_exports,
     TrueSolarTime: () => true_solar_time_exports,
@@ -2195,22 +2197,7 @@ var Bazi = (() => {
         return map[baseStem] === targetBranch;
       }
     },
-    // 17. 魁罡貴人
-    // 戊戌、庚戌、庚辰、壬辰四日出生者為魁罡。
-    {
-      id: "kui_gang",
-      name: "\u9B41\u7F61\u8CB4\u4EBA",
-      category: "neutral",
-      baseOn: ["dayPillar"],
-      ruleId: "SS_KUIGANG_017",
-      version: "1.0.0",
-      reference: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E94\u3001\u300A\u6DF5\u6D77\u5B50\u5E73\u300B",
-      matchChart: (pillars) => {
-        const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
-        return ["\u620A\u620C", "\u5E9A\u620C", "\u5E9A\u8FB0", "\u58EC\u8FB0"].includes(ganzhi);
-      }
-    },
-    // 18. 紅鸞星
+    // 17. 紅鸞星
     // 以年支查：子見卯、丑見寅、寅見丑、卯見子、辰見亥、巳見戌、
     // 午見酉、未見申、申見未、酉見午、戌見巳、亥見辰。
     {
@@ -2239,7 +2226,7 @@ var Bazi = (() => {
         return map[baseBranch] === targetBranch;
       }
     },
-    // 19. 天喜星（紅鸞對沖位）
+    // 18. 天喜星（紅鸞對沖位）
     // 以年支查：子見酉、丑見申、寅見未、卯見午、辰見巳、巳見辰、
     // 午見卯、未見寅、申見丑、酉見子、戌見亥、亥見戌。
     {
@@ -2268,7 +2255,7 @@ var Bazi = (() => {
         return map[baseBranch] === targetBranch;
       }
     },
-    // 20. 天醫星
+    // 19. 天醫星
     // 以月支查：正月生見丑、二月見寅、三月見卯、四月見辰、五月見巳、六月見午、
     // 七月見未、八月見申、九月見酉、十月見戌、十一月見亥、十二月見子。
     {
@@ -2297,7 +2284,7 @@ var Bazi = (() => {
         return map[monthBranch] === targetBranch;
       }
     },
-    // 21. 紅艷煞
+    // 20. 紅艷煞
     // 以年干或日干查：甲乙見午、丙見寅、丁見未、戊己見辰、庚見戌、辛見酉、壬見子、癸見申。
     {
       id: "hong_yan",
@@ -2321,21 +2308,6 @@ var Bazi = (() => {
           "\u7678": "\u7533"
         };
         return map[baseStem] === targetBranch;
-      }
-    },
-    // 22. 十惡大敗日
-    // 甲辰、乙巳、丙申、丁亥、戊戌、己丑、庚辰、辛巳、壬申、癸亥十日為十惡大敗日。
-    {
-      id: "shi_e_da_bai",
-      name: "\u5341\u60E1\u5927\u6557\u65E5",
-      category: "inauspicious",
-      baseOn: ["dayPillar"],
-      ruleId: "SS_SHIEDABAI_022",
-      version: "1.0.0",
-      reference: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E94",
-      matchChart: (pillars) => {
-        const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
-        return ["\u7532\u8FB0", "\u4E59\u5DF3", "\u4E19\u7533", "\u4E01\u4EA5", "\u620A\u620C", "\u5DF1\u4E11", "\u5E9A\u8FB0", "\u8F9B\u5DF3", "\u58EC\u7533", "\u7678\u4EA5"].includes(ganzhi);
       }
     }
   ];
@@ -2431,12 +2403,15 @@ var Bazi = (() => {
     const expected = map[context.bases[key]];
     return (Array.isArray(expected) ? expected : [expected]).includes(context.target.branch);
   });
-  var matchPillarSet = (context, baseKey, set) => isBaseActive(context, baseKey) && context.target.pillar === "day" && set.includes(context.target.ganzhi);
   var refs = (title, note) => [{ type: "classical", title, note }];
   var rule = (definition) => ({
     aliases: [],
     tags: [],
     schools: ["classical"],
+    tradition: "classical-ziping",
+    conceptType: "shensha",
+    ruleFamily: "general-shensha",
+    scope: "natal",
     priority: 50,
     version: "2.0.0",
     ...definition
@@ -2447,8 +2422,6 @@ var Bazi = (() => {
   var CI_GUAN_BY_NAYIN = { \u91D1: "\u7533", \u6728: "\u5BC5", \u6C34: "\u4EA5", \u706B: "\u5DF3", \u571F: "\u4EA5" };
   var CI_GUAN_COMMON = { \u7532: "\u5E9A\u5BC5", \u4E59: "\u8F9B\u536F", \u4E19: "\u4E59\u5DF3", \u4E01: "\u620A\u5348", \u620A: "\u4E01\u5DF3", \u5DF1: "\u5E9A\u5348", \u5E9A: "\u58EC\u7533", \u8F9B: "\u7678\u9149", \u58EC: "\u7678\u4EA5", \u7678: "\u58EC\u620C" };
   var XUE_TANG_COMMON = { \u7532: "\u4E19\u5BC5", \u4E59: "\u4E01\u536F", \u4E19: "\u620A\u7533", \u4E01: "\u5DF1\u9149", \u620A: "\u5E9A\u7533", \u5DF1: "\u8F9B\u9149", \u5E9A: "\u58EC\u5BC5", \u8F9B: "\u7678\u536F", \u58EC: "\u7532\u7533", \u7678: "\u4E59\u9149" };
-  var YIN_YANG_CHA_CUO = ["\u4E19\u5B50", "\u4E01\u4E11", "\u620A\u5BC5", "\u8F9B\u536F", "\u58EC\u8FB0", "\u7678\u5DF3", "\u4E19\u5348", "\u4E01\u672A", "\u620A\u7533", "\u8F9B\u9149", "\u58EC\u620C", "\u7678\u4EA5"];
-  var GU_LUAN = ["\u4E59\u5DF3", "\u4E01\u5DF3", "\u8F9B\u4EA5", "\u620A\u7533", "\u7532\u5BC5"];
   var FU_XING = { \u7532: ["\u5BC5", "\u5B50"], \u4E59: ["\u536F", "\u4EA5"], \u4E19: ["\u5BC5", "\u5B50"], \u4E01: ["\u9149", "\u4EA5"], \u620A: ["\u536F"], \u5DF1: ["\u5DF3"], \u5E9A: ["\u5348"], \u8F9B: ["\u7533"], \u58EC: ["\u8FB0"], \u7678: ["\u4EA5"] };
   var TIAN_CHU = { \u7532: "\u5DF3", \u4E59: "\u5348", \u4E19: "\u5DF3", \u4E01: "\u5348", \u620A: "\u7533", \u5DF1: "\u9149", \u5E9A: "\u4EA5", \u8F9B: "\u5B50", \u58EC: "\u5BC5", \u7678: "\u536F" };
   var TIAN_GUAN = { \u7532: "\u672A", \u4E59: "\u8FB0", \u4E19: "\u5DF3", \u4E01: "\u9149", \u620A: "\u620C", \u5DF1: "\u536F", \u5E9A: "\u4EA5", \u8F9B: "\u7533", \u58EC: "\u5BC5", \u7678: "\u5348" };
@@ -2487,20 +2460,7 @@ var Bazi = (() => {
     rule({ id: "diao_ke", name: "\u540A\u5BA2", displayName: "\u540A\u5BA2", category: "inauspicious", tags: ["mourning"], tier: "extended", priority: 57, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_DIAOKE_039", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u6B72\u715E\u8A23", "\u5E74\u652F\u9006\u6578\u4E8C\u4F4D"), match: (c) => isBaseActive(c, "yearBranch") && c.target.branch === branchAt2(c.bases.yearBranch, 10) }),
     rule({ id: "bai_hu", name: "\u767D\u864E", displayName: "\u767D\u864E", category: "inauspicious", tags: ["sha"], tier: "extended", priority: 58, confidence: "traditional", baseOn: ["yearBranch"], target: "branch", ruleId: "SS_BAIHU_040", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u767D\u864E\u6B72\u715E\u8A23", "\u4E09\u5408\u5C40\u53D6\u767D\u864E\u4F4D"), match: (c) => matchMap(c, "yearBranch", BAI_HU) }),
     rule({ id: "tian_luo", name: "\u5929\u7F85", displayName: "\u5929\u7F85", category: "inauspicious", tags: ["net"], tier: "extended", priority: 59, confidence: "traditional", baseOn: ["dayStem"], target: "branch", ruleId: "SS_TIANLUO_041", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u7F85\u5730\u7DB2\u8A23", "\u706B\u547D\u620C\u4EA5\u70BA\u5929\u7F85"), description: "\u706B\u65E5\u4E3B\u898B\u620C\u3001\u4EA5\u70BA\u5929\u7F85\u3002", match: (c) => isBaseActive(c, "dayStem") && ["\u4E19", "\u4E01"].includes(c.bases.dayStem) && ["\u620C", "\u4EA5"].includes(c.target.branch) }),
-    rule({ id: "di_wang", name: "\u5730\u7DB2", displayName: "\u5730\u7DB2", category: "inauspicious", tags: ["net"], tier: "extended", priority: 60, confidence: "traditional", baseOn: ["dayStem"], target: "branch", ruleId: "SS_DIWANG_042", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u7F85\u5730\u7DB2\u8A23", "\u6C34\u547D\u8FB0\u5DF3\u70BA\u5730\u7DB2"), description: "\u6C34\u65E5\u4E3B\u898B\u8FB0\u3001\u5DF3\u70BA\u5730\u7DB2\u3002", match: (c) => isBaseActive(c, "dayStem") && ["\u58EC", "\u7678"].includes(c.bases.dayStem) && ["\u8FB0", "\u5DF3"].includes(c.target.branch) }),
-    rule({ id: "gu_luan", name: "\u5B64\u9E1E", displayName: "\u5B64\u9E1E", category: "inauspicious", tags: ["marriage"], tier: "extended", priority: 61, confidence: "school-specific", baseOn: ["dayPillar"], target: "pillar", ruleId: "SS_GULUAN_043", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5B64\u9E1E\u715E\u65E5\u4F8B", "\u56FA\u5B9A\u65E5\u67F1\u6E05\u55AE\u5404\u5BB6\u7565\u6709\u5DEE\u7570"), researchNotes: { conflict: true, note: "\u56FA\u5B9A\u65E5\u67F1\u6E05\u55AE\u5B58\u5728\u589E\u6E1B\uFF0C\u672C\u7248\u63A1\u4FDD\u5B88\u5E38\u898B\u4E94\u67F1\u3002" }, match: (c) => matchPillarSet(c, "dayPillar", GU_LUAN) }),
-    rule({ id: "yin_yang_cha_cuo", name: "\u9670\u967D\u5DEE\u932F", displayName: "\u9670\u967D\u5DEE\u932F", category: "inauspicious", tags: ["marriage"], tier: "extended", priority: 62, confidence: "traditional", baseOn: ["dayPillar"], target: "pillar", ruleId: "SS_YYCC_044", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u9670\u967D\u5DEE\u932F\u65E5\u4F8B", "\u56FA\u5B9A\u65E5\u67F1\u6E05\u55AE"), match: (c) => matchPillarSet(c, "dayPillar", YIN_YANG_CHA_CUO) }),
-    rule({ id: "si_fei", name: "\u56DB\u5EE2", displayName: "\u56DB\u5EE2", category: "inauspicious", tags: ["seasonal"], tier: "extended", priority: 63, confidence: "traditional", baseOn: ["monthBranch", "dayPillar"], target: "pillar", ruleId: "SS_SIFEI_045", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u56DB\u5EE2\u65E5\u4F8B", "\u6309\u6625\u590F\u79CB\u51AC\u6708\u4EE4\u53D6\u56DB\u5EE2\u65E5"), match: (c) => {
-      if (!isBaseActive(c, "dayPillar") || c.target.pillar !== "day" || !c.target.ganzhi) return false;
-      const sets = {
-        spring: ["\u5E9A\u7533", "\u8F9B\u9149"],
-        summer: ["\u58EC\u5B50", "\u7678\u4EA5"],
-        autumn: ["\u7532\u5BC5", "\u4E59\u536F"],
-        winter: ["\u4E19\u5348", "\u4E01\u5DF3"]
-      };
-      const season = ["\u5BC5", "\u536F", "\u8FB0"].includes(c.bases.monthBranch) ? "spring" : ["\u5DF3", "\u5348", "\u672A"].includes(c.bases.monthBranch) ? "summer" : ["\u7533", "\u9149", "\u620C"].includes(c.bases.monthBranch) ? "autumn" : "winter";
-      return sets[season].includes(c.target.ganzhi);
-    } })
+    rule({ id: "di_wang", name: "\u5730\u7DB2", displayName: "\u5730\u7DB2", category: "inauspicious", tags: ["net"], tier: "extended", priority: 60, confidence: "traditional", baseOn: ["dayStem"], target: "branch", ruleId: "SS_DIWANG_042", references: refs("\u300A\u4E09\u547D\u901A\u6703\u300B\u5929\u7F85\u5730\u7DB2\u8A23", "\u6C34\u547D\u8FB0\u5DF3\u70BA\u5730\u7DB2"), description: "\u6C34\u65E5\u4E3B\u898B\u8FB0\u3001\u5DF3\u70BA\u5730\u7DB2\u3002", match: (c) => isBaseActive(c, "dayStem") && ["\u58EC", "\u7678"].includes(c.bases.dayStem) && ["\u8FB0", "\u5DF3"].includes(c.target.branch) })
   ];
 
   // src/shensha/registry.js
@@ -2508,8 +2468,7 @@ var Bazi = (() => {
     tao_hua: { displayName: "\u6843\u82B1\uFF08\u54B8\u6C60\uFF09", aliases: ["\u54B8\u6C60"] },
     tian_xi: { name: "\u5929\u559C", displayName: "\u5929\u559C", aliases: ["\u5929\u559C\u661F"] },
     tian_yi_star: { name: "\u5929\u91AB", displayName: "\u5929\u91AB", aliases: ["\u5929\u91AB\u661F"] },
-    hong_luan: { name: "\u7D05\u9E1E", displayName: "\u7D05\u9E1E", aliases: ["\u7D05\u9E1E\u661F"] },
-    shi_e_da_bai: { name: "\u5341\u60E1\u5927\u6557", displayName: "\u5341\u60E1\u5927\u6557", aliases: ["\u5341\u60E1\u5927\u6557\u65E5"] }
+    hong_luan: { name: "\u7D05\u9E1E", displayName: "\u7D05\u9E1E", aliases: ["\u7D05\u9E1E\u661F"] }
   };
   function legacyMatcher(rule2, context) {
     if (rule2.matchChart) return context.target.pillar === "day" && rule2.matchChart(context.pillars);
@@ -2529,6 +2488,10 @@ var Bazi = (() => {
       name: override.name || rule2.name,
       displayName: override.displayName || rule2.name,
       aliases: override.aliases || [],
+      tradition: "classical-ziping",
+      conceptType: "shensha",
+      ruleFamily: "general-shensha",
+      scope: "natal",
       tags: ["legacy", rule2.category === "auspicious" ? "noble" : rule2.category],
       tier: "core",
       priority: 100,
@@ -2554,6 +2517,9 @@ var Bazi = (() => {
       if (!rule2.ruleId || ruleIds.has(rule2.ruleId)) errors.push(`duplicate ruleId: ${rule2.ruleId || "(empty)"}`);
       ruleIds.add(rule2.ruleId);
       if (!rule2.name || !rule2.displayName) errors.push(`${rule2.id}: name/displayName is required`);
+      for (const field of ["tradition", "conceptType", "ruleFamily", "scope"]) {
+        if (!rule2[field]) errors.push(`${rule2.id}: ${field} is required`);
+      }
       if (!SHENSHA_CATEGORIES.includes(rule2.category)) errors.push(`${rule2.id}: invalid category`);
       if (!SHENSHA_TIERS.includes(rule2.tier)) errors.push(`${rule2.id}: invalid tier`);
       if (!SHENSHA_CONFIDENCES.includes(rule2.confidence)) errors.push(`${rule2.id}: invalid confidence`);
@@ -2602,6 +2568,10 @@ var Bazi = (() => {
       name: rule2.name,
       displayName: rule2.displayName || rule2.name,
       aliases: rule2.aliases || [],
+      tradition: rule2.tradition,
+      conceptType: rule2.conceptType,
+      ruleFamily: rule2.ruleFamily,
+      scope: rule2.scope,
       category: rule2.category,
       tags: rule2.tags || [],
       tier: rule2.tier,
@@ -2609,6 +2579,7 @@ var Bazi = (() => {
       confidence: rule2.confidence,
       schools: rule2.schools || [],
       hitOn: [...new Set(hits)],
+      baseOn: rule2.baseOn,
       basedOn: rule2.baseOn,
       target: rule2.target,
       ruleId: rule2.ruleId,
@@ -2688,6 +2659,568 @@ var Bazi = (() => {
       }
     }
     return grouped;
+  }
+
+  // src/special-rules/index.js
+  var special_rules_exports = {};
+  __export(special_rules_exports, {
+    BA_ZHUAN: () => BA_ZHUAN,
+    GU_LUAN: () => GU_LUAN,
+    JIN_SHEN: () => JIN_SHEN,
+    JIU_CHOU: () => JIU_CHOU,
+    KUI_GANG: () => KUI_GANG,
+    RI_DE: () => RI_DE,
+    RI_GUI: () => RI_GUI,
+    SEASONAL_SPECIAL_RULES: () => SEASONAL_SPECIAL_RULES,
+    SHI_E_DA_BAI: () => SHI_E_DA_BAI,
+    SPECIAL_PILLAR_RULES: () => SPECIAL_PILLAR_RULES,
+    SPECIAL_RULE_REGISTRY: () => SPECIAL_RULE_REGISTRY,
+    YIN_YANG_CHA_CUO: () => YIN_YANG_CHA_CUO,
+    calculateSeasonalSpecialRules: () => calculateSeasonalSpecialRules,
+    calculateSpecialPillarRules: () => calculateSpecialPillarRules,
+    calculateSpecialRules: () => calculateSpecialRules,
+    getSpecialRule: () => getSpecialRule,
+    getSpecialRuleCatalog: () => getSpecialRuleCatalog,
+    validateSpecialRuleRegistry: () => validateSpecialRuleRegistry
+  });
+
+  // src/rules/versions.js
+  var ENGINE_VERSION = "1.0.2";
+  var RULE_SET_VERSION = "2026.09";
+  var CALENDAR_RULE_VERSION = "1.0.0";
+  var SHENSHA_RULE_VERSION = "2.1.0";
+  var SPECIAL_RULE_VERSION = "1.0.0";
+  var PATTERN_RULE_VERSION = "0.1.0";
+  var STRENGTH_RULE_VERSION = "1.0.0";
+  var INTERACTION_RULE_VERSION = "1.0.0";
+  var LUCK_RULE_VERSION = "1.0.0";
+  var VERSIONS = {
+    engineVersion: ENGINE_VERSION,
+    ruleSetVersion: RULE_SET_VERSION,
+    calendarRuleVersion: CALENDAR_RULE_VERSION,
+    shenShaRuleVersion: SHENSHA_RULE_VERSION,
+    specialRuleVersion: SPECIAL_RULE_VERSION,
+    patternRuleVersion: PATTERN_RULE_VERSION,
+    strengthRuleVersion: STRENGTH_RULE_VERSION,
+    interactionRuleVersion: INTERACTION_RULE_VERSION,
+    luckRuleVersion: LUCK_RULE_VERSION
+  };
+
+  // src/special-rules/context.js
+  var SEASON_BY_MONTH_BRANCH = Object.freeze({
+    \u5BC5: "spring",
+    \u536F: "spring",
+    \u8FB0: "spring",
+    \u5DF3: "summer",
+    \u5348: "summer",
+    \u672A: "summer",
+    \u7533: "autumn",
+    \u9149: "autumn",
+    \u620C: "autumn",
+    \u4EA5: "winter",
+    \u5B50: "winter",
+    \u4E11: "winter"
+  });
+  var SEASON_BRANCHES = Object.freeze({
+    spring: Object.freeze(["\u5BC5", "\u536F", "\u8FB0"]),
+    summer: Object.freeze(["\u5DF3", "\u5348", "\u672A"]),
+    autumn: Object.freeze(["\u7533", "\u9149", "\u620C"]),
+    winter: Object.freeze(["\u4EA5", "\u5B50", "\u4E11"])
+  });
+  function normalizePillar(pillar) {
+    if (!pillar) return { available: false, stem: null, branch: null, ganzhi: null };
+    const stem = pillar.stem || null;
+    const branch = pillar.branch || null;
+    return {
+      ...pillar,
+      available: pillar.available !== false && Boolean(stem || branch || pillar.ganzhi),
+      stem,
+      branch,
+      ganzhi: pillar.ganzhi || (stem && branch ? `${stem}${branch}` : null)
+    };
+  }
+  function createSpecialRuleContext(pillars, options = {}) {
+    const normalized = {
+      year: normalizePillar(pillars && pillars.year),
+      month: normalizePillar(pillars && pillars.month),
+      day: normalizePillar(pillars && pillars.day),
+      hour: normalizePillar(pillars && pillars.hour)
+    };
+    const monthBranch = normalized.month.branch;
+    const season = SEASON_BY_MONTH_BRANCH[monthBranch] || null;
+    return {
+      pillars: normalized,
+      input: options.input || null,
+      gender: options.gender || null,
+      calendar: options.calendar || null,
+      monthBranch,
+      season,
+      seasonBranches: season ? SEASON_BRANCHES[season] : [],
+      seasonSource: "month-branch (\u7BC0\u4EE4\u6708\u4EE4)"
+    };
+  }
+
+  // src/special-rules/registry.js
+  var CLASSICAL_ZIPING = "classical-ziping";
+  var DAY_PILLAR = "day-pillar-special";
+  var HOUR_PILLAR = "hour-pillar-special";
+  var SEASONAL_DAY = "seasonal-day-special";
+  var refs2 = (...references) => references.map(([title, locator, url, note]) => ({
+    type: "classical",
+    title,
+    locator,
+    url,
+    ...note ? { note } : {}
+  }));
+  var pillarGanzhi = (context, pillar) => context.pillars[pillar] && context.pillars[pillar].ganzhi;
+  function fixedEvidence(context, pillar, values, originalBasis, notes = []) {
+    const value = pillarGanzhi(context, pillar);
+    return {
+      matched: values.includes(value),
+      basedOn: [`${pillar}Pillar`],
+      targetPillar: pillar,
+      targetValue: value,
+      originalBasis,
+      notes
+    };
+  }
+  function seasonalEvidence(context, values, originalBasis, notes = []) {
+    const dayPillar = pillarGanzhi(context, "day");
+    const validBranches = context.season ? SEASON_BRANCHES[context.season] : [];
+    const matched = Boolean(context.season && values[context.season] && values[context.season].includes(dayPillar));
+    return {
+      matched,
+      basedOn: ["monthBranch", "dayPillar"],
+      season: context.season,
+      seasonSource: context.seasonSource,
+      monthBranch: context.monthBranch,
+      seasonBranches: validBranches,
+      targetPillar: "day",
+      targetValue: dayPillar,
+      originalBasis,
+      notes
+    };
+  }
+  var KUI_GANG = Object.freeze(["\u5E9A\u8FB0", "\u58EC\u8FB0", "\u620A\u620C", "\u5E9A\u620C"]);
+  var SHI_E_DA_BAI = Object.freeze(["\u7532\u8FB0", "\u4E59\u5DF3", "\u4E19\u7533", "\u4E01\u4EA5", "\u620A\u620C", "\u5DF1\u4E11", "\u5E9A\u8FB0", "\u8F9B\u5DF3", "\u58EC\u7533", "\u7678\u4EA5"]);
+  var RI_GUI = Object.freeze(["\u4E01\u9149", "\u4E01\u4EA5", "\u7678\u5DF3", "\u7678\u536F"]);
+  var RI_DE = Object.freeze(["\u7532\u5BC5", "\u4E19\u8FB0", "\u620A\u8FB0", "\u5E9A\u8FB0", "\u58EC\u620C"]);
+  var BA_ZHUAN = Object.freeze(["\u7532\u5BC5", "\u4E59\u536F", "\u5DF1\u672A", "\u4E01\u672A", "\u5E9A\u7533", "\u8F9B\u9149", "\u620A\u620C", "\u7678\u4E11"]);
+  var JIU_CHOU = Object.freeze(["\u620A\u5B50", "\u620A\u5348", "\u5DF1\u536F", "\u5DF1\u9149", "\u8F9B\u536F", "\u8F9B\u9149", "\u58EC\u5B50", "\u58EC\u5348", "\u4E01\u9149", "\u4E59\u536F"]);
+  var GU_LUAN = Object.freeze(["\u4E59\u5DF3", "\u4E01\u5DF3", "\u8F9B\u4EA5", "\u620A\u7533", "\u7532\u5BC5", "\u4E19\u5348", "\u620A\u5348", "\u58EC\u5B50"]);
+  var YIN_YANG_CHA_CUO = Object.freeze(["\u4E19\u5B50", "\u4E01\u4E11", "\u620A\u5BC5", "\u8F9B\u536F", "\u58EC\u8FB0", "\u7678\u5DF3", "\u4E19\u5348", "\u4E01\u672A", "\u620A\u7533", "\u8F9B\u9149", "\u58EC\u620C", "\u7678\u4EA5"]);
+  var JIN_SHEN = Object.freeze(["\u7678\u9149", "\u5DF1\u5DF3", "\u4E59\u4E11"]);
+  var PILLAR_RULES = [
+    {
+      id: "kui_gang",
+      name: "\u9B41\u7F61",
+      displayName: "\u9B41\u7F61",
+      aliases: ["\u9B41\u7F61\u8CB4\u4EBA"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "neutral",
+      confidence: "classical",
+      ruleId: "SP_KUIGANG_001",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 10,
+      tags: ["special-day"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u9B41\u7F61", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"],
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u9B41\u7F61", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+      ),
+      description: "\u65E5\u67F1\u70BA\u5E9A\u8FB0\u3001\u58EC\u8FB0\u3001\u620A\u620C\u3001\u5E9A\u620C\u4E4B\u4E00\uFF0C\u5373\u4EE5\u9B41\u7F61\u7279\u6B8A\u65E5\u67F1\u689D\u4EF6\u8A18\u9304\uFF1B\u4E0D\u5728\u6B64\u8655\u63A8\u65B7\u9B41\u7F61\u683C\u6210\u683C\u3002",
+      variants: [{ id: "four-day-core", description: "\u56DB\u67F1\u56FA\u5B9A\u65E5\u4F8B\uFF1A\u5E9A\u8FB0\u3001\u58EC\u8FB0\u3001\u620A\u620C\u3001\u5E9A\u620C\u3002" }],
+      researchNotes: { migratedFrom: "SS_KUIGANG_017", note: "\u820A\u7248\u5C07\u56FA\u5B9A\u65E5\u67F1\u8AA4\u639B\u5728 ShenSha Catalog\uFF1B\u672C\u7248\u53EA\u4F5C SpecialPillar \u8B58\u5225\u3002" },
+      match: (context) => KUI_GANG.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", KUI_GANG, "\u56FA\u5B9A\u65E5\u67F1\u56DB\u65E5\uFF1A\u5E9A\u8FB0\u3001\u58EC\u8FB0\u3001\u620A\u620C\u3001\u5E9A\u620C\u3002")
+    },
+    {
+      id: "shi_e_da_bai",
+      name: "\u5341\u60E1\u5927\u6557\u65E5",
+      displayName: "\u5341\u60E1\u5927\u6557\u65E5",
+      aliases: ["\u5341\u60E1\u5927\u6557"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "inauspicious",
+      confidence: "classical",
+      ruleId: "SP_SHIEDABAI_002",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 11,
+      tags: ["special-day"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E94", "\u5341\u60E1\u5927\u6557\u65E5", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u4E94"],
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u5341\u60E1\u5927\u6557", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+      ),
+      description: "\u65E5\u67F1\u843D\u5728\u5341\u60E1\u5927\u6557\u5341\u65E5\u4E4B\u4E00\uFF1B\u9019\u662F\u65E5\u67F1\u689D\u4EF6\uFF0C\u4E0D\u7B49\u540C\u65BC\u6574\u5C40\u5FC5\u7136\u51F6\u6557\u3002",
+      variants: [{ id: "ten-day-list", description: "\u7532\u8FB0\u3001\u4E59\u5DF3\u3001\u4E19\u7533\u3001\u4E01\u4EA5\u3001\u620A\u620C\u3001\u5DF1\u4E11\u3001\u5E9A\u8FB0\u3001\u8F9B\u5DF3\u3001\u58EC\u7533\u3001\u7678\u4EA5\u3002" }],
+      researchNotes: { migratedFrom: "SS_SHIEDABAI_022", note: "\u820A\u7248\u5C07\u56FA\u5B9A\u65E5\u67F1\u8AA4\u639B\u5728 ShenSha Catalog\uFF1B\u672C\u7248\u79FB\u81F3 SpecialPillar\u3002" },
+      match: (context) => SHI_E_DA_BAI.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", SHI_E_DA_BAI, "\u56FA\u5B9A\u65E5\u67F1\u5341\u65E5\uFF1A\u7532\u8FB0\u3001\u4E59\u5DF3\u3001\u4E19\u7533\u3001\u4E01\u4EA5\u3001\u620A\u620C\u3001\u5DF1\u4E11\u3001\u5E9A\u8FB0\u3001\u8F9B\u5DF3\u3001\u58EC\u7533\u3001\u7678\u4EA5\u3002")
+    },
+    {
+      id: "ri_gui",
+      name: "\u65E5\u8CB4",
+      displayName: "\u65E5\u8CB4",
+      aliases: ["\u65E5\u8CB4\u683C"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "auspicious",
+      confidence: "classical",
+      ruleId: "SP_RIGUI_003",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 12,
+      tags: ["special-day", "noble"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u65E5\u8CB4", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"],
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u65E5\u8CB4", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+      ),
+      description: "\u65E5\u67F1\u70BA\u4E01\u9149\u3001\u4E01\u4EA5\u3001\u7678\u5DF3\u3001\u7678\u536F\u4E4B\u4E00\uFF1B\u65E5\u8CB4\u665D\u591C\u5206\u4F8B\u5C6C\u5F8C\u7E8C\u53D6\u7528\u5DEE\u7570\uFF0C\u672C\u8B58\u5225\u53EA\u6A19\u8A18\u65E5\u67F1\u3002",
+      variants: [
+        { id: "day-night", description: "\u4E01\u4EA5\u3001\u7678\u536F\u5E38\u5217\u665D\u8CB4\uFF1B\u4E01\u9149\u3001\u7678\u5DF3\u5E38\u5217\u591C\u8CB4\uFF0C\u5BE6\u969B\u5206\u914D\u4F9D\u7248\u672C\u3002" }
+      ],
+      researchNotes: { note: "\u4E0D\u4EE5\u51FA\u751F\u6642\u523B\u66FF\u53E4\u7C4D\u65E5\u8CB4\u665D\u591C\u5206\u4F8B\u505A\u55AE\u4E00\u5316\u88C1\u6C7A\uFF0C\u907F\u514D\u628A\u65E5\u67F1\u8B58\u5225\u8AA4\u7576\u5B8C\u6574\u683C\u5C40\u3002" },
+      match: (context) => RI_GUI.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", RI_GUI, "\u56FA\u5B9A\u65E5\u67F1\u56DB\u65E5\uFF1A\u4E01\u9149\u3001\u4E01\u4EA5\u3001\u7678\u5DF3\u3001\u7678\u536F\u3002", ["\u665D\u8CB4/\u591C\u8CB4\u5206\u914D\u5B58\u7248\u672C\u5DEE\u7570\u3002"])
+    },
+    {
+      id: "ri_de",
+      name: "\u65E5\u5FB7",
+      displayName: "\u65E5\u5FB7",
+      aliases: ["\u65E5\u5FB7\u683C"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "auspicious",
+      confidence: "classical",
+      ruleId: "SP_RIDE_004",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 13,
+      tags: ["special-day"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u65E5\u5FB7", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"],
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u65E5\u5FB7", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+      ),
+      description: "\u65E5\u67F1\u70BA\u7532\u5BC5\u3001\u4E19\u8FB0\u3001\u620A\u8FB0\u3001\u5E9A\u8FB0\u3001\u58EC\u620C\u4E4B\u4E00\uFF1B\u50C5\u6A19\u8A18\u65E5\u5FB7\u65E5\u4F8B\uFF0C\u5B8C\u6574\u65E5\u5FB7\u683C\u4ECD\u9808\u8003\u5BDF\u6574\u5C40\u3002",
+      variants: [{ id: "five-day-list", description: "\u7532\u5BC5\u3001\u4E19\u8FB0\u3001\u620A\u8FB0\u3001\u5E9A\u8FB0\u3001\u58EC\u620C\u3002" }],
+      researchNotes: { note: "\u65E5\u5FB7\u5728\u53E4\u7C4D\u4E2D\u5E38\u8207\u683C\u5C40\u53D6\u7528\u4E26\u8AD6\uFF1B\u672C\u898F\u5247\u4E0D\u4EE3\u66FF\u6574\u5C40\u6210\u683C\u5224\u65B7\u3002" },
+      match: (context) => RI_DE.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", RI_DE, "\u56FA\u5B9A\u65E5\u67F1\u4E94\u65E5\uFF1A\u7532\u5BC5\u3001\u4E19\u8FB0\u3001\u620A\u8FB0\u3001\u5E9A\u8FB0\u3001\u58EC\u620C\u3002")
+    },
+    {
+      id: "ba_zhuan",
+      name: "\u516B\u5C08",
+      displayName: "\u516B\u5C08",
+      aliases: ["\u516B\u5C08\u65E5"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "neutral",
+      confidence: "classical",
+      ruleId: "SP_BAZHUAN_005",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 14,
+      tags: ["special-day"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u516B\u5C08\u797F\u65FA", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"],
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u516B\u5C08", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+      ),
+      description: "\u4F9D\u300A\u4E09\u547D\u901A\u6703\u300B\u516B\u5C08\u65E5\u4F8B\uFF0C\u4EE5\u7532\u5BC5\u3001\u4E59\u536F\u3001\u5DF1\u672A\u3001\u4E01\u672A\u3001\u5E9A\u7533\u3001\u8F9B\u9149\u3001\u620A\u620C\u3001\u7678\u4E11\u4F5C\u56FA\u5B9A\u65E5\u67F1\u8B58\u5225\u3002",
+      variants: [
+        { id: "four-day-core", description: "\u90E8\u5206\u50B3\u672C\u6216\u8A3B\u5BB6\u53EA\u53D6\u7532\u5BC5\u3001\u4E59\u536F\u3001\u5E9A\u7533\u3001\u8F9B\u9149\u56DB\u65E5\uFF0C\u7A31\u516B\u5C08\u797F\u65FA\u6838\u5FC3\u3002" },
+        { id: "eight-day-list", description: "\u672C\u7248\u4FDD\u7559\u5377\u516D\u5E38\u898B\u516B\u65E5\u8868\uFF0C\u4E26\u65BC evidence \u8A18\u9304\u56DB\u65E5\u6838\u5FC3\u5DEE\u7570\u3002" }
+      ],
+      researchNotes: { conflict: true, note: "\u516B\u5C08\u6709\u56DB\u65E5\u6838\u5FC3\u8207\u516B\u65E5\u64F4\u5C55\u5169\u7A2E\u7528\u6CD5\uFF1B\u672A\u628A\u5DEE\u7570\u975C\u9ED8\u5408\u4F75\u6210\u552F\u4E00\u683C\u5C40\u3002" },
+      match: (context) => BA_ZHUAN.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", BA_ZHUAN, "\u56FA\u5B9A\u65E5\u67F1\u516B\u65E5\u8868\uFF1A\u7532\u5BC5\u3001\u4E59\u536F\u3001\u5DF1\u672A\u3001\u4E01\u672A\u3001\u5E9A\u7533\u3001\u8F9B\u9149\u3001\u620A\u620C\u3001\u7678\u4E11\u3002", ["\u53E6\u6709\u56DB\u65E5\u6838\u5FC3 variant\u3002"])
+    },
+    {
+      id: "jiu_chou",
+      name: "\u4E5D\u919C",
+      displayName: "\u4E5D\u919C",
+      aliases: ["\u4E5D\u919C\u65E5"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "inauspicious",
+      confidence: "classical",
+      ruleId: "SP_JIUCHOU_006",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 15,
+      tags: ["special-day"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09", "\u4E5D\u919C\u65E5", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703_(\u56DB\u5EAB\u5168\u66F8\u672C)/\u537703"],
+        ["\u300A\u6B3D\u5B9A\u53E4\u4ECA\u5716\u66F8\u96C6\u6210\u300B\u85DD\u8853\u5178\u7B2C728\u5377", "\u4E5D\u919C", "https://zh.wikisource.org/wiki/\u6B3D\u5B9A\u53E4\u4ECA\u5716\u66F8\u96C6\u6210/\u535A\u7269\u5F59\u7DE8/\u85DD\u8853\u5178/\u7B2C728\u5377"]
+      ),
+      description: "\u4F9D\u300A\u4E09\u547D\u901A\u6703\u300B\u539F\u6587\u6240\u5217\u5341\u500B\u5E72\u652F\u65E5\u4F8B\u8B58\u5225\uFF1B\u540D\u7A31\u70BA\u4E5D\u919C\uFF0C\u4F46\u539F\u6587\u5217\u6578\u8207\u5F8C\u4E16\u4E5D\u65E5\u8868\u5B58\u5728\u885D\u7A81\u3002",
+      variants: [
+        { id: "sanming-ten-day-text", description: "\u620A\u5B50\u3001\u620A\u5348\u3001\u5DF1\u536F\u3001\u5DF1\u9149\u3001\u8F9B\u536F\u3001\u8F9B\u9149\u3001\u58EC\u5B50\u3001\u58EC\u5348\u3001\u4E01\u9149\u3001\u4E59\u536F\uFF0C\u5171\u5341\u65E5\u3002", source: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09" },
+        { id: "later-nine-day-list", description: "\u5F8C\u4E16\u5E38\u898B\u4E5D\u65E5\u8868\u6703\u522A\u6E1B\u6216\u6539\u5217\uFF0C\u50C5\u4F5C\u7814\u7A76 variant\uFF0C\u4E0D\u4F5C\u672C\u7248\u9810\u8A2D\u3002" }
+      ],
+      researchNotes: { conflict: true, note: "\u4E5D\u919C\u7684\u300C\u4E5D\u300D\u8207\u53E4\u7C4D\u539F\u6587\u5341\u65E5\u5217\u6CD5\u4E0D\u4E00\u81F4\uFF1B\u9810\u8A2D\u63A1\u53EF\u9010\u5B57\u6838\u5C0D\u7684\u5377\u4E09\u5341\u65E5\u8868\u3002" },
+      match: (context) => JIU_CHOU.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", JIU_CHOU, "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09\u6240\u5217\u5341\u65E5\uFF0C\u540D\u7A31\u8207\u5217\u6578\u6709\u6587\u737B\u885D\u7A81\u3002", ["\u63A1\u5341\u65E5 variant\uFF1B\u672A\u5047\u88DD\u53EA\u6709\u552F\u4E00\u4E5D\u65E5\u8868\u3002"])
+    },
+    {
+      id: "gu_luan",
+      name: "\u5B64\u9E1E",
+      displayName: "\u5B64\u9E1E",
+      aliases: ["\u5B64\u9E1E\u715E", "\u5B64\u9E1E\u65E5"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "inauspicious",
+      confidence: "classical",
+      ruleId: "SP_GULUAN_007",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 16,
+      tags: ["special-day", "marriage"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09", "\u5B64\u9E1E\u715E", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703_(\u56DB\u5EAB\u5168\u66F8\u672C)/\u537703"],
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u5B64\u9E1E", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]
+      ),
+      description: "\u4F9D\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09\u6240\u5217\u516B\u65E5\u4F5C\u5B64\u9E1E\u7279\u6B8A\u65E5\u67F1\u8B58\u5225\uFF0C\u4E0D\u628A\u5A5A\u59FB\u5409\u51F6\u76F4\u63A5\u5F9E\u55AE\u4E00\u65E5\u67F1\u63A8\u5B9A\u3002",
+      variants: [
+        { id: "sanming-eight-day-list", description: "\u4E59\u5DF3\u3001\u4E01\u5DF3\u3001\u8F9B\u4EA5\u3001\u620A\u7533\u3001\u7532\u5BC5\u3001\u4E19\u5348\u3001\u620A\u5348\u3001\u58EC\u5B50\u3002", source: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09" },
+        { id: "legacy-conservative-five", description: "\u820A BaziJS vNext \u66FE\u63A1\u4E59\u5DF3\u3001\u4E01\u5DF3\u3001\u8F9B\u4EA5\u3001\u620A\u7533\u3001\u7532\u5BC5\u4E94\u67F1\u3002", source: "BaziJS vNext legacy" }
+      ],
+      researchNotes: { conflict: true, migratedFrom: "SS_GULUAN_043", note: "\u539F\u5178\u516B\u65E5\u3001\u820A\u7248\u4E94\u65E5\u53CA\u5F8C\u4E16\u589E\u6E1B\u4E26\u5B58\uFF1B\u672C\u7248\u9810\u8A2D\u539F\u5178\u516B\u65E5\uFF0C\u4FDD\u7559\u4E94\u65E5\u5DEE\u7570\u3002" },
+      match: (context) => GU_LUAN.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", GU_LUAN, "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09\u6240\u5217\u516B\u65E5\uFF1A\u4E59\u5DF3\u3001\u4E01\u5DF3\u3001\u8F9B\u4EA5\u3001\u620A\u7533\u3001\u7532\u5BC5\u3001\u4E19\u5348\u3001\u620A\u5348\u3001\u58EC\u5B50\u3002", ["\u8207\u820A\u7248\u4E94\u67F1\u6E05\u55AE\u5B58\u5728\u5DEE\u7570\u3002"])
+    },
+    {
+      id: "yin_yang_cha_cuo",
+      name: "\u9670\u967D\u5DEE\u932F",
+      displayName: "\u9670\u967D\u5DEE\u932F",
+      aliases: ["\u9670\u967D\u5DEE\u932F\u65E5"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: DAY_PILLAR,
+      baseOn: ["dayPillar"],
+      scope: "natal",
+      category: "inauspicious",
+      confidence: "classical",
+      ruleId: "SP_YYCC_008",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 17,
+      tags: ["special-day", "marriage"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09", "\u9670\u967D\u5DEE\u932F", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703_(\u56DB\u5EAB\u5168\u66F8\u672C)/\u537703"],
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u9670\u967D\u5DEE\u932F", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+      ),
+      description: "\u65E5\u67F1\u843D\u5728\u4E19\u5B50\u3001\u4E01\u4E11\u3001\u620A\u5BC5\u3001\u8F9B\u536F\u3001\u58EC\u8FB0\u3001\u7678\u5DF3\u3001\u4E19\u5348\u3001\u4E01\u672A\u3001\u620A\u7533\u3001\u8F9B\u9149\u3001\u58EC\u620C\u3001\u7678\u4EA5\u5341\u4E8C\u65E5\u4E4B\u4E00\u3002",
+      variants: [{ id: "twelve-day-list", description: "\u56FA\u5B9A\u65E5\u67F1\u5341\u4E8C\u65E5\u8868\u3002" }],
+      researchNotes: { migratedFrom: "SS_YYCC_044", note: "\u820A\u7248\u64FA\u5728 ShenSha extended\uFF1B\u672C\u7248\u79FB\u81F3 SpecialPillar\u3002" },
+      match: (context) => YIN_YANG_CHA_CUO.includes(pillarGanzhi(context, "day")),
+      evidence: (context) => fixedEvidence(context, "day", YIN_YANG_CHA_CUO, "\u56FA\u5B9A\u65E5\u67F1\u5341\u4E8C\u65E5\u8868\uFF1A\u4E19\u5B50\u3001\u4E01\u4E11\u3001\u620A\u5BC5\u3001\u8F9B\u536F\u3001\u58EC\u8FB0\u3001\u7678\u5DF3\u3001\u4E19\u5348\u3001\u4E01\u672A\u3001\u620A\u7533\u3001\u8F9B\u9149\u3001\u58EC\u620C\u3001\u7678\u4EA5\u3002")
+    },
+    {
+      id: "jin_shen",
+      name: "\u91D1\u795E",
+      displayName: "\u91D1\u795E",
+      aliases: ["\u91D1\u795E\u6642"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "special-pillar",
+      ruleFamily: HOUR_PILLAR,
+      baseOn: ["hourPillar"],
+      scope: "natal",
+      category: "neutral",
+      confidence: "classical",
+      ruleId: "SP_JINSHEN_009",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 18,
+      tags: ["special-hour"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u91D1\u795E", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"],
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u91D1\u795E", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]
+      ),
+      description: "\u6642\u67F1\u70BA\u7678\u9149\u3001\u5DF1\u5DF3\u3001\u4E59\u4E11\u4E4B\u4E00\uFF0C\u5373\u8A18\u9304\u91D1\u795E\u6642\uFF1B\u706B\u5236\u3001\u6708\u4EE4\u53CA\u5168\u5C40\u53D6\u7528\u5C6C\u5F8C\u7E8C\u683C\u5C40\u5224\u65B7\uFF0C\u4E26\u672A\u5728\u6B64\u55AE\u67F1\u8B58\u5225\u4E2D\u786C\u5224\u3002",
+      variants: [{ id: "three-hour-list", description: "\u7678\u9149\u6642\u3001\u5DF1\u5DF3\u6642\u3001\u4E59\u4E11\u6642\u3002" }],
+      researchNotes: { note: "\u53E4\u7C4D\u5C0D\u91D1\u795E\u5F8C\u7E8C\u559C\u5FCC\u53E6\u6709\u5168\u5C40\u689D\u4EF6\uFF1B\u672C\u898F\u5247\u523B\u610F\u53EA\u505A hour-pillar-special \u5075\u6E2C\u3002" },
+      match: (context) => JIN_SHEN.includes(pillarGanzhi(context, "hour")),
+      evidence: (context) => fixedEvidence(context, "hour", JIN_SHEN, "\u56FA\u5B9A\u6642\u67F1\u4E09\u4F8B\uFF1A\u7678\u9149\u3001\u5DF1\u5DF3\u3001\u4E59\u4E11\u3002", ["\u5B8C\u6574\u91D1\u795E\u683C\u53D6\u7528\u4E0D\u7531\u55AE\u4E00\u6642\u67F1\u6C7A\u5B9A\u3002"])
+    }
+  ];
+  var SEASONAL_RULES = [
+    {
+      id: "tian_she",
+      name: "\u5929\u8D66",
+      displayName: "\u5929\u8D66",
+      aliases: ["\u5929\u8D66\u65E5"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "seasonal-special",
+      ruleFamily: SEASONAL_DAY,
+      baseOn: ["monthBranch", "dayPillar"],
+      scope: "natal",
+      category: "auspicious",
+      confidence: "classical",
+      ruleId: "SE_TIANSHE_001",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 20,
+      tags: ["seasonal", "special-day"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u5929\u8D66", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"],
+        ["\u300A\u6B3D\u5B9A\u5354\u7D00\u8FA8\u65B9\u66F8\u300B\u5377\u4E94", "\u5929\u8D66", "https://zh.wikisource.org/wiki/\u6B3D\u5B9A\u5354\u7D00\u8FA8\u65B9\u66F8_(\u56DB\u5EAB\u5168\u66F8\u672C)/\u537705"]
+      ),
+      description: "\u5929\u8D66\u4E0D\u662F\u55AE\u4E00\u65E5\u67F1\u795E\u715E\uFF1A\u6625\u620A\u5BC5\u3001\u590F\u7532\u5348\u3001\u79CB\u620A\u7533\u3001\u51AC\u7532\u5B50\uFF0C\u9808\u5148\u4F9D\u7BC0\u4EE4\u6708\u652F\u5224\u5B9A\u5B63\u7BC0\uFF0C\u518D\u6BD4\u5C0D\u65E5\u67F1\u3002",
+      variants: [{ id: "four-season-day-list", description: "\u672C\u7248\u63A1\u6625\u620A\u5BC5\u3001\u590F\u7532\u5348\u3001\u79CB\u620A\u7533\u3001\u51AC\u7532\u5B50\uFF1B\u5176\u4ED6\u66C6\u66F8\u7570\u6587\u4FDD\u7559\u65BC researchNotes\u3002" }],
+      researchNotes: { conflict: true, note: "\u5929\u8D66\u7684\u5B63\u7BC0\u908A\u754C\u4F9D\u7BC0\u4EE4\u800C\u975E\u570B\u66C6\u6708\u4EFD\uFF1B\u65E5\u4F8B\u5728\u4E0D\u540C\u66C6\u66F8\u6709\u7570\u6587\uFF0C\u672C\u7248\u6CBF\u7528\u5B50\u5E73\u56DB\u5B63\u8868\u4E26\u628A\u5B63\u7BC0 evidence \u5B8C\u6574\u8F38\u51FA\u3002" },
+      match: (context) => {
+        const values = { spring: "\u620A\u5BC5", summer: "\u7532\u5348", autumn: "\u620A\u7533", winter: "\u7532\u5B50" };
+        return Boolean(context.season && values[context.season] === pillarGanzhi(context, "day"));
+      },
+      evidence: (context) => seasonalEvidence(context, { spring: ["\u620A\u5BC5"], summer: ["\u7532\u5348"], autumn: ["\u620A\u7533"], winter: ["\u7532\u5B50"] }, "\u6625\u620A\u5BC5\u3001\u590F\u7532\u5348\u3001\u79CB\u620A\u7533\u3001\u51AC\u7532\u5B50\uFF1B\u4EE5\u7BC0\u4EE4\u6708\u652F\u5206\u5B63\u3002", ["\u7570\u672C\u5B63\u7BC0\u65E5\u4F8B\u9700\u4EE5 references \u9010\u7248\u672C\u6838\u5C0D\u3002"])
+    },
+    {
+      id: "si_fei",
+      name: "\u56DB\u5EE2",
+      displayName: "\u56DB\u5EE2",
+      aliases: ["\u56DB\u5EE2\u65E5"],
+      tradition: CLASSICAL_ZIPING,
+      conceptType: "seasonal-special",
+      ruleFamily: SEASONAL_DAY,
+      baseOn: ["monthBranch", "dayPillar"],
+      scope: "natal",
+      category: "inauspicious",
+      confidence: "classical",
+      ruleId: "SE_SIFEI_002",
+      version: SPECIAL_RULE_VERSION,
+      tier: "core",
+      priority: 21,
+      tags: ["seasonal", "special-day"],
+      schools: ["classical-ziping"],
+      references: refs2(
+        ["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u56DB\u5EE2\u65E5\u4F8B", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"],
+        ["\u300A\u6DF5\u6D77\u5B50\u5E73\u300B", "\u56DB\u5EE2", "https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+      ),
+      description: "\u6625\u5E9A\u7533\u8F9B\u9149\u3001\u590F\u58EC\u5B50\u7678\u4EA5\u3001\u79CB\u7532\u5BC5\u4E59\u536F\u3001\u51AC\u4E19\u5348\u4E01\u5DF3\uFF1B\u5FC5\u9808\u540C\u6642\u7B26\u5408\u5B63\u7BC0\uFF08\u6708\u4EE4\uFF09\u8207\u65E5\u67F1\u3002",
+      variants: [{ id: "four-season-day-list", description: "\u6625\u5E9A\u7533\u8F9B\u9149\u3001\u590F\u58EC\u5B50\u7678\u4EA5\u3001\u79CB\u7532\u5BC5\u4E59\u536F\u3001\u51AC\u4E19\u5348\u4E01\u5DF3\u3002" }],
+      researchNotes: { conflict: true, migratedFrom: "SS_SIFEI_045", note: "\u820A\u7248\u96D6\u6709 monthBranch \u689D\u4EF6\uFF0C\u4ECD\u6DF7\u5728 ShenSha\uFF1B\u672C\u7248\u5C07 season/month evidence \u7368\u7ACB\u8F38\u51FA\u3002" },
+      match: (context) => {
+        const values = { spring: ["\u5E9A\u7533", "\u8F9B\u9149"], summer: ["\u58EC\u5B50", "\u7678\u4EA5"], autumn: ["\u7532\u5BC5", "\u4E59\u536F"], winter: ["\u4E19\u5348", "\u4E01\u5DF3"] };
+        return Boolean(context.season && values[context.season] && values[context.season].includes(pillarGanzhi(context, "day")));
+      },
+      evidence: (context) => seasonalEvidence(context, { spring: ["\u5E9A\u7533", "\u8F9B\u9149"], summer: ["\u58EC\u5B50", "\u7678\u4EA5"], autumn: ["\u7532\u5BC5", "\u4E59\u536F"], winter: ["\u4E19\u5348", "\u4E01\u5DF3"] }, "\u6625\u5E9A\u7533\u8F9B\u9149\u3001\u590F\u58EC\u5B50\u7678\u4EA5\u3001\u79CB\u7532\u5BC5\u4E59\u536F\u3001\u51AC\u4E19\u5348\u4E01\u5DF3\u3002", ["\u5B63\u7BC0\u4EE5\u6708\u652F\u5BC5\u536F\u8FB0\u3001\u5DF3\u5348\u672A\u3001\u7533\u9149\u620C\u3001\u4EA5\u5B50\u4E11\u6B78\u985E\u3002"])
+    }
+  ];
+  var SPECIAL_PILLAR_RULES = Object.freeze(PILLAR_RULES);
+  var SEASONAL_SPECIAL_RULES = Object.freeze(SEASONAL_RULES);
+  var SPECIAL_RULE_REGISTRY = Object.freeze([...PILLAR_RULES, ...SEASONAL_RULES]);
+
+  // src/special-rules/engine.js
+  function resultFor2(rule2, context, evidence) {
+    return {
+      id: rule2.id,
+      name: rule2.name,
+      displayName: rule2.displayName || rule2.name,
+      aliases: rule2.aliases || [],
+      tradition: rule2.tradition,
+      conceptType: rule2.conceptType,
+      ruleFamily: rule2.ruleFamily,
+      baseOn: rule2.baseOn,
+      scope: rule2.scope,
+      category: rule2.category,
+      tags: rule2.tags || [],
+      tier: rule2.tier,
+      priority: rule2.priority,
+      confidence: rule2.confidence,
+      schools: rule2.schools || [],
+      hitOn: rule2.ruleFamily === "hour-pillar-special" ? ["hour"] : ["day"],
+      target: rule2.ruleFamily === "hour-pillar-special" ? "hour" : "day",
+      ruleId: rule2.ruleId,
+      version: rule2.version,
+      reference: rule2.references[0] ? rule2.references[0].title : void 0,
+      references: rule2.references,
+      description: rule2.description || "",
+      ...rule2.variants ? { variants: rule2.variants } : {},
+      ...rule2.researchNotes ? { researchNotes: rule2.researchNotes } : {},
+      evidence
+    };
+  }
+  function calculateFromRegistry(pillars, registry, options = {}) {
+    const context = createSpecialRuleContext(pillars, options);
+    return registry.flatMap((rule2) => {
+      let matched = false;
+      try {
+        matched = rule2.match(context) === true;
+      } catch (error) {
+        return [];
+      }
+      if (!matched) return [];
+      return [resultFor2(rule2, context, rule2.evidence(context))];
+    });
+  }
+  function calculateSpecialPillarRules(pillars, options = {}) {
+    return calculateFromRegistry(pillars, SPECIAL_PILLAR_RULES, options);
+  }
+  function calculateSeasonalSpecialRules(pillars, options = {}) {
+    return calculateFromRegistry(pillars, SEASONAL_SPECIAL_RULES, options);
+  }
+  function calculateSpecialRules(pillars, options = {}) {
+    return calculateFromRegistry(pillars, SPECIAL_RULE_REGISTRY, options);
+  }
+  function validateSpecialRuleRegistry(registry = SPECIAL_RULE_REGISTRY) {
+    const errors = [];
+    const ids = /* @__PURE__ */ new Set();
+    const ruleIds = /* @__PURE__ */ new Set();
+    for (const rule2 of registry) {
+      if (!rule2.id || ids.has(rule2.id)) errors.push(`duplicate id: ${rule2.id || "(empty)"}`);
+      ids.add(rule2.id);
+      if (!rule2.ruleId || ruleIds.has(rule2.ruleId)) errors.push(`duplicate ruleId: ${rule2.ruleId || "(empty)"}`);
+      ruleIds.add(rule2.ruleId);
+      for (const field of ["name", "tradition", "conceptType", "ruleFamily", "scope", "category", "confidence", "version", "description"]) {
+        if (!rule2[field]) errors.push(`${rule2.id}: ${field} is required`);
+      }
+      if (!Array.isArray(rule2.baseOn) || rule2.baseOn.length === 0) errors.push(`${rule2.id}: baseOn is required`);
+      if (typeof rule2.match !== "function") errors.push(`${rule2.id}: match must be a function`);
+      if (typeof rule2.evidence !== "function") errors.push(`${rule2.id}: evidence must be a function`);
+      if (!Array.isArray(rule2.references) || rule2.references.length === 0) errors.push(`${rule2.id}: references is required`);
+    }
+    return { valid: errors.length === 0, errors, count: registry.length };
+  }
+  var validation2 = validateSpecialRuleRegistry();
+  if (!validation2.valid) throw new Error(`Special rule registry invalid: ${validation2.errors.join("; ")}`);
+  function getSpecialRule(id) {
+    return SPECIAL_RULE_REGISTRY.find((rule2) => rule2.id === id) || null;
+  }
+  function getSpecialRuleCatalog() {
+    return SPECIAL_RULE_REGISTRY.slice();
   }
 
   // src/luck/index.js
@@ -3507,7 +4040,8 @@ var Bazi = (() => {
   var ai_exports = {};
   __export(ai_exports, {
     toContext: () => toContext,
-    toShenShaContext: () => toShenShaContext
+    toShenShaContext: () => toShenShaContext,
+    toSpecialRulesContext: () => toSpecialRulesContext
   });
   function buildShenShaItem(item, options = {}) {
     const { includeRules = true, includeEvidence = true } = options;
@@ -3516,6 +4050,10 @@ var Bazi = (() => {
       name: item.name,
       displayName: item.displayName || item.name,
       aliases: item.aliases || [],
+      tradition: item.tradition,
+      conceptType: item.conceptType,
+      ruleFamily: item.ruleFamily,
+      scope: item.scope,
       category: item.category,
       tags: item.tags || [],
       tier: item.tier,
@@ -3523,8 +4061,34 @@ var Bazi = (() => {
       confidence: item.confidence,
       schools: item.schools || [],
       hitOn: item.hitOn || [],
+      baseOn: item.baseOn || item.basedOn || [],
       basedOn: item.basedOn || [],
       target: item.target,
+      ...includeRules ? { ruleId: item.ruleId, version: item.version } : {},
+      reference: item.reference,
+      ...Array.isArray(item.references) ? { references: item.references } : {},
+      ...item.description ? { description: item.description } : {},
+      ...item.variants ? { variants: item.variants } : {},
+      ...item.researchNotes ? { researchNotes: item.researchNotes } : {},
+      ...includeEvidence ? { evidence: item.evidence } : {}
+    };
+  }
+  function buildSpecialRuleItem(item, options = {}) {
+    const { includeRules = true, includeEvidence = true } = options;
+    return {
+      id: item.id,
+      name: item.name,
+      displayName: item.displayName || item.name,
+      aliases: item.aliases || [],
+      tradition: item.tradition,
+      conceptType: item.conceptType,
+      ruleFamily: item.ruleFamily,
+      baseOn: item.baseOn || [],
+      scope: item.scope,
+      category: item.category,
+      tags: item.tags || [],
+      confidence: item.confidence,
+      hitOn: item.hitOn || [],
       ...includeRules ? { ruleId: item.ruleId, version: item.version } : {},
       reference: item.reference,
       ...Array.isArray(item.references) ? { references: item.references } : {},
@@ -3539,12 +4103,26 @@ var Bazi = (() => {
     const grouped = groupShenShaByPillar(result.shenSha || []);
     const context = {
       preset: result.meta.shenshaPreset || "classical",
-      ruleVersion: result.meta.shenShaRuleVersion || "2.0.0",
+      ruleVersion: result.meta.shenShaRuleVersion || "2.1.0",
       all: items,
       byPillar: Object.fromEntries(Object.entries(grouped).map(([pillar, list]) => [
         pillar,
         list.map((item) => buildShenShaItem(item, options))
       ]))
+    };
+    return options.compact ? JSON.stringify(context) : context;
+  }
+  function toSpecialRulesContext(result, options = {}) {
+    const items = (result.specialRules || []).map((item) => buildSpecialRuleItem(item, options));
+    const byConceptType = items.reduce((grouped, item) => {
+      const key = item.conceptType || "unknown";
+      (grouped[key] || (grouped[key] = [])).push(item);
+      return grouped;
+    }, {});
+    const context = {
+      ruleVersion: result.meta.specialRuleVersion || "1.0.0",
+      all: items,
+      byConceptType
     };
     return options.compact ? JSON.stringify(context) : context;
   }
@@ -3565,7 +4143,8 @@ var Bazi = (() => {
         ruleSetVersion: result.meta.ruleSetVersion,
         profileId: result.meta.profileId,
         shenshaPreset: result.meta.shenshaPreset || "classical",
-        shenShaRuleVersion: result.meta.shenShaRuleVersion || "2.0.0"
+        shenShaRuleVersion: result.meta.shenShaRuleVersion || "2.1.0",
+        specialRuleVersion: result.meta.specialRuleVersion || "1.0.0"
       },
       inputSummary: {
         birthDate: result.input.birthDate,
@@ -3632,6 +4211,11 @@ var Bazi = (() => {
         includeEvidence: includeShenShaEvidence,
         compact: false
       }),
+      specialRules: toSpecialRulesContext(result, {
+        includeRules,
+        includeEvidence: includeShenShaEvidence,
+        compact: false
+      }),
       // 舊欄位保留，讓既有整合不必同步升級；新程式請使用 shenSha。
       shenShaList: result.shenSha.map((s) => buildShenShaItem(s, {
         includeRules,
@@ -3661,24 +4245,6 @@ var Bazi = (() => {
     }
     return ctx;
   }
-
-  // src/rules/versions.js
-  var ENGINE_VERSION = "1.0.2";
-  var RULE_SET_VERSION = "2026.09";
-  var CALENDAR_RULE_VERSION = "1.0.0";
-  var SHENSHA_RULE_VERSION = "2.0.0";
-  var STRENGTH_RULE_VERSION = "1.0.0";
-  var INTERACTION_RULE_VERSION = "1.0.0";
-  var LUCK_RULE_VERSION = "1.0.0";
-  var VERSIONS = {
-    engineVersion: ENGINE_VERSION,
-    ruleSetVersion: RULE_SET_VERSION,
-    calendarRuleVersion: CALENDAR_RULE_VERSION,
-    shenShaRuleVersion: SHENSHA_RULE_VERSION,
-    strengthRuleVersion: STRENGTH_RULE_VERSION,
-    interactionRuleVersion: INTERACTION_RULE_VERSION,
-    luckRuleVersion: LUCK_RULE_VERSION
-  };
 
   // src/chart/index.js
   function calculate(input, options = {}) {
@@ -3753,6 +4319,7 @@ var Bazi = (() => {
     const strength = calculateStrength(pillars, interactions);
     const shenshaPreset = input.shenshaPreset || input.shenShaPreset || options.shenshaPreset || options.shenShaPreset || "classical";
     const shenSha = calculateShenSha(pillars, { preset: shenshaPreset, gender: input.gender });
+    const specialRules = calculateSpecialRules(pillars, { gender: input.gender, input });
     const luckCycles = calculateLuckCycles({
       pillars,
       gender: input.gender,
@@ -3861,6 +4428,7 @@ var Bazi = (() => {
       interactions,
       strength,
       shenSha,
+      specialRules,
       luckCycles,
       transits,
       rules: {
@@ -3907,6 +4475,9 @@ var Bazi = (() => {
     getShenSha() {
       return this.result.shenSha;
     }
+    getSpecialRules() {
+      return this.result.specialRules;
+    }
     getStrength() {
       return this.result.strength;
     }
@@ -3920,6 +4491,167 @@ var Bazi = (() => {
       return toContext(this.result, options);
     }
   };
+
+  // src/patterns/index.js
+  var patterns_exports = {};
+  __export(patterns_exports, {
+    SPECIAL_PATTERN_REGISTRY: () => SPECIAL_PATTERN_REGISTRY,
+    getSpecialPattern: () => getSpecialPattern,
+    listResearchPatterns: () => listResearchPatterns,
+    validateSpecialPatternRegistry: () => validateSpecialPatternRegistry
+  });
+
+  // src/patterns/registry.js
+  var CLASSICAL_ZIPING2 = "classical-ziping";
+  var refs3 = (...references) => references.map(([title, locator, url, note]) => ({
+    type: "classical",
+    title,
+    locator,
+    url,
+    ...note ? { note } : {}
+  }));
+  var researchPattern = (definition) => ({
+    aliases: [],
+    tradition: CLASSICAL_ZIPING2,
+    conceptType: "special-pattern",
+    ruleFamily: "whole-chart-pattern",
+    scope: "natal",
+    category: "neutral",
+    confidence: "classical",
+    tier: "research",
+    priority: 100,
+    version: "0.1.0",
+    tags: ["pattern", "research-only"],
+    schools: ["classical-ziping"],
+    implemented: false,
+    status: "research-only",
+    match: null,
+    evidence: () => ({ matched: false, status: "research-only", reason: "\u5C1A\u672A\u5BE6\u4F5C\uFF1B\u6B64\u9805\u53EA\u63D0\u4F9B\u53E4\u5178\u689D\u4EF6\u67B6\u69CB\u3002" }),
+    ...definition
+  });
+  var SPECIAL_PATTERN_REGISTRY = Object.freeze([
+    researchPattern({
+      id: "ren_qi_long_bei",
+      name: "\u58EC\u9A0E\u9F8D\u80CC",
+      displayName: "\u58EC\u9A0E\u9F8D\u80CC",
+      aliases: ["\u58EC\u9A0E\u9F8D\u80CC\u683C"],
+      baseOn: ["dayPillar", "monthBranch", "wholeChart"],
+      ruleId: "PT_RENQILONG_001",
+      references: refs3(["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u58EC\u9A0E\u9F8D\u80CC", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]),
+      description: "\u4EE5\u58EC\u65E5\u5750\u8FB0\u70BA\u6838\u5FC3\uFF0C\u9808\u8003\u5BDF\u8FB0\u591A\u3001\u5BC5\u5B57\u5408\u4F4F\u53CA\u8CA1\u5B98\u5370\u7B49\u5168\u5C40\u689D\u4EF6\uFF1B\u539F\u6587\u53E6\u6709\u58EC\u65E5\u5750\u5BC5\u3001\u8FB0\u591A\u7684\u8B8A\u4F8B\u3002",
+      variants: [{ id: "ren-day-chen-core", description: "\u58EC\u8FB0\u65E5\u70BA\u6838\u5FC3\uFF0C\u8FB0\u591A\u5247\u8CB4\u3002" }, { id: "ren-day-yin-variant", description: "\u58EC\u5BC5\u65E5\u3001\u8FB0\u591A\u70BA\u8B8A\u4F8B\u3002" }],
+      researchNotes: { note: "\u4E0D\u80FD\u7531\u55AE\u4E00 dayPillar \u5224\u5B9A\uFF1B\u9700\u5EFA\u7ACB\u5168\u5C40\u8FB0\u5BC5\u3001\u900F\u5E72\u53CA\u8CA1\u5B98\u53D6\u7528 evidence\u3002" }
+    }),
+    researchPattern({
+      id: "liu_yin_chao_yang",
+      name: "\u516D\u9670\u671D\u967D",
+      displayName: "\u516D\u9670\u671D\u967D",
+      aliases: ["\u516D\u9670\u671D\u967D\u683C"],
+      baseOn: ["dayStem", "hourPillar", "wholeChart"],
+      ruleId: "PT_LIUYIN_002",
+      references: refs3(["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u516D\u9670\u671D\u967D", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]),
+      description: "\u8F9B\u65E5\u9022\u620A\u5B50\u6642\u7684\u7279\u6B8A\u683C\u67B6\u69CB\uFF0C\u9084\u8981\u6AA2\u67E5\u5B50\u6578\u3001\u5348\u4E11\u7B49\u7834\u683C\u689D\u4EF6\u53CA\u5168\u5C40\u5B98\u6BBA\u8CA1\u5370\u3002",
+      variants: [{ id: "six-xin-days", description: "\u8F9B\u65E5\u9047\u620A\u5B50\u6642\uFF1B\u300C\u516D\u9670\u300D\u6307\u516D\u500B\u8F9B\u65E5\u3002" }],
+      researchNotes: { note: "\u6642\u67F1\u3001\u65E5\u5E72\u8207\u5168\u5C40\u7834\u683C\u689D\u4EF6\u7F3A\u4E00\u4E0D\u53EF\uFF0C\u4E0D\u5217\u5165 SpecialPillar\u3002" }
+    }),
+    researchPattern({
+      id: "liu_yi_shu_gui",
+      name: "\u516D\u4E59\u9F20\u8CB4",
+      displayName: "\u516D\u4E59\u9F20\u8CB4",
+      aliases: ["\u516D\u4E59\u9F20\u8CB4\u683C"],
+      baseOn: ["dayStem", "hourPillar", "wholeChart"],
+      ruleId: "PT_LIUYI_003",
+      references: refs3(["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u516D\u4E59\u9F20\u8CB4", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]),
+      description: "\u4E59\u65E5\u9022\u4E19\u5B50\u6642\u7684\u67B6\u69CB\uFF0C\u9808\u8FA8\u516D\u4E59\u65E5\u3001\u5B50\u4E2D\u7678\u6C34\u53CA\u5B98\u661F\u900F\u85CF\u3001\u5211\u6C96\u7834\u5BB3\u7B49\u5168\u5C40\u689D\u4EF6\u3002",
+      variants: [{ id: "yi-day-bing-zi-hour", description: "\u516D\u4E59\u65E5\u9022\u4E19\u5B50\u6642\u3002" }],
+      researchNotes: { note: "\u300C\u9F20\u8CB4\u300D\u662F\u501F\u6642\u652F\u5B50\u4E2D\u7678\u6C34\u53D6\u8CB4\u7684\u683C\u5C40\u8A9E\u8A00\uFF0C\u4E0D\u662F\u4E00\u822C\u67E5\u652F\u795E\u715E\u3002" }
+    }),
+    researchPattern({
+      id: "ri_lu_gui_shi",
+      name: "\u65E5\u797F\u6B78\u6642",
+      displayName: "\u65E5\u797F\u6B78\u6642",
+      aliases: ["\u65E5\u797F\u6B78\u6642\u683C"],
+      baseOn: ["dayStem", "hourPillar", "wholeChart"],
+      ruleId: "PT_RILUGUI_004",
+      references: refs3(["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u65E5\u797F\u6B78\u6642", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]),
+      description: "\u65E5\u5E72\u4E4B\u797F\u843D\u5728\u6642\u652F\u7684\u67B6\u69CB\uFF0C\u9808\u6AA2\u67E5\u5B98\u6BBA\u3001\u50B7\u5B98\u3001\u885D\u7834\u53CA\u6708\u4EE4\u6276\u6291\uFF0C\u4E0D\u80FD\u53EA\u4EE5\u65E5\u5E72\u67E5\u4E00\u500B\u6642\u652F\u5C31\u5BA3\u544A\u6210\u683C\u3002",
+      variants: [{ id: "stem-lu-to-hour", description: "\u7532\u5BC5\u3001\u4E59\u536F\u3001\u4E19\u620A\u5DF3\u3001\u4E01\u5DF1\u5348\u3001\u5E9A\u7533\u3001\u8F9B\u9149\u3001\u58EC\u4EA5\u3001\u7678\u5B50\u7B49\u65E5\u797F\u6B78\u6642\u95DC\u4FC2\u3002" }],
+      researchNotes: { note: "\u65E5\u797F\u6B78\u6642\u96D6\u6709\u56FA\u5B9A\u5E72\u652F\u5C0D\u61C9\uFF0C\u6210\u683C\u4ECD\u662F\u5168\u5C40\u5224\u5B9A\u3002" }
+    }),
+    researchPattern({
+      id: "gong_lu",
+      name: "\u62F1\u797F",
+      displayName: "\u62F1\u797F",
+      aliases: ["\u62F1\u797F\u683C"],
+      baseOn: ["dayPillar", "hourPillar", "wholeChart"],
+      ruleId: "PT_GONGLU_005",
+      references: refs3(["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u62F1\u797F", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]),
+      description: "\u65E5\u6642\u5169\u67F1\u593E\u62F1\u797F\u4F4D\u7684\u865B\u795E\u67B6\u69CB\uFF0C\u9808\u5169\u67F1\u5E72\u540C\u3001\u5730\u652F\u76F8\u9694\u3001\u7121\u586B\u5BE6\u53CA\u6C96\u7834\uFF0C\u4E26\u8003\u5BDF\u6708\u4EE4\u5168\u5C40\u3002",
+      variants: [{ id: "virtual-lu", description: "\u4EE5\u65E5\u6642\u593E\u51FA\u672A\u73FE\u4E4B\u797F\u652F\uFF1B\u865B\u795E\u4E0D\u53EF\u88AB\u586B\u5BE6\u6216\u7834\u58DE\u3002" }],
+      researchNotes: { note: "\u62F1\u5B57\u672C\u8EAB\u8868\u793A\u865B\u795E\u63A8\u53D6\uFF0C\u4E0D\u80FD\u7528\u4E00\u822C\u795E\u715E\u7684\u55AE\u652F\u547D\u4E2D\u6A21\u578B\u5BE6\u4F5C\u3002" }
+    }),
+    researchPattern({
+      id: "gong_gui",
+      name: "\u62F1\u8CB4",
+      displayName: "\u62F1\u8CB4",
+      aliases: ["\u62F1\u8CB4\u683C"],
+      baseOn: ["dayPillar", "hourPillar", "wholeChart"],
+      ruleId: "PT_GONGGUI_006",
+      references: refs3(["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u62F1\u8CB4", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]),
+      description: "\u65E5\u6642\u593E\u62F1\u5929\u4E59\u8CB4\u4EBA\u7B49\u8CB4\u795E\u7684\u865B\u795E\u67B6\u69CB\uFF0C\u9700\u8FA8\u65E5\u5E72\u8CB4\u4EBA\u3001\u76F8\u9130\u5730\u652F\u3001\u586B\u5BE6\u8207\u6C96\u7834\u3002",
+      variants: [{ id: "virtual-noble", description: "\u4EE5\u65E5\u6642\u593E\u51FA\u672A\u73FE\u4E4B\u8CB4\u795E\u652F\u3002" }],
+      researchNotes: { note: "\u62F1\u8CB4\u8207\u4E00\u822C\u5929\u4E59\u8CB4\u4EBA\u67E5\u6CD5\u4E0D\u540C\uFF1B\u9808\u53E6\u5EFA\u865B\u795E\u8207\u7834\u683C evidence\u3002" }
+    }),
+    researchPattern({
+      id: "fu_de_xiu_qi",
+      name: "\u798F\u5FB7\u79C0\u6C23",
+      displayName: "\u798F\u5FB7\u79C0\u6C23",
+      aliases: ["\u798F\u5FB7\u79C0\u6C23\u683C"],
+      baseOn: ["yearPillar", "monthPillar", "dayPillar", "hourPillar", "wholeChart"],
+      ruleId: "PT_FUDE_007",
+      references: refs3(["\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D", "\u798F\u5FB7\u79C0\u6C23", "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D"]),
+      description: "\u4EE5\u5DF3\u9149\u4E11\u91D1\u5C40\u53CA\u65E5\u5E72\u7B49\u7D44\u5408\u53D6\u798F\u5FB7\u79C0\u6C23\uFF0C\u9808\u6574\u5408\u4E09\u5408\u5C40\u3001\u5B63\u7BC0\u3001\u900F\u5E72\u8207\u5211\u6C96\uFF0C\u4E0D\u5B9C\u62C6\u6210\u4E00\u9846\u795E\u715E\u3002",
+      variants: [{ id: "si-you-chou-metal", description: "\u5DF3\u9149\u4E11\u4E09\u5408\u91D1\u5C40\u662F\u91CD\u8981\u9AA8\u67B6\uFF0C\u4ECD\u9700\u6309\u539F\u6587\u689D\u4EF6\u7D30\u5206\u3002" }],
+      researchNotes: { note: "\u6B64\u9805\u9700\u5148\u5B8C\u6210 whole-chart pattern DSL \u6216\u660E\u78BA\u7684\u5168\u5C40 predicate\uFF0C\u73FE\u968E\u6BB5\u53EA\u5EFA\u7814\u7A76\u767B\u9304\u3002" }
+    })
+  ]);
+  function validateSpecialPatternRegistry(registry = SPECIAL_PATTERN_REGISTRY) {
+    const errors = [];
+    const ids = /* @__PURE__ */ new Set();
+    const ruleIds = /* @__PURE__ */ new Set();
+    for (const rule2 of registry) {
+      if (!rule2.id || ids.has(rule2.id)) errors.push(`duplicate id: ${rule2.id || "(empty)"}`);
+      ids.add(rule2.id);
+      if (!rule2.ruleId || ruleIds.has(rule2.ruleId)) errors.push(`duplicate ruleId: ${rule2.ruleId || "(empty)"}`);
+      ruleIds.add(rule2.ruleId);
+      for (const field of ["name", "tradition", "conceptType", "ruleFamily", "scope", "category", "confidence", "version", "description"]) {
+        if (!rule2[field]) errors.push(`${rule2.id}: ${field} is required`);
+      }
+      if (!Array.isArray(rule2.baseOn) || rule2.baseOn.length === 0) errors.push(`${rule2.id}: baseOn is required`);
+      if (rule2.implemented && typeof rule2.match !== "function") errors.push(`${rule2.id}: implemented patterns require match`);
+      if (typeof rule2.evidence !== "function") errors.push(`${rule2.id}: evidence must be a function`);
+      if (!Array.isArray(rule2.references) || rule2.references.length === 0) errors.push(`${rule2.id}: references is required`);
+    }
+    return { valid: errors.length === 0, errors, count: registry.length };
+  }
+  var validation3 = validateSpecialPatternRegistry();
+  if (!validation3.valid) throw new Error(`Special pattern registry invalid: ${validation3.errors.join("; ")}`);
+
+  // src/patterns/index.js
+  function getSpecialPattern(id) {
+    return (SPECIAL_PATTERN_REGISTRY || []).find((rule2) => rule2.id === id) || null;
+  }
+  function listResearchPatterns() {
+    return SPECIAL_PATTERN_REGISTRY.map((rule2) => ({
+      id: rule2.id,
+      name: rule2.name,
+      conceptType: rule2.conceptType,
+      ruleFamily: rule2.ruleFamily,
+      implemented: rule2.implemented,
+      status: rule2.status,
+      references: rule2.references
+    }));
+  }
 
   // src/renderer/themes/index.js
   var THEMES = {
@@ -4392,6 +5124,8 @@ var Bazi = (() => {
     rules: {
       version: VERSIONS.ruleSetVersion,
       shenSha: { version: VERSIONS.shenShaRuleVersion },
+      specialRules: { version: VERSIONS.specialRuleVersion },
+      patterns: { version: VERSIONS.patternRuleVersion },
       strength: { version: VERSIONS.strengthRuleVersion }
     },
     calculate,
@@ -4404,6 +5138,8 @@ var Bazi = (() => {
     TrueSolarTime: true_solar_time_exports,
     Rules: rule_registry_exports,
     ShenSha: shensha_exports,
+    SpecialRules: special_rules_exports,
+    Patterns: patterns_exports,
     Strength: strength_exports,
     Luck: luck_exports,
     Transit: transit_exports,

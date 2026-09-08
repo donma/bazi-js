@@ -362,6 +362,41 @@ for (const detail of first.evidence.details) {
 
 如果你的網站要提供「為什麼有這顆神煞」的展開說明，可以把 `evidence.details` 放在 `<details>` 元素裡；不要只顯示神煞名稱，這樣使用者比較容易理解排盤結果。
 
+## 特殊規則：不要把特殊格當成神煞
+
+BaziJS 把古典子平規則分成不同類型，避免只因為古籍用了相近名稱，就把格局當成一顆神煞：
+
+- `ShenSha`：年干、日干、月令、年支、日支查其他干支的一般神煞。
+- `SpecialPillar`：固定日柱或時柱，例如魁罡、日貴、日德、八專、九醜、孤鸞、陰陽差錯、金神。
+- `SeasonalSpecial`：季節/月令加特殊日柱，例如天赦、四廢。
+- `SpecialPatterns`：必須看多柱、透干、合局、虛神或破格條件的格局，例如壬騎龍背、拱祿、拱貴。
+
+固定柱位與季節規則會放在 `result.specialRules`，而不是 `result.shenSha`：
+
+```js
+const result = Bazi.calculate(input);
+
+for (const item of result.specialRules) {
+  console.log(item.name);          // 例如「日德」或「四廢」
+  console.log(item.conceptType);   // special-pillar / seasonal-special
+  console.log(item.ruleFamily);    // day-pillar-special / seasonal-day-special
+  console.log(item.baseOn);        // 例如 ['dayPillar']
+  console.log(item.evidence);      // 四廢會包含 season、monthBranch 等證據
+}
+```
+
+要讀取規則定義或研究中的整局格局：
+
+```js
+const definition = Bazi.SpecialRules.getSpecialRule('kui_gang');
+const patterns = Bazi.Patterns.listResearchPatterns();
+
+console.log(definition.references);
+console.log(patterns); // P2 目前只提供研究架構，不會宣告已成格
+```
+
+完整的古籍依據、版本差異與目前實作狀態，請看 [`docs/references/classical-special-rules.md`](docs/references/classical-special-rules.md)。
+
 ## SVG 與 PNG 命盤
 
 ### 產生清楚的 SVG
@@ -634,6 +669,8 @@ git diff --check
 console.log(result.meta.engineVersion);
 console.log(result.meta.ruleSetVersion);
 console.log(result.meta.shenShaRuleVersion);
+console.log(result.meta.specialRuleVersion);
+console.log(result.meta.patternRuleVersion);
 console.log(result.rules);
 ```
 

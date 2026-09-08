@@ -3,7 +3,9 @@
 export const ENGINE_VERSION = '1.0.2';
 export const RULE_SET_VERSION = '2026.09';
 export const CALENDAR_RULE_VERSION = '1.0.0';
-export const SHENSHA_RULE_VERSION = '2.0.0';
+export const SHENSHA_RULE_VERSION = '2.1.0';
+export const SPECIAL_RULE_VERSION = '1.0.0';
+export const PATTERN_RULE_VERSION = '0.1.0';
 export const STRENGTH_RULE_VERSION = '1.0.0';
 export const INTERACTION_RULE_VERSION = '1.0.0';
 export const LUCK_RULE_VERSION = '1.0.0';
@@ -13,6 +15,8 @@ export const VERSIONS = {
   ruleSetVersion: RULE_SET_VERSION,
   calendarRuleVersion: CALENDAR_RULE_VERSION,
   shenShaRuleVersion: SHENSHA_RULE_VERSION,
+  specialRuleVersion: SPECIAL_RULE_VERSION,
+  patternRuleVersion: PATTERN_RULE_VERSION,
   strengthRuleVersion: STRENGTH_RULE_VERSION,
   interactionRuleVersion: INTERACTION_RULE_VERSION,
   luckRuleVersion: LUCK_RULE_VERSION

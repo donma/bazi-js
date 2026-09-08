@@ -8,6 +8,8 @@ import * as Julian from './calendar/julian.js';
 import * as TrueSolarTime from './calendar/true-solar-time.js';
 import * as Rules from './rules/rule-registry.js';
 import * as ShenSha from './shensha/index.js';
+import * as SpecialRules from './special-rules/index.js';
+import * as Patterns from './patterns/index.js';
 import * as Strength from './strength/index.js';
 import * as Luck from './luck/index.js';
 import * as Transit from './transit/index.js';
@@ -29,6 +31,8 @@ export {
   TrueSolarTime,
   Rules,
   ShenSha,
+  SpecialRules,
+  Patterns,
   Strength,
   Luck,
   Transit,
@@ -45,6 +49,8 @@ const Bazi = {
   rules: {
     version: VERSIONS.ruleSetVersion,
     shenSha: { version: VERSIONS.shenShaRuleVersion },
+    specialRules: { version: VERSIONS.specialRuleVersion },
+    patterns: { version: VERSIONS.patternRuleVersion },
     strength: { version: VERSIONS.strengthRuleVersion }
   },
   calculate,
@@ -57,6 +63,8 @@ const Bazi = {
   TrueSolarTime,
   Rules,
   ShenSha,
+  SpecialRules,
+  Patterns,
   Strength,
   Luck,
   Transit,
