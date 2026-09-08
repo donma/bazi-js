@@ -316,7 +316,7 @@ function renderPillarShenSha(items) {
     }).join('');
     return `<li class="responsive-pillar-shensha-item">
       <div class="responsive-shensha-name"><strong>${displayText(item.displayName || item.name)}</strong><span>${displayText(category)} · ${displayText(confidence)}</span></div>
-      <div class="responsive-shensha-meta">基準：${displayText(formatBasedOn(item.basedOn))} · 規則代碼：${displayText(item.ruleId)}</div>
+      <div class="responsive-shensha-meta">基準：${displayText(formatBasedOn(item.basedOn))}</div>
       <div class="responsive-shensha-reference">依據：${displayText(item.reference, '未提供')}</div>
       ${evidence ? `<details><summary>判定證據（${(item.evidence.details || []).length} 筆）</summary><ul>${evidence}</ul></details>` : ''}
     </li>`;
@@ -436,7 +436,6 @@ function renderResponsivePreview(result, options) {
               `基準：${formatBasedOn(item.baseOn)}`,
               evidence.targetValue ? `命中：${evidence.targetValue}` : '',
               season,
-              item.ruleId ? `規則：${item.ruleId}` : ''
             ].filter(Boolean).join(' · ');
             return `<div><strong>${displayText(item.name || item.displayName)}</strong><p>${displayText(evidenceText)}<br><small>${displayText(item.description, '—')}</small></p></div>`;
           }).join('')}
