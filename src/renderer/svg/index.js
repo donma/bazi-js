@@ -10,6 +10,18 @@ import { getPreset } from '../presets/index.js';
 import { STEMS, STEM_INDEX } from '../../core/constants/stems.js';
 import { groupShenShaByPillar } from '../../shensha/index.js';
 
+const PILLAR_LABELS = {
+  year: '年柱', month: '月柱', day: '日柱', hour: '時柱', 'transit-year': '流年'
+};
+
+function formatHitOn(hitOn = []) {
+  return hitOn.map((value) => {
+    if (PILLAR_LABELS[value]) return PILLAR_LABELS[value];
+    const luckMatch = String(value).match(/^luck-(\d+)$/);
+    return luckMatch ? `初運第${luckMatch[1]}步` : value;
+  }).join('／');
+}
+
 export function renderSvg(chartResult, options = {}) {
   const theme = getTheme(options.theme || 'modern-oriental');
   const preset = getPreset(options.preset || 'full');
@@ -250,7 +262,7 @@ export function renderSvg(chartResult, options = {}) {
       return cut;
     };
     const wrapNames = (list, limit) => {
-      const names = (list || []).slice(0, limit).map((s) => `${s.name}(${s.hitOn.join('/')})`);
+      const names = (list || []).slice(0, limit).map((s) => `${s.displayName || s.name}（${formatHitOn(s.hitOn)}）`);
       if (names.length === 0) return ['—'];
       const lines = [];
       let cur = '';
@@ -267,6 +279,8 @@ export function renderSvg(chartResult, options = {}) {
       return lines;
     };
     const natalLines = cap(wrapNames(res.shenSha, 14), (res.shenSha || []).length, 3);
+    const specialList = res.specialRules || [];
+    const specialLines = cap(wrapNames(specialList, 10), specialList.length, 2);
     const yearList = res.transits && res.transits.shenShaYear ? res.transits.shenShaYear : [];
     const yearSSLines = cap(wrapNames(yearList, 10), yearList.length, 1);
     const firstLuck = res.luckCycles.cycles[0];
@@ -275,7 +289,7 @@ export function renderSvg(chartResult, options = {}) {
     const luckLabel = firstLuck ? `${firstLuck.ganzhi}運：` : '';
 
     const rowGap = 24;
-    const blockRows = 1 + natalLines.length + yearSSLines.length + luckSSLines.length;
+    const blockRows = 1 + natalLines.length + yearSSLines.length + luckSSLines.length + specialLines.length;
     const cardH = 50 + blockRows * rowGap + 26;
 
     let shenShaInner = '';
@@ -291,6 +305,7 @@ export function renderSvg(chartResult, options = {}) {
     addRow('原局神煞：', natalLines);
     addRow('流年神煞：', yearSSLines);
     addRow('初運神煞：', luckSSLines.map((ln, li) => (li === 0 ? luckLabel + ln : ln)));
+    addRow('特殊條件：', specialLines);
 
     svg += `
     <!-- 神煞與附宮 -->

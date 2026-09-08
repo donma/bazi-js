@@ -146,6 +146,10 @@ async function runUnit() {
   const jiSvg = Bazi.Renderer.render(jiChart, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
   assert(jiSvg.includes('己土'), 'UT-SVG-DAYMASTER-ELEMENT', '');
   assert(!jiSvg.includes('己木'), 'UT-SVG-NO-JIMU', '');
+  const specialChart = Bazi.calculate({ birthDate: '1999-12-28', birthTime: '12:00', gender: 'male' });
+  const specialSvg = Bazi.Renderer.render(specialChart, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
+  assert(specialSvg.includes('日德') && specialSvg.includes('八專') && specialSvg.includes('孤鸞'), 'UT-SVG-SPECIAL-RULES', 'SVG 應包含目前命盤命中的特殊規則');
+  assert(specialSvg.includes('日柱') && !specialSvg.includes('（day）'), 'UT-SVG-CHINESE-PILLAR-LABELS', 'SVG 不應顯示英文柱位代碼');
 }
 
 // ---------- ShenSha vNext ----------

@@ -4694,7 +4694,7 @@ var PRESETS = {
     id: "full",
     name: "\u5168\u89BD\u4E3B\u76E4",
     width: 960,
-    height: 1080,
+    height: 1160,
     includePillars: true,
     includeStrength: true,
     includeInteractions: true,
@@ -4706,7 +4706,7 @@ var PRESETS = {
     id: "mobile-share",
     name: "\u793E\u7FA4\u76F4\u5F0F\u5206\u4EAB",
     width: 640,
-    height: 1100,
+    height: 1220,
     includePillars: true,
     includeStrength: true,
     includeInteractions: false,
@@ -4718,7 +4718,7 @@ var PRESETS = {
     id: "a4",
     name: "A4 \u5217\u5370\u7248\u5F0F",
     width: 800,
-    height: 1130,
+    height: 1200,
     includePillars: true,
     includeStrength: true,
     includeInteractions: true,
@@ -4744,6 +4744,20 @@ function getPreset(presetName = "full") {
 }
 
 // src/renderer/svg/index.js
+var PILLAR_LABELS = {
+  year: "\u5E74\u67F1",
+  month: "\u6708\u67F1",
+  day: "\u65E5\u67F1",
+  hour: "\u6642\u67F1",
+  "transit-year": "\u6D41\u5E74"
+};
+function formatHitOn(hitOn = []) {
+  return hitOn.map((value) => {
+    if (PILLAR_LABELS[value]) return PILLAR_LABELS[value];
+    const luckMatch = String(value).match(/^luck-(\d+)$/);
+    return luckMatch ? `\u521D\u904B\u7B2C${luckMatch[1]}\u6B65` : value;
+  }).join("\uFF0F");
+}
 function renderSvg(chartResult, options = {}) {
   const theme = getTheme(options.theme || "modern-oriental");
   const preset = getPreset(options.preset || "full");
@@ -4954,7 +4968,7 @@ function renderSvg(chartResult, options = {}) {
       return cut;
     };
     const wrapNames = (list, limit) => {
-      const names = (list || []).slice(0, limit).map((s) => `${s.name}(${s.hitOn.join("/")})`);
+      const names = (list || []).slice(0, limit).map((s) => `${s.displayName || s.name}\uFF08${formatHitOn(s.hitOn)}\uFF09`);
       if (names.length === 0) return ["\u2014"];
       const lines = [];
       let cur = "";
@@ -4971,6 +4985,8 @@ function renderSvg(chartResult, options = {}) {
       return lines;
     };
     const natalLines = cap(wrapNames(res.shenSha, 14), (res.shenSha || []).length, 3);
+    const specialList = res.specialRules || [];
+    const specialLines = cap(wrapNames(specialList, 10), specialList.length, 2);
     const yearList = res.transits && res.transits.shenShaYear ? res.transits.shenShaYear : [];
     const yearSSLines = cap(wrapNames(yearList, 10), yearList.length, 1);
     const firstLuck = res.luckCycles.cycles[0];
@@ -4978,7 +4994,7 @@ function renderSvg(chartResult, options = {}) {
     const luckSSLines = cap(wrapNames(luckList, 10), luckList.length, 1);
     const luckLabel = firstLuck ? `${firstLuck.ganzhi}\u904B\uFF1A` : "";
     const rowGap = 24;
-    const blockRows = 1 + natalLines.length + yearSSLines.length + luckSSLines.length;
+    const blockRows = 1 + natalLines.length + yearSSLines.length + luckSSLines.length + specialLines.length;
     const cardH = 50 + blockRows * rowGap + 26;
     let shenShaInner = "";
     let ry = 0;
@@ -4993,6 +5009,7 @@ function renderSvg(chartResult, options = {}) {
     addRow("\u539F\u5C40\u795E\u715E\uFF1A", natalLines);
     addRow("\u6D41\u5E74\u795E\u715E\uFF1A", yearSSLines);
     addRow("\u521D\u904B\u795E\u715E\uFF1A", luckSSLines.map((ln, li) => li === 0 ? luckLabel + ln : ln));
+    addRow("\u7279\u6B8A\u689D\u4EF6\uFF1A", specialLines);
     svg += `
     <!-- \u795E\u715E\u8207\u9644\u5BAE -->
     <g transform="translate(40, ${yOffset})">

@@ -224,7 +224,47 @@ function updateRender() {
     chartContainer.innerHTML = svgStr;
     chartHint.textContent = '窄螢幕會自動換行，文字保持清楚，不需要水平捲軸。';
   }
-  document.getElementById('json-output').textContent = JSON.stringify(currentResult, null, 2);
+  document.getElementById('json-output').textContent = JSON.stringify(getExportResult(), null, 2);
+}
+
+function getPresentationOptions() {
+  return {
+    theme: document.getElementById('theme-select').value,
+    preset: document.getElementById('preset-select').value,
+    preview: responsivePreview ? 'responsive-html' : 'sdk-svg'
+  };
+}
+
+function getExportResult() {
+  return {
+    ...currentResult,
+    presentation: getPresentationOptions()
+  };
+}
+
+function copyText(text, successMessage) {
+  const done = () => alert(successMessage);
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    navigator.clipboard.writeText(text).then(done).catch(() => copyTextFallback(text, successMessage));
+    return;
+  }
+  copyTextFallback(text, successMessage);
+}
+
+function copyTextFallback(text, successMessage) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    if (document.execCommand('copy')) alert(successMessage);
+    else alert('目前瀏覽器不允許複製，請手動選取內容。');
+  } finally {
+    textarea.remove();
+  }
 }
 
 function escapeHtml(value) {
@@ -504,9 +544,10 @@ function renderResponsivePreview(result, options) {
 
 function downloadSvg() {
   if (!currentResult) return;
-  const theme = document.getElementById('theme-select').value;
-  const preset = document.getElementById('preset-select').value;
-  const svgStr = Bazi.Renderer.render(currentResult, { format: 'svg', theme, preset });
+  const presentation = getPresentationOptions();
+  const svgStr = Bazi.Renderer.render(getExportResult(), {
+    format: 'svg', theme: presentation.theme, preset: presentation.preset
+  });
 
   const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -519,11 +560,12 @@ function downloadSvg() {
 
 async function downloadPng() {
   if (!currentResult) return;
-  const theme = document.getElementById('theme-select').value;
-  const preset = document.getElementById('preset-select').value;
+  const presentation = getPresentationOptions();
 
   try {
-    const pngResult = await Bazi.Renderer.render(currentResult, { format: 'png', theme, preset });
+    const pngResult = await Bazi.Renderer.render(getExportResult(), {
+      format: 'png', theme: presentation.theme, preset: presentation.preset
+    });
     if (pngResult.dataUrl) {
       const a = document.createElement('a');
       a.href = pngResult.dataUrl;
@@ -537,17 +579,14 @@ async function downloadPng() {
 
 function copyJson() {
   if (!currentResult) return;
-  navigator.clipboard.writeText(JSON.stringify(currentResult, null, 2)).then(() => {
-    alert('JSON 已複製至剪貼簿！');
-  });
+  copyText(JSON.stringify(getExportResult(), null, 2), 'JSON 已複製至剪貼簿！');
 }
 
 function copyAiContext() {
   if (!currentResult) return;
   const aiCtx = Bazi.AI.toContext(currentResult, { compact: false });
-  navigator.clipboard.writeText(JSON.stringify(aiCtx, null, 2)).then(() => {
-    alert('AI Context 已複製至剪貼簿，可直接提供給 LLM 作為系統提示！');
-  });
+  aiCtx.presentation = getPresentationOptions();
+  copyText(JSON.stringify(aiCtx, null, 2), 'AI Context 已複製至剪貼簿，可直接提供給 LLM 作為系統提示！');
 }
 
 window.addEventListener('DOMContentLoaded', init);
