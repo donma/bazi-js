@@ -3366,7 +3366,7 @@ var Bazi = (() => {
   }
 
   // src/rules/versions.js
-  var ENGINE_VERSION = "1.0.1";
+  var ENGINE_VERSION = "1.0.2";
   var RULE_SET_VERSION = "2026.09";
   var CALENDAR_RULE_VERSION = "1.0.0";
   var SHENSHA_RULE_VERSION = "1.1.0";

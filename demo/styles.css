@@ -287,12 +287,16 @@ input:focus, select:focus {
   overflow-y: hidden;
 }
 
-/* Desktop：SVG 優先接近 960px 原生尺寸顯示，不強制 GPU 合成（見施工文件 §一） */
+/* Desktop：SVG 恆以 1:1 原生 960px 顯示，空間不足時橫向捲動而非縮小（見施工文件 §六/§十一）。
+   用 margin:0 auto 置中，過窄時自動退回 flex-start，屆時左緣仍可捲動不被裁切。 */
 .chart-viewer svg {
   display: block;
-  width: min(100%, 960px) !important;
+  flex: 0 0 auto;
+  width: 960px !important;
+  min-width: 960px !important;
   max-width: 960px !important;
   height: auto !important;
+  margin: 0 auto;
   transform: none !important;
 }
 
@@ -340,11 +344,13 @@ footer {
   h1.hero-title {
     font-size: 28px;
   }
-  /* Tablet / Mobile：允許 SVG 等比縮放 */
+  /* Tablet / Mobile：允許 SVG 等比縮放（放下固定 960 限制） */
   .chart-viewer svg {
     width: 100% !important;
+    min-width: 0 !important;
     max-width: 100% !important;
     height: auto !important;
+    flex: 0 0 auto;
   }
 }
 
