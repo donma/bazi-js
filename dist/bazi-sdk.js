@@ -4093,7 +4093,7 @@ var Bazi = (() => {
   <!-- \u9802\u90E8 Header -->
   <g transform="translate(40, 50)">
     <text x="0" y="0" class="title">\u516B\u5B57\u547D\u76E4 \xB7 \u5B50\u5E73\u56DB\u67F1</text>
-    <text x="0" y="24" class="subtitle">BaziJS Metaphysical Engine v${res.meta.engineVersion} \xB7 \u898F\u7BC4\u6D41\u6D3E: ${res.meta.profileName}</text>
+    <text x="0" y="24" class="subtitle">BaziJS \u547D\u7406\u5F15\u64CE v${res.meta.engineVersion} \xB7 \u898F\u7BC4\u6D41\u6D3E: ${res.meta.profileName}</text>
   </g>
 
   <!-- \u57FA\u672C\u8CC7\u6599\u8CC7\u8A0A\u5217\uFF08\u96D9\u884C\u6392\u7248\uFF0C\u907F\u514D\u55AE\u884C\u5B57\u4E32\u91CD\u758A\u767C\u7CCA\uFF09 -->
@@ -4316,7 +4316,7 @@ var Bazi = (() => {
     }
     svg += `
   <text x="${width / 2}" y="${height - 24}" font-size="11px" fill="${theme.textMuted}" text-anchor="middle">
-    Produced by BaziJS Open Source Metaphysical Engine \xB7 Apache-2.0 License
+    BaziJS \u958B\u6E90\u547D\u7406\u5F15\u64CE \xB7 Apache-2.0 \u6388\u6B0A
   </text>
 </svg>`;
     return svg;

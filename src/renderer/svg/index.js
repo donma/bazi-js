@@ -58,7 +58,7 @@ export function renderSvg(chartResult, options = {}) {
   <!-- 頂部 Header -->
   <g transform="translate(40, 50)">
     <text x="0" y="0" class="title">八字命盤 · 子平四柱</text>
-    <text x="0" y="24" class="subtitle">BaziJS Metaphysical Engine v${res.meta.engineVersion} · 規範流派: ${res.meta.profileName}</text>
+    <text x="0" y="24" class="subtitle">BaziJS 命理引擎 v${res.meta.engineVersion} · 規範流派: ${res.meta.profileName}</text>
   </g>
 
   <!-- 基本資料資訊列（雙行排版，避免單行字串重疊發糊） -->
@@ -309,7 +309,7 @@ export function renderSvg(chartResult, options = {}) {
   // 底部版權落款
   svg += `
   <text x="${width / 2}" y="${height - 24}" font-size="11px" fill="${theme.textMuted}" text-anchor="middle">
-    Produced by BaziJS Open Source Metaphysical Engine · Apache-2.0 License
+    BaziJS 開源命理引擎 · Apache-2.0 授權
   </text>
 </svg>`;
 

@@ -131,9 +131,38 @@ function displayText(value, fallback = '—') {
   return escapeHtml(value === undefined || value === null || value === '' ? fallback : value);
 }
 
+const PILLAR_LABELS = { year: '年柱', month: '月柱', day: '日柱', hour: '時柱' };
+const BASE_LABELS = {
+  yearStem: '年干',
+  monthStem: '月干',
+  dayStem: '日干',
+  yearBranch: '年支',
+  monthBranch: '月支',
+  dayBranch: '日支',
+  yearPillar: '年柱',
+  dayPillar: '日柱'
+};
+
+function formatPillarLabel(value) {
+  if (!value) return '—';
+  if (PILLAR_LABELS[value]) return PILLAR_LABELS[value];
+  if (value === 'transit-year') return '流年';
+  const luckMatch = String(value).match(/^luck-(\d+)$/);
+  if (luckMatch) return `初運第${luckMatch[1]}步`;
+  return value;
+}
+
+function formatHitOn(hitOn) {
+  return (hitOn || []).map(formatPillarLabel).join('／');
+}
+
+function formatBasedOn(basedOn) {
+  return (basedOn || []).map((value) => BASE_LABELS[value] || value).join('、');
+}
+
 function formatShenSha(list, limit = 14) {
   const names = (list || []).slice(0, limit).map((item) => {
-    const hitOn = Array.isArray(item.hitOn) && item.hitOn.length ? `(${item.hitOn.join('/')})` : '';
+    const hitOn = Array.isArray(item.hitOn) && item.hitOn.length ? `（${formatHitOn(item.hitOn)}）` : '';
     return `${item.displayName || item.name || ''}${hitOn}`;
   });
   if (!names.length) return '—';
@@ -164,7 +193,7 @@ function renderPillarShenSha(items) {
     }).join('');
     return `<li class="responsive-pillar-shensha-item">
       <div class="responsive-shensha-name"><strong>${displayText(item.displayName || item.name)}</strong><span>${displayText(category)} · ${displayText(confidence)}</span></div>
-      <div class="responsive-shensha-meta">基準：${displayText((item.basedOn || []).join('、'))} · 規則：${displayText(item.ruleId)}</div>
+      <div class="responsive-shensha-meta">基準：${displayText(formatBasedOn(item.basedOn))} · 規則代碼：${displayText(item.ruleId)}</div>
       <div class="responsive-shensha-reference">依據：${displayText(item.reference, '未提供')}</div>
       ${evidence ? `<details><summary>判定證據（${(item.evidence.details || []).length} 筆）</summary><ul>${evidence}</ul></details>` : ''}
     </li>`;
@@ -307,14 +336,14 @@ function renderResponsivePreview(result, options) {
     ['胎元', result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : '—'],
     ['胎息', result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : '—'],
     ['起運', result.luckCycles && result.luckCycles.startAge ? `${result.luckCycles.startAge.display}${result.luckCycles.startAge.startDate ? `（${result.luckCycles.startAge.startDate}）` : ''}` : '—'],
-    ['規則版本', `ShenSha ${result.meta.shenShaRuleVersion || '—'}`]
+    ['規則版本', `神煞 ${result.meta.shenShaRuleVersion || '—'}`]
   ];
   const basicInfo = infoItems.map(([label, value]) => `<div><span>${displayText(label)}</span><strong>${displayText(value)}</strong></div>`).join('');
 
   return `<div class="responsive-chart" style="${styles}">
     <header class="responsive-chart-header">
       <h3>八字命盤 · 子平四柱</h3>
-      <p>BaziJS Metaphysical Engine v${displayText(result.meta.engineVersion)} · 規範流派：${displayText(result.meta.profileName)}</p>
+      <p>BaziJS 命理引擎 v${displayText(result.meta.engineVersion)} · 規範流派：${displayText(result.meta.profileName)}</p>
     </header>
     <section class="responsive-info-grid">${basicInfo}</section>
     <section class="responsive-section responsive-pillars-section">
@@ -326,7 +355,7 @@ function renderResponsivePreview(result, options) {
     ${transitSection}
     ${interactions}
     ${shenSha}
-    <footer>Produced by BaziJS Open Source Metaphysical Engine · Apache-2.0 License</footer>
+    <footer>BaziJS 開源命理引擎 · Apache-2.0 授權</footer>
   </div>`;
 }
 
