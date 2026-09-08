@@ -9,6 +9,7 @@ export const PATTERN_RULE_VERSION = '0.1.0';
 export const STRENGTH_RULE_VERSION = '1.0.0';
 export const INTERACTION_RULE_VERSION = '1.0.0';
 export const LUCK_RULE_VERSION = '1.0.0';
+export const RESULT_SCHEMA_VERSION = '2.0.0';
 
 export const VERSIONS = {
   engineVersion: ENGINE_VERSION,
@@ -19,5 +20,6 @@ export const VERSIONS = {
   patternRuleVersion: PATTERN_RULE_VERSION,
   strengthRuleVersion: STRENGTH_RULE_VERSION,
   interactionRuleVersion: INTERACTION_RULE_VERSION,
-  luckRuleVersion: LUCK_RULE_VERSION
+  luckRuleVersion: LUCK_RULE_VERSION,
+  resultSchemaVersion: RESULT_SCHEMA_VERSION
 };

@@ -10,6 +10,7 @@
 // bit 3..0: 閏月月份
 
 import { gregorianToJulianDay, julianDayToGregorian } from './julian.js';
+import { BaziCalendarError } from '../core/errors/index.js';
 
 // 1900 ~ 2100 農曆編碼數據表
 // 資料來源：紫金山天文台曆算數據核校
@@ -71,6 +72,17 @@ export function getLunarYearDays(year) {
 
 // 公曆年月日 → 農曆年月日（含是否閏月）
 export function solarToLunar(year, month, day) {
+  if (!Number.isInteger(year) || year < 1900 || year > 2100) {
+    throw new BaziCalendarError('農曆換算目前支援 1900-01-01 至 2100-12-31', {
+      operation: 'solarToLunar',
+      allowedRange: ['1900-01-01', '2100-12-31'],
+      providedYear: year
+    });
+  }
+  const maxDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (!Number.isInteger(month) || month < 1 || month > 12 || !Number.isInteger(day) || day < 1 || day > maxDay) {
+    throw new BaziCalendarError('solarToLunar 收到無效公曆日期', { year, month, day });
+  }
   const currentJD = gregorianToJulianDay(year, month, day);
   let offset = Math.round(currentJD - BASE_JD);
 

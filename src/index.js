@@ -4,6 +4,8 @@ import { calculate, calculateSafe, Chart } from './chart/index.js';
 import * as Calendar from './calendar/solar-terms.js';
 import * as Solar from './calendar/solar.js';
 import * as Lunar from './calendar/lunar.js';
+import * as Constellation from './calendar/constellation.js';
+import * as Zodiac from './calendar/zodiac.js';
 import * as Julian from './calendar/julian.js';
 import * as TrueSolarTime from './calendar/true-solar-time.js';
 import * as Rules from './rules/rule-registry.js';
@@ -27,6 +29,8 @@ export {
   Calendar,
   Solar,
   Lunar,
+  Constellation,
+  Zodiac,
   Julian,
   TrueSolarTime,
   Rules,
@@ -59,6 +63,8 @@ const Bazi = {
   Calendar,
   Solar,
   Lunar,
+  Constellation,
+  Zodiac,
   Julian,
   TrueSolarTime,
   Rules,

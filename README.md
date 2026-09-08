@@ -208,6 +208,42 @@ console.log(result.pillars.hour.available); // false
 
 不知道時間時，年、月、日三柱仍可使用；時柱會標記為不可用，不要把它當成已計算出的時柱。
 
+## 規則 Profile 與可重現性
+
+BaziJS 不把流派差異藏在程式碼裡。`canonical` 是預設 Profile，但年界、月界、換日界線與真太陽時都會寫入結果：
+
+```js
+const result = Bazi.calculate({
+  birthDate: '2024-02-09',
+  birthTimeMode: 'exact',
+  birthTime: '12:00',
+  gender: 'male',
+  timezone: '+08:00',
+  yearBoundary: 'lunar_new_year', // 或 lichun
+  monthBoundary: 'lunar_month',   // 或 jie
+  dayBoundary: '23:00'            // 或 00:00
+});
+
+console.log(result.rules.applied);       // 實際採用的 ruleId 與 value
+console.log(result.accuracy.boundaryRules);
+console.log(result.accuracy.assumptions);
+```
+
+目前可用的邊界值：`yearBoundary` 為 `lichun`／`lunar_new_year`，`monthBoundary` 為 `jie`／`lunar_month`，`dayBoundary` 為 `23:00`／`00:00`。輸入日期會檢查實際月日，時區支援 UTC-14:00 至 UTC+14:00；錯誤會在曆法計算前回傳穩定的 error code。
+
+建立自訂 Profile 時，未知 Profile、重複 id、非法覆寫欄位都會明確失敗，不會靜默改用 canonical：
+
+```js
+const midnight = Bazi.Rules.RuleRegistry.createProfile({
+  id: 'midnight-school',
+  name: '午夜換日派',
+  base: 'canonical',
+  overrides: { dayBoundary: '00:00' }
+});
+
+console.log(midnight.diff);
+```
+
 ## 如何讀取排盤結果
 
 `Bazi.calculate()` 回傳一個物件。最常用的資料都在以下欄位：
@@ -225,6 +261,8 @@ console.log(result.pillars.hour.ganzhi);  // 時柱；未知時間時先檢查 a
 console.log(result.calendar.lunar);
 console.log(result.calendar.solarTerms);
 console.log(result.calendar.time);
+console.log(result.calendar.zodiac);        // 生肖，例如 { name: '豬' }
+console.log(result.calendar.constellation); // 公曆星座，例如 { name: '金牛座' }
 
 // 十神、藏干、納音、十二長生
 console.log(result.tenGods);
@@ -237,6 +275,8 @@ console.log(result.strength.dayMaster);          // 日主五行
 console.log(result.strength.score);              // 分數
 console.log(result.strength.level);              // 例如「偏弱」
 console.log(result.strength.favorableElements);  // 喜用方向的模型結果
+console.log(result.strength.monthState);         // 月令對日主的旺衰狀態
+console.log(result.strength.monthCommander);     // 人元司令與分段 evidence
 
 // 大運、流年與輔助資料
 console.log(result.luckCycles.cycles);
@@ -244,6 +284,26 @@ console.log(result.transits.year);
 console.log(result.auxiliary.mingGong);
 console.log(result.auxiliary.shenGong);
 ```
+
+### 讀取星座、司令與逐年大運
+
+`calendar.constellation` 和 `calendar.zodiac` 是顯示用資料，不會改變四柱計算。`strength.monthCommander` 會依「節」之後經過的整日，對照月令人元司令分段；結果同時帶有採用的分段，方便不同流派自行建立 profile。
+
+需要像 `sample1.html` 一樣展開每一步大運的逐年資料時，明確開啟選項：
+
+```js
+const detailed = Bazi.calculate(input, {
+  includeLuckAnnualDetails: true,
+  includeAnnualLuckShenSha: true
+});
+
+const firstLuck = detailed.luckCycles.cycles[0];
+console.log(firstLuck.startDate, firstLuck.endDate);
+console.log(firstLuck.nominalFromAge, firstLuck.nominalToAge);
+console.log(firstLuck.annuals[0]);
+```
+
+逐年資料提供年份、流年干支、十神、十二長生、納音、旬空、流年神煞與流年對原局的互動。SDK 不會產生沒有可追溯規則的「小運分數、實際運勢分數」或固定吉凶文案；這些內容若要加入，應先建立獨立且可引用的 rule profile。
 
 ### 顯示四柱的小範例
 
@@ -291,6 +351,8 @@ console.log(result.calendar.time.trueSolarTime);
 ```
 
 如果 `trueSolarTime` 沒有開啟，或出生時間不是 `exact`，`trueSolarTimeUsed` 會是 `false`。這個欄位可用來在畫面上清楚告訴使用者目前採用哪種時間。
+
+只知時辰時，四柱只把時支視為確定資料；起運需要一個時刻，因此 SDK 會以該時辰中點估算並在 `result.luckCycles.startAge.timingAssumption` 揭露。完全未知時間則以民用中午作為起運計時假設，同樣不會假裝成精確出生時刻。
 
 ## 神煞：原局、四柱、大運與流年
 
@@ -467,6 +529,8 @@ createPng(result);
 
 可用的主題：`modern-oriental`、`classic`、`dark`。
 
+Demo 的 SVG／PNG 會依目前選取的 `theme` 與 `preset` 匯出同一份完整命盤資料；SVG 會自動計算長度，PNG 會以高解析度轉換，因此不會遺漏下方的大運、流年或神煞內容。下載圖底部會保留低調浮水印：「當麻實驗室 · github.com/donma/bazi-js」。
+
 ## AI Context：把排盤資料交給 AI
 
 如果你的網站有 AI 解說功能，建議先用 SDK 整理資料，再把整理後的文字傳給 AI。不要讓 AI 自己從出生日期重新猜算四柱。
@@ -477,7 +541,9 @@ const contextJson = Bazi.AI.toContext(result, {
   includeRules: true,
   includeEvidence: true,
   includeInteractions: true,
-  maxLuckCycles: 6
+  // 要與 demo 的完整命盤對齊，保留全部大運與逐年資料
+  includeLuckAnnualDetails: true,
+  maxLuckCycles: 10
 });
 
 console.log(contextJson); // JSON 字串，可放入 API request
@@ -489,7 +555,11 @@ console.log(contextJson); // JSON 字串，可放入 API request
 const context = Bazi.AI.toContext(result, { compact: false });
 console.log(context.pillars);
 console.log(context.shenSha.byPillar);
+console.log(context.transits.year); // 畫面上的目前流年
+console.log(context.luckCyclesSummary.cycles); // 全部大運、神煞與逐年資料
 ```
+
+`toContext` 會保留畫面會用到的完整結構：每柱的藏幹明細、地勢、自坐、空亡、流年四柱、流年神煞、大運神煞與逐年資料。`maxLuckCycles` 預設為 10；若只要較小的 AI 輸入，再自行降低數量。Demo 的「複製 AI Context」會固定啟用完整逐年資料與 10 步大運，確保和目前命盤一致。
 
 只需要神煞時，可以使用更小的 Context：
 
@@ -681,6 +751,8 @@ console.log(result.rules);
 - 出生時間接近節氣前後約 10 分鐘時，請用天文台年曆人工覆核。
 - 真太陽時、夏令時間、出生地經度等資料，會影響實際排盤方式，請在表單中清楚標示。
 - 強弱分數是傳統命理規則模型，不是科學測量值。
+
+完整的系統責任邊界、不可違反的不變量與發布前檢查，請參考 [`docs/architecture/quality-gates.md`](docs/architecture/quality-gates.md)；本輪全系統審查紀錄見 [`docs/references/system-audit.md`](docs/references/system-audit.md)。
 
 ## License
 

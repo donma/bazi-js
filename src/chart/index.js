@@ -5,7 +5,7 @@
 // - new Bazi.Chart(input, options)
 // - 模組導出：Calendar, Chart, Rules, ShenSha, Strength, Luck, Transit, Renderer, AI, Validation
 
-import { validateInput } from '../core/utils/validation.js';
+import { validateInput, parseTimezoneOffset } from '../core/utils/validation.js';
 import { calculateFourPillars } from './chart.js';
 import { calculateChartTenGods } from '../tengods/index.js';
 import { calculateChartHiddenStems } from '../hidden-stems/index.js';
@@ -21,11 +21,22 @@ import { calculateLuckCycles } from '../luck/index.js';
 import { calculateTransit } from '../transit/index.js';
 import { calculateTrueSolarTime } from '../calendar/true-solar-time.js';
 import { solarToLunar } from '../calendar/lunar.js';
+import { getWesternConstellation } from '../calendar/constellation.js';
+import { getZodiacAnimal } from '../calendar/zodiac.js';
 import { getYearSolarTerms, getSurroundingJie } from '../calendar/solar-terms.js';
 import { gregorianToJulianDay } from '../calendar/julian.js';
 import { RuleRegistry } from '../rules/rule-registry.js';
 import { toContext } from '../ai/index.js';
 import { VERSIONS } from '../rules/versions.js';
+import { BaziRuleError } from '../core/errors/index.js';
+
+function formatTimezoneOffset(offsetHours) {
+  const sign = offsetHours < 0 ? '-' : '+';
+  const absolute = Math.abs(offsetHours);
+  const hours = Math.floor(absolute);
+  const minutes = Math.round((absolute - hours) * 60);
+  return `${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
 
 // 主計算函數
 export function calculate(input, options = {}) {
@@ -34,7 +45,7 @@ export function calculate(input, options = {}) {
 
   // 2. 解析 Rule Profile
   const profileId = input.profile || options.profile || 'canonical';
-  const profile = RuleRegistry.get(profileId);
+  const profile = RuleRegistry.require(profileId);
 
   // 3. 提取規則參數
   const yearBoundary = input.yearBoundary || profile.rules.yearBoundary.value;
@@ -46,11 +57,7 @@ export function calculate(input, options = {}) {
 
   // 4. 時區與時間解析
   const timezone = input.timezone || '+08:00';
-  const tzMatch = timezone.match(/^([+-])(\d{1,2})(?::?(\d{2}))?$/);
-  const tzSign = tzMatch[1] === '-' ? -1 : 1;
-  const tzHours = parseInt(tzMatch[2], 10);
-  const tzMins = tzMatch[3] ? parseInt(tzMatch[3], 10) : 0;
-  const timezoneOffsetHours = tzSign * (tzHours + tzMins / 60);
+  const timezoneOffsetHours = parseTimezoneOffset(timezone);
 
   const [inYear, inMonth, inDay] = input.birthDate.split('-').map(Number);
   const birthTimeMode = input.birthTimeMode || (input.birthTime ? 'exact' : 'unknown');
@@ -111,6 +118,8 @@ export function calculate(input, options = {}) {
     timezoneOffsetHours,
     yearBoundary,
     monthBoundary,
+    lunarYear: lunarInfo.year,
+    lunarMonth: lunarInfo.month,
     dayBoundary
   });
 
@@ -122,10 +131,23 @@ export function calculate(input, options = {}) {
   const kongWang = calculateChartKongWang(pillars);
   const auxiliary = calculateChartAuxiliary(pillars);
   const interactions = calculateInteractions(pillars);
-  const strength = calculateStrength(pillars, interactions);
+  const strength = calculateStrength(pillars, interactions, {
+    currentJD,
+    prevJie: surroundingJieInfo.prevJie
+  });
   const shenshaPreset = input.shenshaPreset || input.shenShaPreset || options.shenshaPreset || options.shenShaPreset || 'classical';
+  if (!['minimal', 'classical', 'full'].includes(shenshaPreset)) {
+    throw new BaziRuleError(`找不到 ShenSha preset：${shenshaPreset}`, 'SHENSHA_PRESET_NOT_FOUND', { preset: shenshaPreset });
+  }
   const shenSha = calculateShenSha(pillars, { preset: shenshaPreset, gender: input.gender });
   const specialRules = calculateSpecialRules(pillars, { gender: input.gender, input });
+
+  const appliedRule = (profileRule, value, overridden = false, ruleId = profileRule.ruleId) => ({
+    ...profileRule,
+    value,
+    ruleId,
+    overridden: overridden || value !== profileRule.value
+  });
 
   // 9. 大運計算
   const luckCycles = calculateLuckCycles({
@@ -133,14 +155,31 @@ export function calculate(input, options = {}) {
     gender: input.gender,
     birthDate: input.birthDate,
     birthTime: input.birthTime,
+    birthTimeMode,
+    birthHourBranch: input.birthHourBranch,
+    timingDate: `${calcYear}-${String(calcMonth).padStart(2, '0')}-${String(calcDay).padStart(2, '0')}`,
+    timingTime: birthTimeMode === 'exact'
+      ? `${String(calcHour).padStart(2, '0')}:${String(calcMinute).padStart(2, '0')}`
+      : undefined,
     timezoneOffsetHours,
     directionRule: profile.rules.luckCycle.directionRule.value,
-    startAgeMethod: profile.rules.luckCycle.startAgeMethod.value
+    startAgeMethod: profile.rules.luckCycle.startAgeMethod.value,
+    yearBoundary,
+    monthBoundary,
+    dayBoundary,
+    includeAnnualDetails: options.includeLuckAnnualDetails === true,
+    shenshaPreset,
+    includeAnnualShenSha: options.includeAnnualLuckShenSha !== false
   });
 
   // 10. 當期流年/流月運勢計算（以當前或指定時刻）
-  const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00+08:00`;
-  const transits = calculateTransit(pillars, { datetime: transitDate });
+  const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00${formatTimezoneOffset(timezoneOffsetHours)}`;
+  const transits = calculateTransit(pillars, {
+    datetime: transitDate,
+    yearBoundary,
+    monthBoundary,
+    dayBoundary
+  });
 
   // 11. 大運神煞：每步大運干支以原局為基準觸發的神煞（catalog scope: luck）
   if (luckCycles && Array.isArray(luckCycles.cycles)) {
@@ -173,7 +212,21 @@ export function calculate(input, options = {}) {
     accuracy: {
       timeKnown: birthTimeMode !== 'unknown',
       hourPillarAvailable: pillars.hour.available,
-      trueSolarTimeUsed: Boolean(enableTrueSolarTime && birthTimeMode === 'exact')
+      trueSolarTimeUsed: Boolean(enableTrueSolarTime && birthTimeMode === 'exact'),
+      boundaryRules: {
+        year: yearBoundary,
+        month: monthBoundary,
+        day: dayBoundary
+      },
+      assumptions: {
+        unknownTime: birthTimeMode === 'unknown' ? '時柱、命宮、身宮與起運時刻採不可確定處理；起運日期以民用中午作為計時假設。' : null,
+        branchTime: birthTimeMode === 'branch' ? '時辰模式只確定時支；起運日期以該時辰中點估算。' : null,
+        trueSolarTime: enableTrueSolarTime && birthTimeMode === 'exact' ? '四柱與起運計時使用真太陽時修正後時刻。' : null
+      },
+      precision: {
+        solarTerms: 'Meeus low-precision solar longitude; typical boundary uncertainty is approximately ±10 minutes.',
+        lunarCalendar: '1900-2100 encoded lunisolar table.'
+      }
     },
 
     calendar: {
@@ -181,9 +234,15 @@ export function calculate(input, options = {}) {
         year: inYear,
         month: inMonth,
         day: inDay,
-        time: input.birthTime || null
+        time: input.birthTime || null,
+        effectiveDate: `${calcYear}-${String(calcMonth).padStart(2, '0')}-${String(calcDay).padStart(2, '0')}`,
+        effectiveTime: birthTimeMode === 'unknown'
+          ? null
+          : `${String(calcHour).padStart(2, '0')}:${String(calcMinute).padStart(2, '0')}`
       },
       lunar: lunarInfo,
+      zodiac: getZodiacAnimal(pillars.year.branch),
+      constellation: getWesternConstellation(inMonth, inDay),
       solarTerms: {
         prevJie: surroundingJieInfo.prevJie ? {
           name: surroundingJieInfo.prevJie.name,
@@ -200,7 +259,11 @@ export function calculate(input, options = {}) {
         civilTime: input.birthTime || null,
         trueSolarTime: trueSolarInfo ? trueSolarInfo.trueSolarTime : null,
         correctionMinutes: trueSolarInfo ? trueSolarInfo.corrections.totalCorrectionMinutes : 0,
-        usedTrueSolarTime: Boolean(enableTrueSolarTime && birthTimeMode === 'exact')
+        usedTrueSolarTime: Boolean(enableTrueSolarTime && birthTimeMode === 'exact'),
+        effectiveDate: `${calcYear}-${String(calcMonth).padStart(2, '0')}-${String(calcDay).padStart(2, '0')}`,
+        effectiveTime: birthTimeMode === 'unknown'
+          ? null
+          : `${String(calcHour).padStart(2, '0')}:${String(calcMinute).padStart(2, '0')}`
       }
     },
 
@@ -254,9 +317,9 @@ export function calculate(input, options = {}) {
 
     rules: {
       applied: [
-        profile.rules.yearBoundary,
-        profile.rules.monthBoundary,
-        profile.rules.dayBoundary,
+        appliedRule(profile.rules.yearBoundary, yearBoundary, input.yearBoundary !== undefined, `YEAR_BOUNDARY_${yearBoundary.toUpperCase()}`),
+        appliedRule(profile.rules.monthBoundary, monthBoundary, input.monthBoundary !== undefined, `MONTH_BOUNDARY_${monthBoundary.toUpperCase()}`),
+        appliedRule(profile.rules.dayBoundary, dayBoundary, input.dayBoundary !== undefined, dayBoundary === '00:00' ? 'DAY_BOUNDARY_MIDNIGHT_0000' : 'DAY_BOUNDARY_ZISHI_2300'),
         profile.rules.luckCycle.directionRule,
         profile.rules.luckCycle.startAgeMethod
       ]

@@ -191,7 +191,10 @@ function runCalculation() {
     }
   };
 
-  const res = Bazi.calculateSafe(input);
+  const res = Bazi.calculateSafe(input, {
+    includeLuckAnnualDetails: true,
+    includeAnnualLuckShenSha: true
+  });
   if (!res.success) {
     alert('排盤錯誤: ' + res.error.message);
     return;
@@ -214,7 +217,7 @@ function updateRender() {
 
   if (responsivePreview) {
     chartContainer.innerHTML = renderResponsivePreview(currentResult, { theme, preset });
-    chartHint.textContent = '直式閱讀版：文字不縮放、無需水平捲軸；file:// 與 localhost 共用此畫面。';
+    chartHint.textContent = '直式閱讀版：文字不縮放、無需水平捲軸；SVG／PNG 下載會保留同一份完整資料。';
   } else {
     const svgStr = Bazi.Renderer.render(currentResult, {
       format: 'svg',
@@ -231,14 +234,24 @@ function getPresentationOptions() {
   return {
     theme: document.getElementById('theme-select').value,
     preset: document.getElementById('preset-select').value,
-    preview: responsivePreview ? 'responsive-html' : 'sdk-svg'
+    preview: responsivePreview ? 'responsive-html' : 'sdk-svg',
+    watermark: {
+      label: '當麻實驗室',
+      url: 'https://github.com/donma/bazi-js'
+    }
   };
 }
 
 function getExportResult() {
   return {
     ...currentResult,
-    presentation: getPresentationOptions()
+    presentation: getPresentationOptions(),
+    exportInfo: {
+      schema: 'bazijs.demo.export.v2',
+      source: 'current-chart-result',
+      sameDataAsPreview: true,
+      note: '此物件保留目前畫面使用的完整 SDK Result；presentation 只描述顯示設定。'
+    }
   };
 }
 
@@ -390,9 +403,10 @@ function renderResponsivePreview(result, options) {
   const elementColors = theme.elementColors || {};
   const elementBars = ['木', '火', '土', '金', '水'].map((element) => {
     const data = result.strength.distribution[element] || { percentage: 0 };
+    const state = result.strength.seasonalStates && result.strength.seasonalStates[element];
     const percentage = Number(data.percentage) || 0;
     return `<div class="responsive-element-row">
-      <span class="responsive-element-name" style="color:${elementColors[element] || theme.textPrimary}">${element}</span>
+      <span class="responsive-element-name" style="color:${elementColors[element] || theme.textPrimary}">${element}<small>${displayText(state && state.name, '')}</small></span>
       <span class="responsive-element-track"><span style="width:${Math.min(100, Math.max(0, percentage))}%;background:${elementColors[element] || theme.textPrimary}"></span></span>
       <strong>${percentage}%</strong>
     </div>`;
@@ -413,16 +427,26 @@ function renderResponsivePreview(result, options) {
     </article>`;
   }).join('');
 
+  const currentYear = new Date().getFullYear();
+  const visibleLuckCycles = result.luckCycles ? result.luckCycles.cycles.slice(0, 8) : [];
+  const currentLuckCycle = visibleLuckCycles.find((cycle) => currentYear >= Number(cycle.fromYear) && currentYear <= Number(cycle.toYear));
   const luckCycles = preset.includeLuckCycles && result.luckCycles
     ? `<section class="responsive-section">
-        <h4>起運走勢 <span>（${displayText(result.luckCycles.directionText)} · ${displayText(result.luckCycles.startAge.display)}起運）</span></h4>
-        <div class="responsive-luck-grid">${result.luckCycles.cycles.slice(0, 8).map((cycle) => `<article>
-          <span>${displayText(cycle.fromAge)}歲</span>
+        <h4>起運走勢 <span>（${displayText(result.luckCycles.directionText)} · ${displayText(result.luckCycles.startAge.display)}起運${currentLuckCycle ? ` · ${currentYear}年已自動展開` : ''}）</span></h4>
+        <div class="responsive-luck-grid">${visibleLuckCycles.map((cycle) => {
+          const isCurrentCycle = currentLuckCycle === cycle;
+          return `<article class="${isCurrentCycle ? 'is-current-cycle' : ''}"${isCurrentCycle ? ` aria-label="${currentYear}年所在大運，已自動展開"` : ''}>
+          <span>${displayText(cycle.nominalFromAge ?? cycle.fromAge)}歲起</span>
           <strong>${displayText(cycle.ganzhi)}</strong>
           <small>${displayText(cycle.tenGodStem && cycle.tenGodStem.short)}</small>
-          <em>${displayText(cycle.fromYear)}年</em>
+          <em>${displayText(cycle.fromYear)}-${displayText(cycle.toYear)}</em>
           <small class="responsive-luck-shensha">神煞：${displayText(formatShenSha(cycle.shenSha, 5))}</small>
-        </article>`).join('')}</div>
+          ${Array.isArray(cycle.annuals) ? `<details class="responsive-luck-annuals"${isCurrentCycle ? ' open' : ''}><summary>${isCurrentCycle ? `${currentYear}年所在大運 · ` : ''}展開逐年資料（${cycle.annuals.length} 年）</summary><div class="responsive-annual-list">${cycle.annuals.map((annual) => {
+            const isCurrentYear = Number(annual.year) === currentYear;
+            return `<div class="responsive-annual-item${isCurrentYear ? ' is-current-year' : ''}"${isCurrentYear ? ` aria-label="${currentYear}年流年"` : ''}><div><strong>${displayText(annual.age)}歲 · ${displayText(annual.year)}年 · ${displayText(annual.ganzhi)}</strong>${isCurrentYear ? '<span class="responsive-current-badge">今年</span>' : ''}<span>${displayText(annual.tenGod && (annual.tenGod.full || annual.tenGod.short))} · ${displayText(annual.stage && annual.stage.name)} · ${displayText(annual.nayin)}</span></div><p>互動：${displayText((annual.interactions || []).map((item) => item.description || item.name).join('、'))}<br>神煞：${displayText(formatShenSha(annual.shenSha, 8))}</p></div>`;
+          }).join('')}</div></details>` : ''}
+        </article>`;
+        }).join('')}</div>
       </section>`
     : '';
 
@@ -450,6 +474,10 @@ function renderResponsivePreview(result, options) {
         <h4>天干地支互動</h4>
         <ul>${interactionItems.map((item) => `<li>${displayText(item)}</li>`).join('')}</ul>
       </section>`
+    : '';
+
+  const elementStates = result.strength.monthState
+    ? `<div class="responsive-month-state"><strong>月令旺衰</strong><span>月支 ${displayText(result.strength.monthState.branch)}：${displayText(result.strength.monthState.name)}（係數 ${displayText(result.strength.monthState.factor)}）</span></div>`
     : '';
 
   const shenSha = preset.includeShenSha && result.shenSha
@@ -485,13 +513,28 @@ function renderResponsivePreview(result, options) {
 
   const strength = preset.includeStrength
     ? `<section class="responsive-section">
-        <h4>五行氣數與強弱平衡</h4>
+        <h4>五行分析 · 氣數與強弱平衡</h4>
         <div class="responsive-strength-summary">
           <p><strong>日主旺衰得分</strong><span>${displayText(result.strength.score)} 分 · 【${displayText(result.strength.level)}】</span></p>
           <p><strong>喜用五行</strong><span>${displayText((result.strength.favorableElements || []).join('、'))}</span></p>
           <p><strong>忌仇五行</strong><span>${displayText((result.strength.unfavorableElements || []).join('、'))}</span></p>
         </div>
+        ${elementStates}
         <div class="responsive-element-bars">${elementBars}</div>
+        <details class="responsive-evidence-details"><summary>查看強弱判定 evidence（${(result.strength.evidence || []).length} 筆）</summary><ul>${(result.strength.evidence || []).map((item) => `<li><strong>${displayText(item.ruleId)}</strong> ${displayText(item.reason)}</li>`).join('')}</ul></details>
+      </section>`
+    : '';
+
+  const useGod = preset.includeStrength
+    ? `<section class="responsive-section responsive-use-god">
+        <h4>用神模型</h4>
+        <p class="responsive-model-note">以下為 BaziJS canonical 扶抑模型的可追溯摘要，不是 sample1 的固定斷語或醫療、財務建議。</p>
+        <div class="responsive-use-god-grid">
+          <div><strong>扶助方向</strong><span>${displayText((result.strength.favorableElements || []).join('、'))}</span></div>
+          <div><strong>忌仇方向</strong><span>${displayText((result.strength.unfavorableElements || []).join('、'))}</span></div>
+          <div><strong>得令／得地／得勢</strong><span>${displayText([result.strength.deLing ? '得令' : '不得令', result.strength.deDi ? '得地' : '不得地', result.strength.deShi ? '得勢' : '不得勢'].join('、'))}</span></div>
+          <div><strong>月令司令</strong><span>${displayText(result.strength.monthCommander ? `${result.strength.monthCommander.stem}${result.strength.monthCommander.element}（第${result.strength.monthCommander.phase}段）` : '—')}</span></div>
+        </div>
       </section>`
     : '';
 
@@ -508,16 +551,19 @@ function renderResponsivePreview(result, options) {
     ['乾造', result.input.gender === 'male' ? '男' : '女'],
     ['陰陽', yearStemInfo.yinYang === 'yang' ? '陽' : '陰'],
     ['生肖', zodiacNames[result.pillars.year.branch] || '—'],
+    ['星座', result.calendar.constellation ? result.calendar.constellation.name : '—'],
     ['節氣', prevJie ? prevJie.name : '—'],
     ['季節', seasonNames[result.pillars.month.branch] || '—'],
+    ['司令', result.strength.monthCommander ? `${result.strength.monthCommander.stem}${result.strength.monthCommander.element}` : '—'],
     ['日主', `${dayMaster}（${result.strength.level}）`],
     ['月令格局', `${result.tenGods.stems.month ? result.tenGods.stems.month.full : '—'}格`],
     ['強弱分數', `${result.strength.score} 分`],
+    ['五行月令', result.strength.monthState ? result.strength.monthState.name : '—'],
     ['命宮', result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : '—'],
     ['身宮', result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : '—'],
     ['胎元', result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : '—'],
     ['胎息', result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : '—'],
-    ['起運', result.luckCycles && result.luckCycles.startAge ? `${result.luckCycles.startAge.display}${result.luckCycles.startAge.startDate ? `（${result.luckCycles.startAge.startDate}）` : ''}` : '—'],
+    ['起運', result.luckCycles && result.luckCycles.startAge ? `${result.luckCycles.startAge.display}${result.luckCycles.startAge.startDateTime ? `（${result.luckCycles.startAge.startDateTime}）` : ''}` : '—'],
     ['規則版本', `神煞 ${result.meta.shenShaRuleVersion || '—'}`]
   ];
   const basicInfo = infoItems.map(([label, value]) => `<div><span>${displayText(label)}</span><strong>${displayText(value)}</strong></div>`).join('');
@@ -534,10 +580,12 @@ function renderResponsivePreview(result, options) {
     </section>
     ${specialRules}
     ${strength}
+    ${useGod}
     ${luckCycles}
     ${transitSection}
     ${interactions}
     ${shenSha}
+    <div class="responsive-watermark" aria-hidden="true">當麻實驗室 · github.com/donma/bazi-js</div>
     <footer>BaziJS 開源命理引擎 · Apache-2.0 授權</footer>
   </div>`;
 }
@@ -551,11 +599,7 @@ function downloadSvg() {
 
   const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `bazi_${currentResult.input.birthDate}.svg`;
-  a.click();
-  URL.revokeObjectURL(url);
+  triggerDownload(url, `bazi_${currentResult.input.birthDate}.svg`, true);
 }
 
 async function downloadPng() {
@@ -566,15 +610,26 @@ async function downloadPng() {
     const pngResult = await Bazi.Renderer.render(getExportResult(), {
       format: 'png', theme: presentation.theme, preset: presentation.preset
     });
-    if (pngResult.dataUrl) {
-      const a = document.createElement('a');
-      a.href = pngResult.dataUrl;
-      a.download = `bazi_${currentResult.input.birthDate}.png`;
-      a.click();
+    if (pngResult.blob) {
+      const url = URL.createObjectURL(pngResult.blob);
+      triggerDownload(url, `bazi_${currentResult.input.birthDate}.png`, true);
+    } else if (pngResult.dataUrl) {
+      triggerDownload(pngResult.dataUrl, `bazi_${currentResult.input.birthDate}.png`);
     }
   } catch (err) {
     alert('PNG 轉出失敗: ' + err.message);
   }
+}
+
+function triggerDownload(href, filename, revoke = false) {
+  const link = document.createElement('a');
+  link.href = href;
+  link.download = filename;
+  link.setAttribute('aria-label', `下載 ${filename}`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  if (revoke) window.setTimeout(() => URL.revokeObjectURL(href), 1000);
 }
 
 function copyJson() {
@@ -584,8 +639,18 @@ function copyJson() {
 
 function copyAiContext() {
   if (!currentResult) return;
-  const aiCtx = Bazi.AI.toContext(currentResult, { compact: false });
+  const aiCtx = Bazi.AI.toContext(currentResult, {
+    compact: false,
+    includeLuckAnnualDetails: true,
+    maxLuckCycles: 10
+  });
   aiCtx.presentation = getPresentationOptions();
+  aiCtx.exportInfo = {
+    schema: 'bazijs.demo.ai-context-export.v2',
+    source: 'current-chart-result',
+    sameDataAsPreview: true,
+    note: '此 Context 已包含畫面顯示的完整柱位、流年、大運神煞與判定證據。'
+  };
   copyText(JSON.stringify(aiCtx, null, 2), 'AI Context 已複製至剪貼簿，可直接提供給 LLM 作為系統提示！');
 }
 

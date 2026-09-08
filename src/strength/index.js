@@ -47,7 +47,55 @@ const STATE_FACTOR = {
   '死': 0.1
 };
 
-export function calculateStrength(pillars, interactions = null) {
+// 人元司令分野：以「節」為月界，按節後經過的整日選出當月值令藏干。
+// 這是細化 evidence，不取代整體強弱模型；各家在巳、申、亥等月的分日
+// 有差異，因此把採用的分段與 elapsedDays 一併輸出，讓使用端可追溯。
+export const MONTH_COMMAND_PHASES = Object.freeze({
+  '寅': [{ stem: '戊', days: 7 }, { stem: '丙', days: 7 }, { stem: '甲', days: 16 }],
+  '卯': [{ stem: '甲', days: 10 }, { stem: '乙', days: 20 }],
+  '辰': [{ stem: '乙', days: 9 }, { stem: '癸', days: 3 }, { stem: '戊', days: 18 }],
+  '巳': [{ stem: '戊', days: 7 }, { stem: '庚', days: 7 }, { stem: '丙', days: 16 }],
+  '午': [{ stem: '丙', days: 10 }, { stem: '己', days: 9 }, { stem: '丁', days: 11 }],
+  '未': [{ stem: '丁', days: 9 }, { stem: '乙', days: 3 }, { stem: '己', days: 18 }],
+  '申': [{ stem: '戊', days: 7 }, { stem: '壬', days: 7 }, { stem: '庚', days: 16 }],
+  '酉': [{ stem: '庚', days: 10 }, { stem: '辛', days: 20 }],
+  '戌': [{ stem: '辛', days: 9 }, { stem: '丁', days: 3 }, { stem: '戊', days: 18 }],
+  '亥': [{ stem: '戊', days: 7 }, { stem: '甲', days: 5 }, { stem: '壬', days: 18 }],
+  '子': [{ stem: '壬', days: 10 }, { stem: '癸', days: 20 }],
+  '丑': [{ stem: '癸', days: 9 }, { stem: '辛', days: 3 }, { stem: '己', days: 18 }]
+});
+
+export function calculateMonthCommander(monthBranch, elapsedDays) {
+  const phases = MONTH_COMMAND_PHASES[monthBranch];
+  if (!phases || !Number.isFinite(elapsedDays)) return null;
+
+  const wholeDays = Math.max(0, Math.floor(elapsedDays));
+  let cursor = 0;
+  let phaseIndex = phases.length - 1;
+  for (let index = 0; index < phases.length; index++) {
+    cursor += phases[index].days;
+    if (wholeDays < cursor) {
+      phaseIndex = index;
+      break;
+    }
+  }
+
+  const phase = phases[phaseIndex];
+  const stem = STEMS[STEM_INDEX[phase.stem]];
+  return {
+    stem: phase.stem,
+    element: stem ? stem.element : null,
+    monthBranch,
+    elapsedDays: wholeDays,
+    phase: phaseIndex + 1,
+    phaseCount: phases.length,
+    phaseDays: phase.days,
+    phases: phases.map((item) => ({ ...item })),
+    algorithm: 'jie-after-whole-days'
+  };
+}
+
+export function calculateStrength(pillars, interactions = null, calendarContext = {}) {
   const dayMasterStem = pillars.day.stem;
   const dayMasterData = STEMS[STEM_INDEX[dayMasterStem]];
   const dmElement = dayMasterData.element;
@@ -122,6 +170,11 @@ export function calculateStrength(pillars, interactions = null) {
   const monthState = (SEASON_STATES[monthBranch] && SEASON_STATES[monthBranch][dmElement]) || '休';
   const monthStateFactor = STATE_FACTOR[monthState] || 0.6;
   const deLing = (monthState === '旺' || monthState === '相');
+
+  const elapsedDays = Number.isFinite(calendarContext.currentJD) && calendarContext.prevJie && Number.isFinite(calendarContext.prevJie.jdUT)
+    ? Math.max(0, calendarContext.currentJD - calendarContext.prevJie.jdUT)
+    : null;
+  const monthCommander = calculateMonthCommander(monthBranch, elapsedDays);
 
   evidence.push({
     ruleId: 'STR_DE_LING',
@@ -269,6 +322,18 @@ export function calculateStrength(pillars, interactions = null) {
     deShi,
     allyScore: Number(allyScore.toFixed(1)),
     enemyScore: Number(enemyScore.toFixed(1)),
+    dayMasterStem: dayMasterStem,
+    monthState: {
+      branch: monthBranch,
+      name: monthState,
+      factor: monthStateFactor,
+      deLing
+    },
+    monthCommander,
+    seasonalStates: Object.fromEntries(Object.entries(SEASON_STATES[monthBranch] || {}).map(([element, name]) => [element, {
+      name,
+      factor: STATE_FACTOR[name] || null
+    }])),
     distribution: fiveElementsDistribution,
     favorableElements: [...new Set(favorableElements)],
     unfavorableElements: [...new Set(unfavorableElements)],

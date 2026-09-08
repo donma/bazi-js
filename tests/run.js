@@ -55,6 +55,23 @@ async function runUnit() {
   const err = Bazi.calculateSafe({ birthDate: '1899-01-01', birthTime: '12:00', gender: 'male' });
   assert(err.success === false && err.error.code === 'BIRTH_DATE_OUT_OF_RANGE', 'UT-SAFEAPI-RANGE', JSON.stringify(err.error && err.error.code));
 
+  // 輸入契約：不能讓無效日期、地支或時區進入曆法層。
+  const invalidDate = Bazi.calculateSafe({ birthDate: '2024-02-30', birthTime: '12:00', gender: 'male' });
+  assert(invalidDate.success === false && invalidDate.error.code === 'BAZI_VALIDATION_ERROR', 'UT-VALIDATE-CALENDAR-DATE', JSON.stringify(invalidDate.error));
+  const invalidBranch = Bazi.calculateSafe({ birthDate: '2024-01-01', birthTimeMode: 'branch', birthHourBranch: '不存在', gender: 'male' });
+  assert(invalidBranch.success === false && invalidBranch.error.field === 'birthHourBranch', 'UT-VALIDATE-BRANCH', JSON.stringify(invalidBranch.error));
+  const invalidTimezone = Bazi.calculateSafe({ birthDate: '2024-01-01', birthTime: '12:00', gender: 'male', timezone: '+25:00' });
+  assert(invalidTimezone.success === false && invalidTimezone.error.field === 'timezone', 'UT-VALIDATE-TIMEZONE', JSON.stringify(invalidTimezone.error));
+  const invalidLocation = Bazi.calculateSafe({ birthDate: '2024-01-01', birthTime: '12:00', gender: 'male', location: { longitude: 181 } });
+  assert(invalidLocation.success === false && invalidLocation.error.field === 'location.longitude', 'UT-VALIDATE-LONGITUDE', JSON.stringify(invalidLocation.error));
+  const unknownProfile = Bazi.calculateSafe({ birthDate: '2024-01-01', birthTime: '12:00', gender: 'male' }, { profile: 'not-a-real-profile' });
+  assert(unknownProfile.success === false && unknownProfile.error.code === 'BAZI_RULE_ERROR', 'UT-PROFILE-UNKNOWN-IS-ERROR', JSON.stringify(unknownProfile.error));
+  const unknownPreset = Bazi.calculateSafe({ birthDate: '2024-01-01', birthTime: '12:00', gender: 'male' }, { shenshaPreset: 'not-a-real-preset' });
+  assert(unknownPreset.success === false && unknownPreset.error.details.ruleId === 'SHENSHA_PRESET_NOT_FOUND', 'UT-SHENSHA-PRESET-UNKNOWN-IS-ERROR', JSON.stringify(unknownPreset.error));
+  let lunarRangeError = false;
+  try { Bazi.Lunar.solarToLunar(2200, 1, 1); } catch (error) { lunarRangeError = error.code === 'BAZI_CALENDAR_ERROR'; }
+  assert(lunarRangeError, 'UT-LUNAR-OUT-OF-RANGE', '超出農曆資料範圍必須明確失敗');
+
   // AI Context 結構
   const ctx = Bazi.AI.toContext(d1, { compact: false });
   assert(ctx.pillars && ctx.pillars.day.ganzhi === '戊午' && ctx.metadata.profileId === 'canonical', 'UT-AI-CONTEXT', '');
@@ -79,6 +96,39 @@ async function runUnit() {
   // Transit 結構
   const tr = Bazi.Transit.calculateTransit(d1.pillars, { datetime: '2026-09-08T12:00:00+08:00' });
   assert(tr.year && tr.month && tr.day && tr.hour, 'UT-TRANSIT-STRUCT', '');
+  const westTransit = Bazi.Transit.calculateTransit(d1.pillars, { datetime: '2026-09-08T12:00:00-05:00' });
+  assert(westTransit.timezoneOffsetHours === -5 && westTransit.targetDatetime === '2026-09-08 12:00', 'UT-TRANSIT-NEGATIVE-TZ', JSON.stringify(westTransit));
+  const utcTransit = Bazi.Transit.calculateTransit(d1.pillars, { datetime: '2026-09-08T12:00:00Z' });
+  assert(utcTransit.timezoneOffsetHours === 0, 'UT-TRANSIT-UTC', JSON.stringify(utcTransit));
+  let invalidTransitDate = false;
+  try { Bazi.Transit.parseTransitDatetime(new Date('invalid')); } catch (error) { invalidTransitDate = error.code === 'BAZI_VALIDATION_ERROR'; }
+  assert(invalidTransitDate, 'UT-TRANSIT-INVALID-DATE', 'invalid Date 必須回傳穩定驗證錯誤');
+
+  // Profile 邊界不是裝飾欄位：農曆正月切年與農曆月切柱必須改變實際計算。
+  const lunarNewYearBefore = Bazi.calculate({ birthDate: '2024-02-09', birthTime: '12:00', gender: 'male', yearBoundary: 'lunar_new_year' });
+  const lunarNewYearAfter = Bazi.calculate({ birthDate: '2024-02-10', birthTime: '12:00', gender: 'male', yearBoundary: 'lunar_new_year' });
+  assert(lunarNewYearBefore.pillars.year.ganzhi === '癸卯' && lunarNewYearAfter.pillars.year.ganzhi === '甲辰', 'UT-YEAR-BOUNDARY-LUNAR-NEW-YEAR', `${lunarNewYearBefore.pillars.year.ganzhi}/${lunarNewYearAfter.pillars.year.ganzhi}`);
+  const lunarMonth = Bazi.calculate({ birthDate: '2024-02-09', birthTime: '12:00', gender: 'male', monthBoundary: 'lunar_month' });
+  assert(lunarMonth.pillars.month.ganzhi === '丁丑' && lunarMonth.rules.applied.find((rule) => rule.ruleId === 'MONTH_BOUNDARY_LUNAR_MONTH'), 'UT-MONTH-BOUNDARY-LUNAR-MONTH', JSON.stringify(lunarMonth.pillars.month));
+  assert(lunarMonth.rules.applied.find((rule) => rule.ruleId === 'MONTH_BOUNDARY_LUNAR_MONTH')?.overridden === true, 'UT-RULES-ACTUAL-OVERRIDE', JSON.stringify(lunarMonth.rules));
+  assert(lunarMonth.accuracy.boundaryRules.month === 'lunar_month' && lunarMonth.accuracy.precision, 'UT-ACCURACY-PROVENANCE', JSON.stringify(lunarMonth.accuracy));
+
+  // sample1.html 抽樣對照：只比對可由 SDK 規則重現的結構，不比對第三方吉凶文案。
+  const sample1 = Bazi.calculate({ birthDate: '1983-05-11', birthTime: '16:19', gender: 'male' }, {
+    includeLuckAnnualDetails: true
+  });
+  assert(sample1.calendar.zodiac && sample1.calendar.zodiac.name === '豬', 'UT-SAMPLE1-ZODIAC', JSON.stringify(sample1.calendar.zodiac));
+  assert(sample1.calendar.constellation && sample1.calendar.constellation.name === '金牛座', 'UT-SAMPLE1-CONSTELLATION', JSON.stringify(sample1.calendar.constellation));
+  assert(sample1.strength.monthCommander && sample1.strength.monthCommander.stem === '戊', 'UT-SAMPLE1-MONTH-COMMANDER', JSON.stringify(sample1.strength.monthCommander));
+  assert(sample1.luckCycles.startAge.startDate === '1985-02-09' && sample1.luckCycles.startAge.startDateTime, 'UT-SAMPLE1-LUCK-START', JSON.stringify(sample1.luckCycles.startAge));
+  assert(sample1.luckCycles.cycles[0].fromYear === 1985 && sample1.luckCycles.cycles[0].toYear === 1994 && sample1.luckCycles.cycles[0].nominalFromAge === 3, 'UT-SAMPLE1-LUCK-RANGE', JSON.stringify(sample1.luckCycles.cycles[0]));
+  assert(Array.isArray(sample1.luckCycles.cycles[0].annuals) && sample1.luckCycles.cycles[0].annuals[0].ganzhi === '乙丑', 'UT-SAMPLE1-ANNUALS', JSON.stringify(sample1.luckCycles.cycles[0].annuals[0]));
+  const sample1Context = Bazi.AI.toContext(sample1, { compact: false, includeLuckAnnualDetails: true });
+  assert(sample1Context.calendar.constellation.name === '金牛座' && sample1Context.dayMaster.monthCommander.stem === '戊', 'UT-SAMPLE1-AI-FIELDS', '');
+  assert(sample1Context.pillars.year.stage && sample1Context.pillars.year.xunKong && sample1Context.transits.year.ganzhi === sample1.transits.year.ganzhi, 'UT-SAMPLE1-AI-CHART-DETAILS', 'AI Context 缺少畫面使用的柱位或流年資料');
+  assert(sample1Context.luckCyclesSummary.cycles.length === sample1.luckCycles.cycles.length && sample1Context.luckCyclesSummary.cycles.every((cycle) => Array.isArray(cycle.shenSha)), 'UT-SAMPLE1-AI-LUCK-COMPLETE', 'AI Context 不應只保留部分大運或省略大運神煞');
+  assert(sample1Context.input.birthDate === sample1.input.birthDate && sample1Context.accuracy.boundaryRules && sample1Context.rules.applied, 'UT-SAMPLE1-AI-PROVENANCE', 'AI Context 必須保留重現排盤所需的輸入、精度與實際規則');
+  assert(sample1Context.auxiliary.taiYuan.ganzhi === sample1.auxiliary.taiYuan.ganzhi && sample1Context.luckCyclesSummary.cycles[0].stage, 'UT-SAMPLE1-AI-FULL-AUXILIARY', 'AI Context 不應把輔宮或大運狀態壓成不可追溯摘要');
 
   // 新神煞（v1.0.1）：以 2024-01-01 甲子日（年支子）驗紅鸞在卯、天喜在酉
   const ss24 = Bazi.calculate({ birthDate: '2024-05-15', birthTime: '10:00', gender: 'male' });
@@ -150,6 +200,16 @@ async function runUnit() {
   const specialSvg = Bazi.Renderer.render(specialChart, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
   assert(specialSvg.includes('日德') && specialSvg.includes('八專') && specialSvg.includes('孤鸞'), 'UT-SVG-SPECIAL-RULES', 'SVG 應包含目前命盤命中的特殊規則');
   assert(specialSvg.includes('日柱') && !specialSvg.includes('（day）'), 'UT-SVG-CHINESE-PILLAR-LABELS', 'SVG 不應顯示英文柱位代碼');
+
+  // 完整匯出：下載圖與 demo 直式預覽必須使用同一份完整資料，且高度不可固定裁切。
+  const completeSvg = Bazi.Renderer.render(sample1, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
+  const completeViewBox = completeSvg.match(/viewBox="0 0 960 (\d+)"/);
+  assert(completeViewBox && Number(completeViewBox[1]) > 3000, 'UT-SVG-COMPLETE-DYNAMIC-HEIGHT', completeViewBox && completeViewBox[1]);
+  assert(completeSvg.includes('基本資料') && completeSvg.includes('四柱主盤') && completeSvg.includes('神煞（'), 'UT-SVG-COMPLETE-SECTIONS', '完整 SVG 缺少主盤或神煞區塊');
+  assert(completeSvg.includes('逐年資料') && completeSvg.includes('1985') && completeSvg.includes('乙丑'), 'UT-SVG-COMPLETE-ANNUALS', '完整 SVG 缺少大運逐年資料');
+  assert(completeSvg.includes('胎元命宮') && completeSvg.includes('天干地支互動'), 'UT-SVG-COMPLETE-AUXILIARY', '完整 SVG 缺少附宮或互動區塊');
+  assert(!completeSvg.includes('SS_'), 'UT-SVG-NO-INTERNAL-RULE-ID', '下載 SVG 不應顯示內部 rule id');
+  assert(completeSvg.includes('當麻實驗室') && completeSvg.includes('github.com/donma/bazi-js'), 'UT-SVG-WATERMARK', '下載 SVG 應包含低調浮水印');
 }
 
 // ---------- ShenSha vNext ----------
@@ -239,7 +299,7 @@ async function runBoundary() {
     const e = c.expected;
     if (e.year && r.pillars.year.ganzhi !== e.year) { ok = false; notes.push(`年${r.pillars.year.ganzhi}≠${e.year}`); }
     if (e.month && r.pillars.month.ganzhi !== e.month) { ok = false; notes.push(`月${r.pillars.month.ganzhi}≠${e.month}`); }
-    if (e.day && !c.checkDay === false && r.pillars.day.ganzhi !== e.day) { ok = false; notes.push(`日${r.pillars.day.ganzhi}≠${e.day}`); }
+    if (e.day && c.checkDay !== false && r.pillars.day.ganzhi !== e.day) { ok = false; notes.push(`日${r.pillars.day.ganzhi}≠${e.day}`); }
     if (c.checkDay === false && e.day) { /* 跳過日柱 */ }
     if (e.hour && r.pillars.hour.ganzhi !== e.hour) { ok = false; notes.push(`時${r.pillars.hour.ganzhi}≠${e.hour}`); }
     if (e.hourPillarAvailable === false && r.pillars.hour.available !== false) { ok = false; notes.push('時柱應缺席'); }

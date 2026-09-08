@@ -29,11 +29,18 @@ export async function renderPng(chartResult, options = {}) {
       const blobUrl = URL.createObjectURL(svgBlob);
 
       img.onload = () => {
+        // SVG 本身是向量；PNG 以 2x 輸出，避免在高 DPI 螢幕或放大檢視時文字發糊。
+        const scale = Number.isFinite(Number(options.pngScale)) && Number(options.pngScale) > 0
+          ? Number(options.pngScale) : 2;
+        const sourceWidth = img.naturalWidth || img.width || 960;
+        const sourceHeight = img.naturalHeight || img.height || 980;
         const canvas = document.createElement('canvas');
-        canvas.width = img.width || 960;
-        canvas.height = img.height || 980;
+        canvas.width = Math.ceil(sourceWidth * scale);
+        canvas.height = Math.ceil(sourceHeight * scale);
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(blobUrl);
 
         canvas.toBlob((blob) => {
@@ -42,7 +49,8 @@ export async function renderPng(chartResult, options = {}) {
             blob,
             dataUrl: canvas.toDataURL('image/png'),
             width: canvas.width,
-            height: canvas.height
+            height: canvas.height,
+            scale
           });
         }, 'image/png');
       };

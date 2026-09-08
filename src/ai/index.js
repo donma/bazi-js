@@ -5,7 +5,7 @@
 // 保留：四柱、十神、藏干、五行、強弱、合沖刑害、神煞、大運、流運、ruleId、evidence、profile、version。
 // 專供大型語言模型 (LLM) 作為 system prompt 或 context 注入，嚴禁直接讓 LLM 自行猜算八字。
 
-import { groupShenShaByPillar } from '../shensha/index.js';
+import { calculateXunKong, groupShenShaByPillar } from '../shensha/index.js';
 
 function buildShenShaItem(item, options = {}) {
   const { includeRules = true, includeEvidence = true } = options;
@@ -94,21 +94,59 @@ export function toSpecialRulesContext(result, options = {}) {
   return options.compact ? JSON.stringify(context) : context;
 }
 
+function buildPillarContext(result, pillarKey, options = {}) {
+  const pillar = result.pillars[pillarKey];
+  const hidden = result.tenGods.hidden[pillarKey] || [];
+  const stage = result.twelveStages.byDayMaster[pillarKey] || null;
+  const selfSeated = result.twelveStages.selfSeated[pillarKey] || null;
+  return {
+    available: pillar.available !== false,
+    ganzhi: pillar.ganzhi,
+    stem: pillar.stem,
+    branch: pillar.branch,
+    sexagenaryIndex: pillar.sexagenaryIndex,
+    tenGod: pillarKey === 'day' ? '日主（元神）' : result.tenGods.stems[pillarKey] ? result.tenGods.stems[pillarKey].full : null,
+    nayin: result.nayin[pillarKey],
+    hidden: hidden.map((item) => `${item.stem}(${item.tenGod.full})`),
+    hiddenDetails: hidden,
+    stage,
+    selfSeated,
+    xunKong: pillar.ganzhi ? calculateXunKong(pillar.ganzhi) : null,
+    ...(options.includeRules ? { source: 'BaziJS canonical chart result' } : {})
+  };
+}
+
+function buildTransitPillarContext(result, pillarKey, options = {}) {
+  const pillar = result.transits && result.transits[pillarKey];
+  if (!pillar) return null;
+  return {
+    ganzhi: pillar.ganzhi,
+    stem: pillar.stem,
+    branch: pillar.branch,
+    sexagenaryIndex: pillar.sexagenaryIndex,
+    tenGod: pillar.tenGod || null,
+    stage: pillar.stage || null,
+    nayin: pillar.nayin || null,
+    shenSha: (pillar.shenSha || []).map((item) => buildShenShaItem(item, options))
+  };
+}
+
 export function toContext(result, options = {}) {
   const {
     compact = true,
     includeRules = true,
     includeEvidence = true,
-    includeShenShaEvidence = true,
+    includeShenShaEvidence = includeEvidence,
     includeStrengthEvidence = true,
     includeInteractions = true,
-    maxLuckCycles = 6
+    maxLuckCycles = 10
   } = options;
 
   const ctx = {
     metadata: {
       engine: 'BaziJS',
       engineVersion: result.meta.engineVersion,
+      resultSchemaVersion: result.meta.resultSchemaVersion || '2.0.0',
       ruleSetVersion: result.meta.ruleSetVersion,
       profileId: result.meta.profileId,
       shenshaPreset: result.meta.shenshaPreset || 'classical',
@@ -121,48 +159,41 @@ export function toContext(result, options = {}) {
       birthTime: result.input.birthTime || '未知',
       gender: result.input.gender === 'male' ? '乾造（男）' : '坤造（女）',
       timezone: result.input.timezone,
-      trueSolarTimeUsed: result.accuracy.trueSolarTimeUsed
+      trueSolarTimeUsed: result.accuracy.trueSolarTimeUsed,
+      zodiac: result.calendar.zodiac ? result.calendar.zodiac.name : null,
+      constellation: result.calendar.constellation ? result.calendar.constellation.name : null
+    },
+
+    // AI Context 也必須能重現本次排盤，不只保留人類可讀摘要。
+    input: result.input,
+    accuracy: result.accuracy,
+
+    calendar: {
+      solar: result.calendar.solar,
+      lunar: result.calendar.lunar,
+      zodiac: result.calendar.zodiac || null,
+      constellation: result.calendar.constellation || null,
+      solarTerms: result.calendar.solarTerms,
+      time: result.calendar.time
     },
 
     pillars: {
-      year: {
-        ganzhi: result.pillars.year.ganzhi,
-        stem: result.pillars.year.stem,
-        branch: result.pillars.year.branch,
-        tenGod: result.tenGods.stems.year ? result.tenGods.stems.year.full : null,
-        nayin: result.nayin.year,
-        hidden: result.tenGods.hidden.year.map(h => `${h.stem}(${h.tenGod.full})`)
-      },
-      month: {
-        ganzhi: result.pillars.month.ganzhi,
-        stem: result.pillars.month.stem,
-        branch: result.pillars.month.branch,
-        tenGod: result.tenGods.stems.month ? result.tenGods.stems.month.full : null,
-        nayin: result.nayin.month,
-        hidden: result.tenGods.hidden.month.map(h => `${h.stem}(${h.tenGod.full})`)
-      },
-      day: {
-        ganzhi: result.pillars.day.ganzhi,
-        stem: result.pillars.day.stem,
-        branch: result.pillars.day.branch,
-        tenGod: '日主（元神）',
-        nayin: result.nayin.day,
-        hidden: result.tenGods.hidden.day.map(h => `${h.stem}(${h.tenGod.full})`)
-      },
-      hour: result.pillars.hour.available ? {
-        ganzhi: result.pillars.hour.ganzhi,
-        stem: result.pillars.hour.stem,
-        branch: result.pillars.hour.branch,
-        tenGod: result.tenGods.stems.hour ? result.tenGods.stems.hour.full : null,
-        nayin: result.nayin.hour,
-        hidden: result.tenGods.hidden.hour.map(h => `${h.stem}(${h.tenGod.full})`)
-      } : { available: false, reason: '時間未知' }
+      year: buildPillarContext(result, 'year', { includeRules }),
+      month: buildPillarContext(result, 'month', { includeRules }),
+      day: buildPillarContext(result, 'day', { includeRules }),
+      hour: result.pillars.hour.available
+        ? buildPillarContext(result, 'hour', { includeRules })
+        : { available: false, reason: '時間未知' }
     },
 
     dayMaster: {
-      stem: result.strength.dayMaster,
+      stem: result.strength.dayMasterStem || result.pillars.day.stem,
+      element: result.strength.dayMaster,
       elementScore: result.strength.score,
       strengthLevel: result.strength.level,
+      monthState: result.strength.monthState || null,
+      monthCommander: result.strength.monthCommander || null,
+      seasonalStates: result.strength.seasonalStates || {},
       favorableElements: result.strength.favorableElements,
       unfavorableElements: result.strength.unfavorableElements,
       ...(includeStrengthEvidence ? { strengthEvidence: result.strength.evidence } : {})
@@ -176,11 +207,13 @@ export function toContext(result, options = {}) {
     },
 
     auxiliary: {
-      taiYuan: result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : null,
-      taiXi: result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : null,
-      mingGong: result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : null,
-      shenGong: result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : null
+      taiYuan: result.auxiliary.taiYuan || null,
+      taiXi: result.auxiliary.taiXi || null,
+      mingGong: result.auxiliary.mingGong || null,
+      shenGong: result.auxiliary.shenGong || null
     },
+
+    rules: result.rules,
 
     shenSha: toShenShaContext(result, {
       includeRules,
@@ -203,9 +236,28 @@ export function toContext(result, options = {}) {
     ...(includeInteractions ? {
       interactions: {
         stems: result.interactions.stems.map(s => s.name),
-        branches: result.interactions.branches.map(b => b.name)
+        branches: result.interactions.branches.map(b => b.name),
+        details: result.interactions
       }
     } : {}),
+
+    // 畫面會顯示目前流年；AI Context 不能只保留原局與大運摘要。
+    transits: result.transits ? {
+      targetDatetime: result.transits.targetDatetime,
+      year: buildTransitPillarContext(result, 'year', { includeRules, includeEvidence: includeShenShaEvidence }),
+      month: buildTransitPillarContext(result, 'month', { includeRules, includeEvidence: includeShenShaEvidence }),
+      day: buildTransitPillarContext(result, 'day', { includeRules, includeEvidence: includeShenShaEvidence }),
+      hour: buildTransitPillarContext(result, 'hour', { includeRules, includeEvidence: includeShenShaEvidence }),
+      interactions: result.transits.interactions || [],
+      shenShaYear: (result.transits.shenShaYear || []).map((item) => buildShenShaItem(item, {
+        includeRules,
+        includeEvidence: includeShenShaEvidence
+      })),
+      shenSha: ((Array.isArray(result.transits.shenSha) ? result.transits.shenSha : result.transits.shenSha && result.transits.shenSha.shenSha) || []).map((item) => buildShenShaItem(item, {
+        includeRules,
+        includeEvidence: includeShenShaEvidence
+      }))
+    } : null,
 
     luckCyclesSummary: {
       direction: result.luckCycles.directionText,
@@ -214,9 +266,38 @@ export function toContext(result, options = {}) {
       cycles: result.luckCycles.cycles.slice(0, maxLuckCycles).map(c => ({
         step: c.step,
         ganzhi: c.ganzhi,
+        stem: c.stem,
+        branch: c.branch,
+        sexagenaryIndex: c.sexagenaryIndex,
         ageRange: `${c.fromAge}~${c.toAge}歲`,
+        fromYear: c.fromYear,
+        toYear: c.toYear,
         tenGodStem: c.tenGodStem ? c.tenGodStem.full : '',
-        nayin: c.nayin
+        stage: c.stage || null,
+        nayin: c.nayin,
+        startDate: c.startDate || null,
+        endDate: c.endDate || null,
+        nominalAgeRange: c.nominalFromAge !== undefined ? `${c.nominalFromAge}~${c.nominalToAge}歲` : null,
+        shenSha: (c.shenSha || []).map((item) => buildShenShaItem(item, {
+          includeRules,
+          includeEvidence: includeShenShaEvidence
+        })),
+        ...(options.includeLuckAnnualDetails && Array.isArray(c.annuals) ? {
+          annuals: c.annuals.map((annual) => ({
+            age: annual.age,
+            year: annual.year,
+            ganzhi: annual.ganzhi,
+            tenGod: annual.tenGod,
+            stage: annual.stage,
+            nayin: annual.nayin,
+            xunKong: annual.xunKong,
+            shenSha: (annual.shenSha || []).map((item) => buildShenShaItem(item, {
+              includeRules,
+              includeEvidence: includeShenShaEvidence
+            })),
+            interactions: includeInteractions ? annual.interactions : undefined
+          }))
+        } : {})
       }))
     }
   };

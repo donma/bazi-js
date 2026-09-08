@@ -43,7 +43,8 @@ export function calculateMonthPillar({
   minute = 0,
   timezoneOffsetHours = 8,
   yearStemChar, // 由年柱計算所得之年干
-  monthBoundary = 'jie'
+  monthBoundary = 'jie',
+  lunarMonth = null
 }) {
   // 當地民用時刻 → UT 的 JD（同 year-pillar 註解，否則節氣邊界誤判時區偏移量）
   const currentJD = gregorianToJulianDay(year, month, day + (hour + minute / 60) / 24) - timezoneOffsetHours / 24;
@@ -65,6 +66,14 @@ export function calculateMonthPillar({
       monthBranchChar = '寅';
       trace.push(`未找到前置交節點，預設寅月`);
     }
+  } else if (monthBoundary === 'lunar_month') {
+    if (!Number.isInteger(lunarMonth) || lunarMonth < 1 || lunarMonth > 12) {
+      throw new Error('monthBoundary 為 lunar_month 時必須提供 1 至 12 的 lunarMonth');
+    }
+    monthBranchChar = YIN_BASED_BRANCH_ORDER[lunarMonth - 1];
+    trace.push(`使用農曆月份切月，農曆 ${lunarMonth} 月對應月建地支【${monthBranchChar}】`);
+  } else {
+    throw new Error(`不支援的月柱切界規則: ${monthBoundary}`);
   }
 
   // 計算月干：五虎遁
@@ -85,6 +94,7 @@ export function calculateMonthPillar({
     ganzhi: `${stem.char}${branch.char}`,
     sexagenaryIndex: ganzhiIndex,
     boundaryRule: monthBoundary,
+    lunarMonth: Number.isInteger(lunarMonth) ? lunarMonth : null,
     prevJie: prevJieInfo,
     nextJie: nextJieInfo,
     trace

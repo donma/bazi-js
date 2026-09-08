@@ -10,35 +10,63 @@
 // - shenSha (流運觸發之神煞)
 
 import { calculateFourPillars } from '../chart/chart.js';
+import { parseTimezoneOffset } from '../core/utils/validation.js';
+import { BaziValidationError } from '../core/errors/index.js';
+import { solarToLunar } from '../calendar/lunar.js';
 import { getTenGod } from '../core/constants/ten-gods-data.js';
 import { getNayin } from '../core/constants/nayin-data.js';
 import { getTwelveStage } from '../core/constants/twelve-stages-data.js';
 
-export function calculateTransit(chartPillars, options = {}) {
-  // 解析目標時間
-  let dtStr = options.datetime || new Date().toISOString();
-  // 支援格式如 "2026-09-08T12:00:00+08:00" 或 "2026-09-08 12:00"
-  let datePart = '2026-09-08';
-  let timePart = '12:00';
-  let timezoneOffsetHours = 8;
+function daysInMonth(year, month) {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
 
-  if (dtStr.includes('T')) {
-    const parts = dtStr.split('T');
-    datePart = parts[0];
-    const timeMatch = parts[1].match(/^(\d{2}:\d{2})/);
-    if (timeMatch) timePart = timeMatch[1];
-    if (parts[1].includes('+')) {
-      const tzPart = parts[1].split('+')[1];
-      timezoneOffsetHours = Number(tzPart.split(':')[0]);
-    }
-  } else {
-    const parts = dtStr.split(' ');
-    datePart = parts[0];
-    if (parts[1]) timePart = parts[1].slice(0, 5);
+export function parseTransitDatetime(value) {
+  if (value instanceof Date && Number.isNaN(value.getTime())) {
+    throw new BaziValidationError('Transit datetime 的 Date 無效', 'datetime');
+  }
+  const dtStr = value instanceof Date ? value.toISOString() : (value || new Date().toISOString());
+  if (typeof dtStr !== 'string') {
+    throw new BaziValidationError('Transit datetime 必須是 ISO 日期字串或 Date', 'datetime');
   }
 
-  const [y, m, d] = datePart.split('-').map(Number);
-  const [hh, mm] = timePart.split(':').map(Number);
+  const match = dtStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:T|\s)(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{1,2}(?::?\d{2})?)?$/);
+  if (!match) {
+    throw new BaziValidationError('Transit datetime 格式不正確，請使用 YYYY-MM-DDTHH:mm[:ss](Z 或 ±HH:mm)', 'datetime');
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month) || hour > 23 || minute > 59) {
+    throw new BaziValidationError('Transit datetime 包含無效日期或時間', 'datetime');
+  }
+
+  const suffix = match[6];
+  const timezoneOffsetHours = suffix === 'Z' ? 0 : (suffix ? parseTimezoneOffset(suffix) : 8);
+  return {
+    datePart: `${match[1]}-${match[2]}-${match[3]}`,
+    timePart: `${match[4]}:${match[5]}`,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    timezoneOffsetHours,
+    input: dtStr
+  };
+}
+
+export function calculateTransit(chartPillars, options = {}) {
+  const parsed = parseTransitDatetime(options.datetime);
+  const { datePart, timePart, year: y, month: m, day: d, hour: hh, minute: mm, timezoneOffsetHours } = parsed;
+  const yearBoundary = options.yearBoundary || 'lichun';
+  const monthBoundary = options.monthBoundary || 'jie';
+  const dayBoundary = options.dayBoundary || '23:00';
+  const needsLunarBoundary = yearBoundary === 'lunar_new_year' || monthBoundary === 'lunar_month';
+  const lunarInfo = needsLunarBoundary ? solarToLunar(y, m, d) : null;
 
   // 以核心排盤計算目標時間點的四柱（即該時刻的流年、流月、流日、流時）
   const transitPillars = calculateFourPillars({
@@ -49,9 +77,11 @@ export function calculateTransit(chartPillars, options = {}) {
     minute: mm,
     birthTimeMode: 'exact',
     timezoneOffsetHours,
-    yearBoundary: 'lichun',
-    monthBoundary: 'jie',
-    dayBoundary: '23:00'
+    yearBoundary,
+    monthBoundary,
+    lunarYear: lunarInfo ? lunarInfo.year : null,
+    lunarMonth: lunarInfo ? lunarInfo.month : null,
+    dayBoundary
   });
 
   const dayMaster = chartPillars.day.stem;
@@ -117,6 +147,8 @@ export function calculateTransit(chartPillars, options = {}) {
 
   return {
     targetDatetime: `${datePart} ${timePart}`,
+    timezoneOffsetHours,
+    ruleBasis: { yearBoundary, monthBoundary, dayBoundary },
     year: yearTransit,
     month: monthTransit,
     day: dayTransit,

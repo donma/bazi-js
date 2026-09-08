@@ -17,6 +17,8 @@ export function calculateFourPillars({
   timezoneOffsetHours = 8,
   yearBoundary = 'lichun',
   monthBoundary = 'jie',
+  lunarYear = null,
+  lunarMonth = null,
   dayBoundary = '23:00'
 }) {
   const debug = {
@@ -34,7 +36,8 @@ export function calculateFourPillars({
     hour: birthTimeMode === 'exact' ? (hour ?? 12) : 12,
     minute: birthTimeMode === 'exact' ? minute : 0,
     timezoneOffsetHours,
-    yearBoundary
+    yearBoundary,
+    lunarYear
   });
   debug.yearPillarTrace = yearPillar.trace;
 
@@ -47,7 +50,8 @@ export function calculateFourPillars({
     minute: birthTimeMode === 'exact' ? minute : 0,
     timezoneOffsetHours,
     yearStemChar: yearPillar.stem,
-    monthBoundary
+    monthBoundary,
+    lunarMonth
   });
   debug.monthPillarTrace = monthPillar.trace;
 

@@ -17,7 +17,8 @@ export function calculateYearPillar({
   hour = 12,
   minute = 0,
   timezoneOffsetHours = 8,
-  yearBoundary = 'lichun' // 'lichun' | 'lunar_new_year'
+  yearBoundary = 'lichun', // 'lichun' | 'lunar_new_year'
+  lunarYear = null
 }) {
   // 注意：輸入為時區當地民用時刻，須先換算為 UT 的 JD，才能與節氣 JD(UT) 比較。
   // （未換算會造成整整時區偏移量的邊界誤判，例如 UTC+8 差 8 小時。）
@@ -39,8 +40,14 @@ export function calculateYearPillar({
     } else {
       trace.push(`當前時刻已過 ${year} 年立春，年柱歸屬 ${year} 年`);
     }
+  } else if (yearBoundary === 'lunar_new_year') {
+    if (!Number.isInteger(lunarYear)) {
+      throw new Error('yearBoundary 為 lunar_new_year 時必須提供 lunarYear');
+    }
+    baziYear = lunarYear;
+    trace.push(`使用農曆正月初一切年，當日農曆年為 ${lunarYear} 年`);
   } else {
-    trace.push(`使用自訂年邊界: ${yearBoundary}`);
+    throw new Error(`不支援的年柱切界規則: ${yearBoundary}`);
   }
 
   // 1984 年為甲子年 (stem=0, branch=0)
@@ -62,6 +69,7 @@ export function calculateYearPillar({
     ganzhi: `${stem.char}${branch.char}`,
     sexagenaryIndex: ganzhiIndex,
     boundaryRule: yearBoundary,
+    lunarYear: Number.isInteger(lunarYear) ? lunarYear : null,
     lichunMoment: lichunUsed,
     trace
   };

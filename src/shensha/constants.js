@@ -1,5 +1,7 @@
 // ShenSha vNext 的共用常數與 preset 定義。
 
+import { BaziRuleError } from '../core/errors/index.js';
+
 export const SHENSHA_CATEGORIES = Object.freeze(['auspicious', 'inauspicious', 'neutral']);
 export const SHENSHA_TIERS = Object.freeze(['core', 'extended', 'optional']);
 export const SHENSHA_CONFIDENCES = Object.freeze([
@@ -19,5 +21,12 @@ export const SHENSHA_PRESETS = Object.freeze({
 });
 
 export function getShenShaPreset(name = 'classical') {
-  return SHENSHA_PRESETS[name] || SHENSHA_PRESETS.classical;
+  const preset = SHENSHA_PRESETS[name];
+  if (!preset) {
+    throw new BaziRuleError(`找不到 ShenSha preset：${name}`, 'SHENSHA_PRESET_NOT_FOUND', {
+      preset: name,
+      available: Object.keys(SHENSHA_PRESETS)
+    });
+  }
+  return preset;
 }

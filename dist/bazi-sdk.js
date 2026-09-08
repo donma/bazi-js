@@ -24,6 +24,7 @@ var Bazi = (() => {
     Calendar: () => solar_terms_exports,
     Chart: () => Chart,
     Constants: () => stems_exports,
+    Constellation: () => constellation_exports,
     Errors: () => errors_exports,
     Julian: () => julian_exports,
     Luck: () => luck_exports,
@@ -39,6 +40,7 @@ var Bazi = (() => {
     TrueSolarTime: () => true_solar_time_exports,
     VERSIONS: () => VERSIONS,
     Validation: () => validation_exports,
+    Zodiac: () => zodiac_exports,
     calculate: () => calculate,
     calculateSafe: () => calculateSafe,
     default: () => index_default
@@ -47,6 +49,11 @@ var Bazi = (() => {
   // src/core/utils/validation.js
   var validation_exports = {};
   __export(validation_exports, {
+    DAY_BOUNDARY_VALUES: () => DAY_BOUNDARY_VALUES,
+    MONTH_BOUNDARY_VALUES: () => MONTH_BOUNDARY_VALUES,
+    SHENSHA_PRESET_VALUES: () => SHENSHA_PRESET_VALUES,
+    YEAR_BOUNDARY_VALUES: () => YEAR_BOUNDARY_VALUES,
+    parseTimezoneOffset: () => parseTimezoneOffset,
     validateInput: () => validateInput
   });
 
@@ -130,8 +137,36 @@ var Bazi = (() => {
     const idx = Math.floor((hour + 1) % 24 / 2);
     return idx % 12;
   }
+  function branchStartHour(branchIdx) {
+    return (branchIdx * 2 + 23) % 24;
+  }
 
   // src/core/utils/validation.js
+  var YEAR_BOUNDARY_VALUES = Object.freeze(["lichun", "lunar_new_year"]);
+  var MONTH_BOUNDARY_VALUES = Object.freeze(["jie", "lunar_month"]);
+  var DAY_BOUNDARY_VALUES = Object.freeze(["23:00", "00:00"]);
+  var SHENSHA_PRESET_VALUES = Object.freeze(["minimal", "classical", "full"]);
+  function parseTimezoneOffset(timezone = "+08:00") {
+    if (typeof timezone !== "string") {
+      throw new BaziValidationError('timezone \u5FC5\u9808\u662F\u5B57\u4E32\uFF0C\u4F8B\u5982 "+08:00" \u6216 "-05:00"', "timezone");
+    }
+    const match = timezone.match(/^([+-])(\d{1,2})(?::?(\d{2}))?$/);
+    if (!match) {
+      throw new BaziValidationError('timezone \u683C\u5F0F\u4E0D\u6B63\u78BA\uFF0C\u4F8B\u5982 "+08:00" \u6216 "-05:00"', "timezone");
+    }
+    const hours = Number(match[2]);
+    const minutes = Number(match[3] || 0);
+    if (!Number.isInteger(hours) || !Number.isInteger(minutes) || minutes > 59 || hours > 14 || hours === 14 && minutes !== 0) {
+      throw new BaziValidationError("timezone \u8D85\u51FA\u652F\u63F4\u7BC4\u570D\uFF0C\u5FC5\u9808\u4ECB\u65BC UTC-14:00 \u81F3 UTC+14:00", "timezone", {
+        allowedRange: ["-14:00", "+14:00"]
+      });
+    }
+    const sign = match[1] === "-" ? -1 : 1;
+    return sign * (hours + minutes / 60);
+  }
+  function daysInMonth(year, month) {
+    return new Date(Date.UTC(year, month, 0)).getUTCDate();
+  }
   function validateInput(input) {
     if (!input || typeof input !== "object") {
       throw new BaziValidationError("\u8F38\u5165\u53C3\u6578\u5FC5\u9808\u70BA\u7269\u4EF6", "input");
@@ -147,7 +182,7 @@ var Bazi = (() => {
     const year = parseInt(yStr, 10);
     const month = parseInt(mStr, 10);
     const day = parseInt(dStr, 10);
-    if (month < 1 || month > 12 || day < 1 || day > 31) {
+    if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) {
       throw new BaziValidationError("birthDate \u5305\u542B\u7121\u6548\u7684\u6708\u4EFD\u6216\u65E5\u671F\u6578\u503C", "birthDate");
     }
     if (year < 1900 || year > 2100) {
@@ -165,7 +200,7 @@ var Bazi = (() => {
       throw new BaziValidationError('birthTimeMode \u5FC5\u9808\u70BA "exact"\u3001"branch" \u6216 "unknown"', "birthTimeMode");
     }
     if (mode === "exact") {
-      if (!input.birthTime) {
+      if (typeof input.birthTime !== "string" || !input.birthTime) {
         throw new BaziValidationError('birthTimeMode \u70BA "exact" \u6642\u5FC5\u9808\u63D0\u4F9B birthTime (HH:mm)', "birthTime");
       }
       const timeMatch = input.birthTime.match(/^(\d{1,2}):(\d{2})$/);
@@ -179,14 +214,40 @@ var Bazi = (() => {
       }
     }
     if (mode === "branch") {
-      if (!input.birthHourBranch || !BRANCH_INDEX[input.birthHourBranch] === void 0) {
+      if (!input.birthHourBranch || BRANCH_INDEX[input.birthHourBranch] === void 0) {
         throw new BaziValidationError('birthTimeMode \u70BA "branch" \u6642\u5FC5\u9808\u63D0\u4F9B\u6709\u6548\u7684\u5730\u652F birthHourBranch (\u5982 "\u5348")', "birthHourBranch");
       }
     }
     const timezone = input.timezone || "+08:00";
-    const tzMatch = timezone.match(/^([+-])(\d{1,2})(?::?(\d{2}))?$/);
-    if (!tzMatch) {
-      throw new BaziValidationError('timezone \u683C\u5F0F\u4E0D\u6B63\u78BA\uFF0C\u4F8B\u5982 "+08:00" \u6216 "-05:00"', "timezone");
+    parseTimezoneOffset(timezone);
+    if (input.yearBoundary !== void 0 && !YEAR_BOUNDARY_VALUES.includes(input.yearBoundary)) {
+      throw new BaziValidationError('yearBoundary \u5FC5\u9808\u70BA "lichun" \u6216 "lunar_new_year"', "yearBoundary");
+    }
+    if (input.monthBoundary !== void 0 && !MONTH_BOUNDARY_VALUES.includes(input.monthBoundary)) {
+      throw new BaziValidationError('monthBoundary \u5FC5\u9808\u70BA "jie" \u6216 "lunar_month"', "monthBoundary");
+    }
+    if (input.dayBoundary !== void 0 && !DAY_BOUNDARY_VALUES.includes(input.dayBoundary)) {
+      throw new BaziValidationError('dayBoundary \u5FC5\u9808\u70BA "23:00" \u6216 "00:00"', "dayBoundary");
+    }
+    if (input.shenshaPreset !== void 0 && !SHENSHA_PRESET_VALUES.includes(input.shenshaPreset)) {
+      throw new BaziValidationError('shenshaPreset \u5FC5\u9808\u70BA "minimal"\u3001"classical" \u6216 "full"', "shenshaPreset");
+    }
+    if (input.shenShaPreset !== void 0 && !SHENSHA_PRESET_VALUES.includes(input.shenShaPreset)) {
+      throw new BaziValidationError('shenShaPreset \u5FC5\u9808\u70BA "minimal"\u3001"classical" \u6216 "full"', "shenShaPreset");
+    }
+    if (input.trueSolarTime !== void 0 && typeof input.trueSolarTime !== "boolean") {
+      throw new BaziValidationError("trueSolarTime \u5FC5\u9808\u662F boolean", "trueSolarTime");
+    }
+    if (input.location !== void 0) {
+      if (!input.location || typeof input.location !== "object" || Array.isArray(input.location)) {
+        throw new BaziValidationError("location \u5FC5\u9808\u662F\u7269\u4EF6", "location");
+      }
+      if (input.location.longitude !== void 0 && (!Number.isFinite(input.location.longitude) || input.location.longitude < -180 || input.location.longitude > 180)) {
+        throw new BaziValidationError("location.longitude \u5FC5\u9808\u4ECB\u65BC -180 \u81F3 180", "location.longitude");
+      }
+      if (input.location.latitude !== void 0 && (!Number.isFinite(input.location.latitude) || input.location.latitude < -90 || input.location.latitude > 90)) {
+        throw new BaziValidationError("location.latitude \u5FC5\u9808\u4ECB\u65BC -90 \u81F3 90", "location.latitude");
+      }
     }
     return true;
   }
@@ -537,8 +598,9 @@ var Bazi = (() => {
     hour = 12,
     minute = 0,
     timezoneOffsetHours = 8,
-    yearBoundary = "lichun"
+    yearBoundary = "lichun",
     // 'lichun' | 'lunar_new_year'
+    lunarYear = null
   }) {
     const currentJD = gregorianToJulianDay(year, month, day + (hour + minute / 60) / 24) - timezoneOffsetHours / 24;
     let baziYear = year;
@@ -553,8 +615,14 @@ var Bazi = (() => {
       } else {
         trace.push(`\u7576\u524D\u6642\u523B\u5DF2\u904E ${year} \u5E74\u7ACB\u6625\uFF0C\u5E74\u67F1\u6B78\u5C6C ${year} \u5E74`);
       }
+    } else if (yearBoundary === "lunar_new_year") {
+      if (!Number.isInteger(lunarYear)) {
+        throw new Error("yearBoundary \u70BA lunar_new_year \u6642\u5FC5\u9808\u63D0\u4F9B lunarYear");
+      }
+      baziYear = lunarYear;
+      trace.push(`\u4F7F\u7528\u8FB2\u66C6\u6B63\u6708\u521D\u4E00\u5207\u5E74\uFF0C\u7576\u65E5\u8FB2\u66C6\u5E74\u70BA ${lunarYear} \u5E74`);
     } else {
-      trace.push(`\u4F7F\u7528\u81EA\u8A02\u5E74\u908A\u754C: ${yearBoundary}`);
+      throw new Error(`\u4E0D\u652F\u63F4\u7684\u5E74\u67F1\u5207\u754C\u898F\u5247: ${yearBoundary}`);
     }
     const stemIdx = ((baziYear - 4) % 10 + 10) % 10;
     const branchIdx = ((baziYear - 4) % 12 + 12) % 12;
@@ -570,6 +638,7 @@ var Bazi = (() => {
       ganzhi: `${stem.char}${branch.char}`,
       sexagenaryIndex: ganzhiIndex,
       boundaryRule: yearBoundary,
+      lunarYear: Number.isInteger(lunarYear) ? lunarYear : null,
       lichunMoment: lichunUsed,
       trace
     };
@@ -588,7 +657,8 @@ var Bazi = (() => {
     timezoneOffsetHours = 8,
     yearStemChar,
     // 由年柱計算所得之年干
-    monthBoundary = "jie"
+    monthBoundary = "jie",
+    lunarMonth = null
   }) {
     const currentJD = gregorianToJulianDay(year, month, day + (hour + minute / 60) / 24) - timezoneOffsetHours / 24;
     const trace = [];
@@ -606,6 +676,14 @@ var Bazi = (() => {
         monthBranchChar = "\u5BC5";
         trace.push(`\u672A\u627E\u5230\u524D\u7F6E\u4EA4\u7BC0\u9EDE\uFF0C\u9810\u8A2D\u5BC5\u6708`);
       }
+    } else if (monthBoundary === "lunar_month") {
+      if (!Number.isInteger(lunarMonth) || lunarMonth < 1 || lunarMonth > 12) {
+        throw new Error("monthBoundary \u70BA lunar_month \u6642\u5FC5\u9808\u63D0\u4F9B 1 \u81F3 12 \u7684 lunarMonth");
+      }
+      monthBranchChar = YIN_BASED_BRANCH_ORDER[lunarMonth - 1];
+      trace.push(`\u4F7F\u7528\u8FB2\u66C6\u6708\u4EFD\u5207\u6708\uFF0C\u8FB2\u66C6 ${lunarMonth} \u6708\u5C0D\u61C9\u6708\u5EFA\u5730\u652F\u3010${monthBranchChar}\u3011`);
+    } else {
+      throw new Error(`\u4E0D\u652F\u63F4\u7684\u6708\u67F1\u5207\u754C\u898F\u5247: ${monthBoundary}`);
     }
     const yStemIdx = stemIndex(yearStemChar);
     const tigerStartStemIdx = WU_HU_DUN[yStemIdx];
@@ -622,6 +700,7 @@ var Bazi = (() => {
       ganzhi: `${stem.char}${branch.char}`,
       sexagenaryIndex: ganzhiIndex,
       boundaryRule: monthBoundary,
+      lunarMonth: Number.isInteger(lunarMonth) ? lunarMonth : null,
       prevJie: prevJieInfo,
       nextJie: nextJieInfo,
       trace
@@ -750,6 +829,8 @@ var Bazi = (() => {
     timezoneOffsetHours = 8,
     yearBoundary = "lichun",
     monthBoundary = "jie",
+    lunarYear = null,
+    lunarMonth = null,
     dayBoundary = "23:00"
   }) {
     const debug = {
@@ -765,7 +846,8 @@ var Bazi = (() => {
       hour: birthTimeMode === "exact" ? hour ?? 12 : 12,
       minute: birthTimeMode === "exact" ? minute : 0,
       timezoneOffsetHours,
-      yearBoundary
+      yearBoundary,
+      lunarYear
     });
     debug.yearPillarTrace = yearPillar.trace;
     const monthPillar = calculateMonthPillar({
@@ -776,7 +858,8 @@ var Bazi = (() => {
       minute: birthTimeMode === "exact" ? minute : 0,
       timezoneOffsetHours,
       yearStemChar: yearPillar.stem,
-      monthBoundary
+      monthBoundary,
+      lunarMonth
     });
     debug.monthPillarTrace = monthPillar.trace;
     const dayPillar = calculateDayPillar({
@@ -1516,6 +1599,8 @@ var Bazi = (() => {
   // src/strength/index.js
   var strength_exports = {};
   __export(strength_exports, {
+    MONTH_COMMAND_PHASES: () => MONTH_COMMAND_PHASES,
+    calculateMonthCommander: () => calculateMonthCommander,
     calculateStrength: () => calculateStrength
   });
   var SEASON_STATES = {
@@ -1539,7 +1624,48 @@ var Bazi = (() => {
     "\u56DA": 0.3,
     "\u6B7B": 0.1
   };
-  function calculateStrength(pillars, interactions = null) {
+  var MONTH_COMMAND_PHASES = Object.freeze({
+    "\u5BC5": [{ stem: "\u620A", days: 7 }, { stem: "\u4E19", days: 7 }, { stem: "\u7532", days: 16 }],
+    "\u536F": [{ stem: "\u7532", days: 10 }, { stem: "\u4E59", days: 20 }],
+    "\u8FB0": [{ stem: "\u4E59", days: 9 }, { stem: "\u7678", days: 3 }, { stem: "\u620A", days: 18 }],
+    "\u5DF3": [{ stem: "\u620A", days: 7 }, { stem: "\u5E9A", days: 7 }, { stem: "\u4E19", days: 16 }],
+    "\u5348": [{ stem: "\u4E19", days: 10 }, { stem: "\u5DF1", days: 9 }, { stem: "\u4E01", days: 11 }],
+    "\u672A": [{ stem: "\u4E01", days: 9 }, { stem: "\u4E59", days: 3 }, { stem: "\u5DF1", days: 18 }],
+    "\u7533": [{ stem: "\u620A", days: 7 }, { stem: "\u58EC", days: 7 }, { stem: "\u5E9A", days: 16 }],
+    "\u9149": [{ stem: "\u5E9A", days: 10 }, { stem: "\u8F9B", days: 20 }],
+    "\u620C": [{ stem: "\u8F9B", days: 9 }, { stem: "\u4E01", days: 3 }, { stem: "\u620A", days: 18 }],
+    "\u4EA5": [{ stem: "\u620A", days: 7 }, { stem: "\u7532", days: 5 }, { stem: "\u58EC", days: 18 }],
+    "\u5B50": [{ stem: "\u58EC", days: 10 }, { stem: "\u7678", days: 20 }],
+    "\u4E11": [{ stem: "\u7678", days: 9 }, { stem: "\u8F9B", days: 3 }, { stem: "\u5DF1", days: 18 }]
+  });
+  function calculateMonthCommander(monthBranch, elapsedDays) {
+    const phases = MONTH_COMMAND_PHASES[monthBranch];
+    if (!phases || !Number.isFinite(elapsedDays)) return null;
+    const wholeDays = Math.max(0, Math.floor(elapsedDays));
+    let cursor = 0;
+    let phaseIndex = phases.length - 1;
+    for (let index = 0; index < phases.length; index++) {
+      cursor += phases[index].days;
+      if (wholeDays < cursor) {
+        phaseIndex = index;
+        break;
+      }
+    }
+    const phase = phases[phaseIndex];
+    const stem = STEMS[STEM_INDEX[phase.stem]];
+    return {
+      stem: phase.stem,
+      element: stem ? stem.element : null,
+      monthBranch,
+      elapsedDays: wholeDays,
+      phase: phaseIndex + 1,
+      phaseCount: phases.length,
+      phaseDays: phase.days,
+      phases: phases.map((item) => ({ ...item })),
+      algorithm: "jie-after-whole-days"
+    };
+  }
+  function calculateStrength(pillars, interactions = null, calendarContext = {}) {
     const dayMasterStem = pillars.day.stem;
     const dayMasterData = STEMS[STEM_INDEX[dayMasterStem]];
     const dmElement = dayMasterData.element;
@@ -1597,6 +1723,8 @@ var Bazi = (() => {
     const monthState = SEASON_STATES[monthBranch] && SEASON_STATES[monthBranch][dmElement] || "\u4F11";
     const monthStateFactor = STATE_FACTOR[monthState] || 0.6;
     const deLing = monthState === "\u65FA" || monthState === "\u76F8";
+    const elapsedDays = Number.isFinite(calendarContext.currentJD) && calendarContext.prevJie && Number.isFinite(calendarContext.prevJie.jdUT) ? Math.max(0, calendarContext.currentJD - calendarContext.prevJie.jdUT) : null;
+    const monthCommander = calculateMonthCommander(monthBranch, elapsedDays);
     evidence.push({
       ruleId: "STR_DE_LING",
       effect: deLing ? 15 : -15,
@@ -1708,6 +1836,18 @@ var Bazi = (() => {
       deShi,
       allyScore: Number(allyScore.toFixed(1)),
       enemyScore: Number(enemyScore.toFixed(1)),
+      dayMasterStem,
+      monthState: {
+        branch: monthBranch,
+        name: monthState,
+        factor: monthStateFactor,
+        deLing
+      },
+      monthCommander,
+      seasonalStates: Object.fromEntries(Object.entries(SEASON_STATES[monthBranch] || {}).map(([element, name]) => [element, {
+        name,
+        factor: STATE_FACTOR[name] || null
+      }])),
       distribution: fiveElementsDistribution,
       favorableElements: [...new Set(favorableElements)],
       unfavorableElements: [...new Set(unfavorableElements)],
@@ -1753,7 +1893,14 @@ var Bazi = (() => {
     full: Object.freeze({ id: "full", tiers: ["core", "extended", "optional"], excludeExperimental: true })
   });
   function getShenShaPreset(name = "classical") {
-    return SHENSHA_PRESETS[name] || SHENSHA_PRESETS.classical;
+    const preset = SHENSHA_PRESETS[name];
+    if (!preset) {
+      throw new BaziRuleError(`\u627E\u4E0D\u5230 ShenSha preset\uFF1A${name}`, "SHENSHA_PRESET_NOT_FOUND", {
+        preset: name,
+        available: Object.keys(SHENSHA_PRESETS)
+      });
+    }
+    return preset;
   }
 
   // src/shensha/catalog.js
@@ -2694,6 +2841,7 @@ var Bazi = (() => {
   var STRENGTH_RULE_VERSION = "1.0.0";
   var INTERACTION_RULE_VERSION = "1.0.0";
   var LUCK_RULE_VERSION = "1.0.0";
+  var RESULT_SCHEMA_VERSION = "2.0.0";
   var VERSIONS = {
     engineVersion: ENGINE_VERSION,
     ruleSetVersion: RULE_SET_VERSION,
@@ -2703,7 +2851,8 @@ var Bazi = (() => {
     patternRuleVersion: PATTERN_RULE_VERSION,
     strengthRuleVersion: STRENGTH_RULE_VERSION,
     interactionRuleVersion: INTERACTION_RULE_VERSION,
-    luckRuleVersion: LUCK_RULE_VERSION
+    luckRuleVersion: LUCK_RULE_VERSION,
+    resultSchemaVersion: RESULT_SCHEMA_VERSION
   };
 
   // src/special-rules/context.js
@@ -3228,289 +3377,13 @@ var Bazi = (() => {
   __export(luck_exports, {
     calculateLuckCycles: () => calculateLuckCycles
   });
-  function calculateLuckCycles({
-    pillars,
-    gender,
-    // 'male' | 'female'
-    birthDate,
-    // 'YYYY-MM-DD'
-    birthTime = "12:00",
-    timezoneOffsetHours = 8,
-    cycleCount = 10,
-    directionRule = "gender-year-yinyang",
-    startAgeMethod = "jieqi-diff-divide-3"
-  }) {
-    const [bYear, bMonth, bDay] = birthDate.split("-").map(Number);
-    const [bHour, bMinute] = (birthTime || "12:00").split(":").map(Number);
-    const currentJD = gregorianToJulianDay(bYear, bMonth, bDay + (bHour + bMinute / 60) / 24) - timezoneOffsetHours / 24;
-    const yearStemYinYang = pillars.year.stemData.yinYang;
-    let forward = true;
-    if (directionRule === "gender-year-yinyang") {
-      if (gender === "male") {
-        forward = yearStemYinYang === "yang";
-      } else {
-        forward = yearStemYinYang === "yin";
-      }
-    }
-    const surrounding = getSurroundingJie(currentJD, timezoneOffsetHours);
-    const prevJie = surrounding.prevJie;
-    const nextJie = surrounding.nextJie;
-    let targetJie = forward ? nextJie : prevJie;
-    let diffDays = forward ? nextJie.jdUT - currentJD : currentJD - prevJie.jdUT;
-    if (diffDays < 0) diffDays = 0;
-    const totalMonths = diffDays * 4;
-    const startYears = Math.floor(totalMonths / 12);
-    const remMonths = totalMonths - startYears * 12;
-    const startMonths = Math.floor(remMonths);
-    const remDays = (remMonths - startMonths) * 30;
-    const startDays = Math.round(remDays);
-    const startJdOffset = diffDays * (365.2422 / 3);
-    const startGregorian = julianDayToGregorian(currentJD + startJdOffset);
-    const pad = (n) => String(n).padStart(2, "0");
-    const startDateStr = `${startGregorian.year}-${pad(startGregorian.month)}-${pad(startGregorian.day)}`;
-    const monthStemIdx = stemIndex(pillars.month.stem);
-    const monthBranchIdx = branchIndex(pillars.month.branch);
-    const cycles = [];
-    const dayMaster = pillars.day.stem;
-    for (let step = 1; step <= cycleCount; step++) {
-      const sOffset = forward ? step : -step;
-      const sStemIdx = ((monthStemIdx + sOffset) % 10 + 10) % 10;
-      const sBranchIdx = ((monthBranchIdx + sOffset) % 12 + 12) % 12;
-      const stemChar = stemAt(sStemIdx).char;
-      const branchChar = branchAt(sBranchIdx).char;
-      const ganzhi = `${stemChar}${branchChar}`;
-      const ganzhiIdx = sexagenaryIndex(sStemIdx, sBranchIdx);
-      const fromAge = startYears + (step - 1) * 10;
-      const toAge = fromAge + 9;
-      const fromYear = bYear + fromAge;
-      const toYear = bYear + toAge;
-      cycles.push({
-        step,
-        ganzhi,
-        stem: stemChar,
-        branch: branchChar,
-        sexagenaryIndex: ganzhiIdx,
-        fromAge,
-        toAge,
-        fromYear,
-        toYear,
-        tenGodStem: getTenGod(dayMaster, stemChar),
-        stage: getTwelveStage(dayMaster, branchChar),
-        nayin: getNayin(ganzhiIdx)
-      });
-    }
-    return {
-      direction: forward ? "forward" : "backward",
-      directionText: forward ? "\u9806\u884C" : "\u9006\u884C",
-      forward,
-      directionRule,
-      startAgeMethod,
-      diffDays: Number(diffDays.toFixed(3)),
-      targetJie: {
-        name: targetJie.name,
-        jdUT: targetJie.jdUT,
-        local: targetJie.local
-      },
-      startAge: {
-        years: startYears,
-        months: startMonths,
-        days: startDays,
-        display: `${startYears} \u6B72 ${startMonths} \u500B\u6708 ${startDays} \u5929`,
-        startDate: startDateStr
-      },
-      cycles
-    };
-  }
 
   // src/transit/index.js
   var transit_exports = {};
   __export(transit_exports, {
-    calculateTransit: () => calculateTransit
+    calculateTransit: () => calculateTransit,
+    parseTransitDatetime: () => parseTransitDatetime
   });
-  function calculateTransit(chartPillars, options = {}) {
-    let dtStr = options.datetime || (/* @__PURE__ */ new Date()).toISOString();
-    let datePart = "2026-09-08";
-    let timePart = "12:00";
-    let timezoneOffsetHours = 8;
-    if (dtStr.includes("T")) {
-      const parts = dtStr.split("T");
-      datePart = parts[0];
-      const timeMatch = parts[1].match(/^(\d{2}:\d{2})/);
-      if (timeMatch) timePart = timeMatch[1];
-      if (parts[1].includes("+")) {
-        const tzPart = parts[1].split("+")[1];
-        timezoneOffsetHours = Number(tzPart.split(":")[0]);
-      }
-    } else {
-      const parts = dtStr.split(" ");
-      datePart = parts[0];
-      if (parts[1]) timePart = parts[1].slice(0, 5);
-    }
-    const [y, m, d] = datePart.split("-").map(Number);
-    const [hh, mm] = timePart.split(":").map(Number);
-    const transitPillars = calculateFourPillars({
-      year: y,
-      month: m,
-      day: d,
-      hour: hh,
-      minute: mm,
-      birthTimeMode: "exact",
-      timezoneOffsetHours,
-      yearBoundary: "lichun",
-      monthBoundary: "jie",
-      dayBoundary: "23:00"
-    });
-    const dayMaster = chartPillars.day.stem;
-    const enrichTransitPillar = (p) => ({
-      ganzhi: p.ganzhi,
-      stem: p.stem,
-      branch: p.branch,
-      sexagenaryIndex: p.sexagenaryIndex,
-      tenGod: getTenGod(dayMaster, p.stem),
-      stage: getTwelveStage(dayMaster, p.branch),
-      nayin: getNayin(p.sexagenaryIndex)
-    });
-    const yearTransit = enrichTransitPillar(transitPillars.year);
-    const monthTransit = enrichTransitPillar(transitPillars.month);
-    const dayTransit = enrichTransitPillar(transitPillars.day);
-    const hourTransit = enrichTransitPillar(transitPillars.hour);
-    const interactions = [];
-    const natalBranches = [
-      { pillar: "year", branch: chartPillars.year.branch },
-      { pillar: "month", branch: chartPillars.month.branch },
-      { pillar: "day", branch: chartPillars.day.branch },
-      ...chartPillars.hour.available ? [{ pillar: "hour", branch: chartPillars.hour.branch }] : []
-    ];
-    const CLASH_MAP = {
-      "\u5B50": "\u5348",
-      "\u5348": "\u5B50",
-      "\u4E11": "\u672A",
-      "\u672A": "\u4E11",
-      "\u5BC5": "\u7533",
-      "\u7533": "\u5BC5",
-      "\u536F": "\u9149",
-      "\u9149": "\u536F",
-      "\u8FB0": "\u620C",
-      "\u620C": "\u8FB0",
-      "\u5DF3": "\u4EA5",
-      "\u4EA5": "\u5DF3"
-    };
-    const HE_MAP = {
-      "\u5B50": "\u4E11",
-      "\u4E11": "\u5B50",
-      "\u5BC5": "\u4EA5",
-      "\u4EA5": "\u5BC5",
-      "\u536F": "\u620C",
-      "\u620C": "\u536F",
-      "\u8FB0": "\u9149",
-      "\u9149": "\u8FB0",
-      "\u5DF3": "\u7533",
-      "\u7533": "\u5DF3",
-      "\u5348": "\u672A",
-      "\u672A": "\u5348"
-    };
-    for (const natal of natalBranches) {
-      if (CLASH_MAP[yearTransit.branch] === natal.branch) {
-        interactions.push({
-          type: "transit_clash",
-          target: "year",
-          natalPillar: natal.pillar,
-          transitBranch: yearTransit.branch,
-          natalBranch: natal.branch,
-          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u6C96\u539F\u5C40${natal.pillar}\u652F\u3010${natal.branch}\u3011`
-        });
-      }
-      if (HE_MAP[yearTransit.branch] === natal.branch) {
-        interactions.push({
-          type: "transit_combine",
-          target: "year",
-          natalPillar: natal.pillar,
-          transitBranch: yearTransit.branch,
-          natalBranch: natal.branch,
-          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u5408\u539F\u5C40${natal.pillar}\u652F\u3010${natal.branch}\u3011`
-        });
-      }
-    }
-    return {
-      targetDatetime: `${datePart} ${timePart}`,
-      year: yearTransit,
-      month: monthTransit,
-      day: dayTransit,
-      hour: hourTransit,
-      interactions
-    };
-  }
-
-  // src/calendar/true-solar-time.js
-  var true_solar_time_exports = {};
-  __export(true_solar_time_exports, {
-    calculateTrueSolarTime: () => calculateTrueSolarTime,
-    dayOfYear: () => dayOfYear,
-    equationOfTime: () => equationOfTime
-  });
-  function dayOfYear(year, month, day) {
-    const jdCurr = gregorianToJulianDay(year, month, day);
-    const jdStart = gregorianToJulianDay(year, 1, 1);
-    return Math.floor(jdCurr - jdStart) + 1;
-  }
-  function equationOfTime(year, month, day, hour = 12) {
-    const N = dayOfYear(year, month, day);
-    const gamma = 2 * Math.PI / 365 * (N - 1 + (hour - 12) / 24);
-    const eot = 229.18 * (75e-6 + 1868e-6 * Math.cos(gamma) - 0.032077 * Math.sin(gamma) - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma));
-    return eot;
-  }
-  function calculateTrueSolarTime({
-    year,
-    month,
-    day,
-    hour,
-    minute,
-    longitude,
-    timezoneOffsetHours = 8
-  }) {
-    const standardMeridian = timezoneOffsetHours * 15;
-    const longitudeCorrection = (longitude - standardMeridian) * 4;
-    const eotCorrection = equationOfTime(year, month, day, hour + minute / 60);
-    const totalCorrectionMinutes = longitudeCorrection + eotCorrection;
-    const civilTotalMinutes = hour * 60 + minute;
-    const trueSolarTotalMinutes = civilTotalMinutes + totalCorrectionMinutes;
-    let adjustedDayOffset = 0;
-    let normalizedMinutes = trueSolarTotalMinutes;
-    while (normalizedMinutes < 0) {
-      normalizedMinutes += 1440;
-      adjustedDayOffset -= 1;
-    }
-    while (normalizedMinutes >= 1440) {
-      normalizedMinutes -= 1440;
-      adjustedDayOffset += 1;
-    }
-    const trueHour = Math.floor(normalizedMinutes / 60);
-    const trueMinute = Math.round(normalizedMinutes % 60);
-    const jdBase = gregorianToJulianDay(year, month, day);
-    const jdAdjusted = jdBase + adjustedDayOffset;
-    const adjGreg = julianDayToGregorian(jdAdjusted);
-    const pad = (n) => String(n).padStart(2, "0");
-    const civilTimeStr = `${pad(hour)}:${pad(minute)}`;
-    const trueSolarTimeStr = `${pad(trueHour)}:${pad(trueMinute)}`;
-    return {
-      civilDate: `${year}-${pad(month)}-${pad(day)}`,
-      civilTime: civilTimeStr,
-      trueSolarDate: `${adjGreg.year}-${pad(adjGreg.month)}-${pad(adjGreg.day)}`,
-      trueSolarTime: trueSolarTimeStr,
-      trueYear: adjGreg.year,
-      trueMonth: adjGreg.month,
-      trueDay: adjGreg.day,
-      trueHour,
-      trueMinute,
-      dayOffset: adjustedDayOffset,
-      corrections: {
-        longitudeCorrectionMinutes: Number(longitudeCorrection.toFixed(2)),
-        equationOfTimeMinutes: Number(eotCorrection.toFixed(2)),
-        totalCorrectionMinutes: Number(totalCorrectionMinutes.toFixed(2))
-      },
-      usedTrueSolarTime: true
-    };
-  }
 
   // src/calendar/lunar.js
   var lunar_exports = {};
@@ -3768,6 +3641,17 @@ var Bazi = (() => {
     return sum + getLeapMonthDays(year);
   }
   function solarToLunar(year, month, day) {
+    if (!Number.isInteger(year) || year < 1900 || year > 2100) {
+      throw new BaziCalendarError("\u8FB2\u66C6\u63DB\u7B97\u76EE\u524D\u652F\u63F4 1900-01-01 \u81F3 2100-12-31", {
+        operation: "solarToLunar",
+        allowedRange: ["1900-01-01", "2100-12-31"],
+        providedYear: year
+      });
+    }
+    const maxDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    if (!Number.isInteger(month) || month < 1 || month > 12 || !Number.isInteger(day) || day < 1 || day > maxDay) {
+      throw new BaziCalendarError("solarToLunar \u6536\u5230\u7121\u6548\u516C\u66C6\u65E5\u671F", { year, month, day });
+    }
     const currentJD = gregorianToJulianDay(year, month, day);
     let offset = Math.round(currentJD - BASE_JD);
     if (offset < 0) {
@@ -3894,6 +3778,475 @@ var Bazi = (() => {
     };
   }
 
+  // src/transit/index.js
+  function daysInMonth2(year, month) {
+    return new Date(Date.UTC(year, month, 0)).getUTCDate();
+  }
+  function parseTransitDatetime(value) {
+    if (value instanceof Date && Number.isNaN(value.getTime())) {
+      throw new BaziValidationError("Transit datetime \u7684 Date \u7121\u6548", "datetime");
+    }
+    const dtStr = value instanceof Date ? value.toISOString() : value || (/* @__PURE__ */ new Date()).toISOString();
+    if (typeof dtStr !== "string") {
+      throw new BaziValidationError("Transit datetime \u5FC5\u9808\u662F ISO \u65E5\u671F\u5B57\u4E32\u6216 Date", "datetime");
+    }
+    const match = dtStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:T|\s)(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{1,2}(?::?\d{2})?)?$/);
+    if (!match) {
+      throw new BaziValidationError("Transit datetime \u683C\u5F0F\u4E0D\u6B63\u78BA\uFF0C\u8ACB\u4F7F\u7528 YYYY-MM-DDTHH:mm[:ss](Z \u6216 \xB1HH:mm)", "datetime");
+    }
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+    if (month < 1 || month > 12 || day < 1 || day > daysInMonth2(year, month) || hour > 23 || minute > 59) {
+      throw new BaziValidationError("Transit datetime \u5305\u542B\u7121\u6548\u65E5\u671F\u6216\u6642\u9593", "datetime");
+    }
+    const suffix = match[6];
+    const timezoneOffsetHours = suffix === "Z" ? 0 : suffix ? parseTimezoneOffset(suffix) : 8;
+    return {
+      datePart: `${match[1]}-${match[2]}-${match[3]}`,
+      timePart: `${match[4]}:${match[5]}`,
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      timezoneOffsetHours,
+      input: dtStr
+    };
+  }
+  function calculateTransit(chartPillars, options = {}) {
+    const parsed = parseTransitDatetime(options.datetime);
+    const { datePart, timePart, year: y, month: m, day: d, hour: hh, minute: mm, timezoneOffsetHours } = parsed;
+    const yearBoundary = options.yearBoundary || "lichun";
+    const monthBoundary = options.monthBoundary || "jie";
+    const dayBoundary = options.dayBoundary || "23:00";
+    const needsLunarBoundary = yearBoundary === "lunar_new_year" || monthBoundary === "lunar_month";
+    const lunarInfo = needsLunarBoundary ? solarToLunar(y, m, d) : null;
+    const transitPillars = calculateFourPillars({
+      year: y,
+      month: m,
+      day: d,
+      hour: hh,
+      minute: mm,
+      birthTimeMode: "exact",
+      timezoneOffsetHours,
+      yearBoundary,
+      monthBoundary,
+      lunarYear: lunarInfo ? lunarInfo.year : null,
+      lunarMonth: lunarInfo ? lunarInfo.month : null,
+      dayBoundary
+    });
+    const dayMaster = chartPillars.day.stem;
+    const enrichTransitPillar = (p) => ({
+      ganzhi: p.ganzhi,
+      stem: p.stem,
+      branch: p.branch,
+      sexagenaryIndex: p.sexagenaryIndex,
+      tenGod: getTenGod(dayMaster, p.stem),
+      stage: getTwelveStage(dayMaster, p.branch),
+      nayin: getNayin(p.sexagenaryIndex)
+    });
+    const yearTransit = enrichTransitPillar(transitPillars.year);
+    const monthTransit = enrichTransitPillar(transitPillars.month);
+    const dayTransit = enrichTransitPillar(transitPillars.day);
+    const hourTransit = enrichTransitPillar(transitPillars.hour);
+    const interactions = [];
+    const natalBranches = [
+      { pillar: "year", branch: chartPillars.year.branch },
+      { pillar: "month", branch: chartPillars.month.branch },
+      { pillar: "day", branch: chartPillars.day.branch },
+      ...chartPillars.hour.available ? [{ pillar: "hour", branch: chartPillars.hour.branch }] : []
+    ];
+    const CLASH_MAP = {
+      "\u5B50": "\u5348",
+      "\u5348": "\u5B50",
+      "\u4E11": "\u672A",
+      "\u672A": "\u4E11",
+      "\u5BC5": "\u7533",
+      "\u7533": "\u5BC5",
+      "\u536F": "\u9149",
+      "\u9149": "\u536F",
+      "\u8FB0": "\u620C",
+      "\u620C": "\u8FB0",
+      "\u5DF3": "\u4EA5",
+      "\u4EA5": "\u5DF3"
+    };
+    const HE_MAP = {
+      "\u5B50": "\u4E11",
+      "\u4E11": "\u5B50",
+      "\u5BC5": "\u4EA5",
+      "\u4EA5": "\u5BC5",
+      "\u536F": "\u620C",
+      "\u620C": "\u536F",
+      "\u8FB0": "\u9149",
+      "\u9149": "\u8FB0",
+      "\u5DF3": "\u7533",
+      "\u7533": "\u5DF3",
+      "\u5348": "\u672A",
+      "\u672A": "\u5348"
+    };
+    for (const natal of natalBranches) {
+      if (CLASH_MAP[yearTransit.branch] === natal.branch) {
+        interactions.push({
+          type: "transit_clash",
+          target: "year",
+          natalPillar: natal.pillar,
+          transitBranch: yearTransit.branch,
+          natalBranch: natal.branch,
+          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u6C96\u539F\u5C40${natal.pillar}\u652F\u3010${natal.branch}\u3011`
+        });
+      }
+      if (HE_MAP[yearTransit.branch] === natal.branch) {
+        interactions.push({
+          type: "transit_combine",
+          target: "year",
+          natalPillar: natal.pillar,
+          transitBranch: yearTransit.branch,
+          natalBranch: natal.branch,
+          description: `\u6D41\u5E74\u652F\u3010${yearTransit.branch}\u3011\u5408\u539F\u5C40${natal.pillar}\u652F\u3010${natal.branch}\u3011`
+        });
+      }
+    }
+    return {
+      targetDatetime: `${datePart} ${timePart}`,
+      timezoneOffsetHours,
+      ruleBasis: { yearBoundary, monthBoundary, dayBoundary },
+      year: yearTransit,
+      month: monthTransit,
+      day: dayTransit,
+      hour: hourTransit,
+      interactions
+    };
+  }
+
+  // src/luck/index.js
+  function formatLocalDateTime(parts) {
+    if (!parts) return null;
+    const pad = (value) => String(value).padStart(2, "0");
+    return `${parts.year}-${pad(parts.month)}-${pad(parts.day)} ${pad(parts.hour)}:${pad(parts.minute)}`;
+  }
+  function formatTimezoneOffset(offsetHours) {
+    const sign = offsetHours < 0 ? "-" : "+";
+    const absolute = Math.abs(offsetHours);
+    const hours = Math.floor(absolute);
+    const minutes = Math.round((absolute - hours) * 60);
+    return `${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+  function annualRange(startLocal, step) {
+    const fromYear = startLocal.year + (step - 1) * 10;
+    return { fromYear, toYear: fromYear + 9 };
+  }
+  function buildAnnualDetails({ pillars, cycle, birthYear, startLocal, timezoneOffsetHours, shenshaPreset, gender, includeAnnualShenSha, yearBoundary, monthBoundary, dayBoundary }) {
+    const { fromYear, toYear } = annualRange(startLocal, cycle.step);
+    const annuals = [];
+    for (let year = fromYear; year <= toYear; year++) {
+      const transit = calculateTransit(pillars, {
+        datetime: `${year}-06-01T12:00:00${formatTimezoneOffset(timezoneOffsetHours)}`,
+        yearBoundary,
+        monthBoundary,
+        dayBoundary
+      });
+      const yearPillar = transit.year;
+      const transitShenSha = includeAnnualShenSha ? calculateTransitShenSha(pillars, transit, { preset: shenshaPreset, gender }).shenSha : [];
+      const xunKong = calculateXunKong(yearPillar.ganzhi);
+      annuals.push({
+        age: year - birthYear + 1,
+        year,
+        ganzhi: yearPillar.ganzhi,
+        stem: yearPillar.stem,
+        branch: yearPillar.branch,
+        tenGod: yearPillar.tenGod,
+        stage: yearPillar.stage,
+        nayin: yearPillar.nayin,
+        xunKong,
+        shenSha: transitShenSha,
+        interactions: transit.interactions,
+        basis: {
+          luck: cycle.ganzhi,
+          method: "annual-transit-at-mid-year",
+          note: "SDK \u63D0\u4F9B\u53EF\u8FFD\u6EAF\u7684\u6D41\u5E74\u7D50\u69CB\u8207\u4E92\u52D5\uFF1B\u672A\u5C07\u672A\u8003\u64DA\u7684\u5409\u51F6\u5206\u6578\u6216\u5C0F\u904B\u6587\u6848\u786C\u7DE8\u5165\u7D50\u679C\u3002"
+        }
+      });
+    }
+    return annuals;
+  }
+  function calculateLuckCycles({
+    pillars,
+    gender,
+    // 'male' | 'female'
+    birthDate,
+    // 'YYYY-MM-DD'
+    birthTime = "12:00",
+    birthTimeMode = birthTime ? "exact" : "unknown",
+    birthHourBranch = null,
+    timingDate = birthDate,
+    timingTime = null,
+    timezoneOffsetHours = 8,
+    cycleCount = 10,
+    directionRule = "gender-year-yinyang",
+    startAgeMethod = "jieqi-diff-divide-3",
+    includeAnnualDetails = false,
+    shenshaPreset = "classical",
+    includeAnnualShenSha = true,
+    yearBoundary = "lichun",
+    monthBoundary = "jie",
+    dayBoundary = "23:00"
+  }) {
+    const [bYear, bMonth, bDay] = birthDate.split("-").map(Number);
+    const [tYear, tMonth, tDay] = timingDate.split("-").map(Number);
+    let bHour = 12;
+    let bMinute = 0;
+    let timingAssumption = "unknown-time-civil-noon";
+    if (birthTimeMode === "exact" && (timingTime || birthTime)) {
+      [bHour, bMinute] = (timingTime || birthTime).split(":").map(Number);
+      timingAssumption = timingTime && timingDate !== birthDate ? "effective-solar-time" : "civil-exact-time";
+    } else if (birthTimeMode === "branch" && birthHourBranch) {
+      bHour = (branchStartHour(branchIndex(birthHourBranch)) + 1) % 24;
+      bMinute = 0;
+      timingAssumption = "branch-midpoint";
+    }
+    const currentJD = gregorianToJulianDay(tYear, tMonth, tDay + (bHour + bMinute / 60) / 24) - timezoneOffsetHours / 24;
+    const yearStemYinYang = pillars.year.stemData.yinYang;
+    let forward = true;
+    if (directionRule === "gender-year-yinyang") {
+      if (gender === "male") {
+        forward = yearStemYinYang === "yang";
+      } else {
+        forward = yearStemYinYang === "yin";
+      }
+    }
+    const surrounding = getSurroundingJie(currentJD, timezoneOffsetHours);
+    const prevJie = surrounding.prevJie;
+    const nextJie = surrounding.nextJie;
+    let targetJie = forward ? nextJie : prevJie;
+    let diffDays = forward ? nextJie.jdUT - currentJD : currentJD - prevJie.jdUT;
+    if (diffDays < 0) diffDays = 0;
+    const totalMonths = diffDays * 4;
+    const startYears = Math.floor(totalMonths / 12);
+    const remMonths = totalMonths - startYears * 12;
+    const startMonths = Math.floor(remMonths);
+    const remDays = (remMonths - startMonths) * 30;
+    const startDays = Math.round(remDays);
+    const startJdOffset = diffDays * (365.2422 / 3);
+    const startLocal = jdToLocalParts(currentJD + startJdOffset, timezoneOffsetHours);
+    const pad = (n) => String(n).padStart(2, "0");
+    const startDateStr = `${startLocal.year}-${pad(startLocal.month)}-${pad(startLocal.day)}`;
+    const startDateTimeStr = formatLocalDateTime(startLocal);
+    const monthStemIdx = stemIndex(pillars.month.stem);
+    const monthBranchIdx = branchIndex(pillars.month.branch);
+    const cycles = [];
+    const dayMaster = pillars.day.stem;
+    for (let step = 1; step <= cycleCount; step++) {
+      const sOffset = forward ? step : -step;
+      const sStemIdx = ((monthStemIdx + sOffset) % 10 + 10) % 10;
+      const sBranchIdx = ((monthBranchIdx + sOffset) % 12 + 12) % 12;
+      const stemChar = stemAt(sStemIdx).char;
+      const branchChar = branchAt(sBranchIdx).char;
+      const ganzhi = `${stemChar}${branchChar}`;
+      const ganzhiIdx = sexagenaryIndex(sStemIdx, sBranchIdx);
+      const fromAge = startYears + (step - 1) * 10;
+      const toAge = fromAge + 9;
+      const range = annualRange(startLocal, step);
+      const fromYear = range.fromYear;
+      const toYear = range.toYear;
+      const cycle = {
+        step,
+        ganzhi,
+        stem: stemChar,
+        branch: branchChar,
+        sexagenaryIndex: ganzhiIdx,
+        fromAge,
+        toAge,
+        fromYear,
+        toYear,
+        tenGodStem: getTenGod(dayMaster, stemChar),
+        stage: getTwelveStage(dayMaster, branchChar),
+        nayin: getNayin(ganzhiIdx)
+      };
+      cycle.nominalFromAge = fromYear - bYear + 1;
+      cycle.nominalToAge = toYear - bYear + 1;
+      cycle.startDate = `${fromYear}-${pad(startLocal.month)}-${pad(startLocal.day)}`;
+      cycle.endDate = `${toYear + 1}-${pad(startLocal.month)}-${pad(startLocal.day)}`;
+      if (includeAnnualDetails) {
+        cycle.annuals = buildAnnualDetails({
+          pillars,
+          cycle,
+          birthYear: bYear,
+          startLocal,
+          timezoneOffsetHours,
+          shenshaPreset,
+          gender,
+          includeAnnualShenSha,
+          yearBoundary,
+          monthBoundary,
+          dayBoundary
+        });
+      }
+      cycles.push(cycle);
+    }
+    return {
+      direction: forward ? "forward" : "backward",
+      directionText: forward ? "\u9806\u884C" : "\u9006\u884C",
+      forward,
+      directionRule,
+      startAgeMethod,
+      diffDays: Number(diffDays.toFixed(3)),
+      targetJie: {
+        name: targetJie.name,
+        jdUT: targetJie.jdUT,
+        local: targetJie.local
+      },
+      startAge: {
+        years: startYears,
+        months: startMonths,
+        days: startDays,
+        display: `${startYears} \u6B72 ${startMonths} \u500B\u6708 ${startDays} \u5929`,
+        startDate: startDateStr,
+        startDateTime: startDateTimeStr,
+        targetJie: targetJie.name,
+        method: startAgeMethod,
+        timingAssumption,
+        timingDate,
+        timingTime: `${String(bHour).padStart(2, "0")}:${String(bMinute).padStart(2, "0")}`
+      },
+      cycles
+    };
+  }
+
+  // src/calendar/true-solar-time.js
+  var true_solar_time_exports = {};
+  __export(true_solar_time_exports, {
+    calculateTrueSolarTime: () => calculateTrueSolarTime,
+    dayOfYear: () => dayOfYear,
+    equationOfTime: () => equationOfTime
+  });
+  function dayOfYear(year, month, day) {
+    const jdCurr = gregorianToJulianDay(year, month, day);
+    const jdStart = gregorianToJulianDay(year, 1, 1);
+    return Math.floor(jdCurr - jdStart) + 1;
+  }
+  function equationOfTime(year, month, day, hour = 12) {
+    const N = dayOfYear(year, month, day);
+    const gamma = 2 * Math.PI / 365 * (N - 1 + (hour - 12) / 24);
+    const eot = 229.18 * (75e-6 + 1868e-6 * Math.cos(gamma) - 0.032077 * Math.sin(gamma) - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma));
+    return eot;
+  }
+  function calculateTrueSolarTime({
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    longitude,
+    timezoneOffsetHours = 8
+  }) {
+    const standardMeridian = timezoneOffsetHours * 15;
+    const longitudeCorrection = (longitude - standardMeridian) * 4;
+    const eotCorrection = equationOfTime(year, month, day, hour + minute / 60);
+    const totalCorrectionMinutes = longitudeCorrection + eotCorrection;
+    const civilTotalMinutes = hour * 60 + minute;
+    const trueSolarTotalMinutes = civilTotalMinutes + totalCorrectionMinutes;
+    let adjustedDayOffset = 0;
+    let normalizedMinutes = trueSolarTotalMinutes;
+    while (normalizedMinutes < 0) {
+      normalizedMinutes += 1440;
+      adjustedDayOffset -= 1;
+    }
+    while (normalizedMinutes >= 1440) {
+      normalizedMinutes -= 1440;
+      adjustedDayOffset += 1;
+    }
+    const trueHour = Math.floor(normalizedMinutes / 60);
+    const trueMinute = Math.round(normalizedMinutes % 60);
+    const jdBase = gregorianToJulianDay(year, month, day);
+    const jdAdjusted = jdBase + adjustedDayOffset;
+    const adjGreg = julianDayToGregorian(jdAdjusted);
+    const pad = (n) => String(n).padStart(2, "0");
+    const civilTimeStr = `${pad(hour)}:${pad(minute)}`;
+    const trueSolarTimeStr = `${pad(trueHour)}:${pad(trueMinute)}`;
+    return {
+      civilDate: `${year}-${pad(month)}-${pad(day)}`,
+      civilTime: civilTimeStr,
+      trueSolarDate: `${adjGreg.year}-${pad(adjGreg.month)}-${pad(adjGreg.day)}`,
+      trueSolarTime: trueSolarTimeStr,
+      trueYear: adjGreg.year,
+      trueMonth: adjGreg.month,
+      trueDay: adjGreg.day,
+      trueHour,
+      trueMinute,
+      dayOffset: adjustedDayOffset,
+      corrections: {
+        longitudeCorrectionMinutes: Number(longitudeCorrection.toFixed(2)),
+        equationOfTimeMinutes: Number(eotCorrection.toFixed(2)),
+        totalCorrectionMinutes: Number(totalCorrectionMinutes.toFixed(2))
+      },
+      usedTrueSolarTime: true
+    };
+  }
+
+  // src/calendar/constellation.js
+  var constellation_exports = {};
+  __export(constellation_exports, {
+    CONSTELLATIONS: () => CONSTELLATIONS,
+    getWesternConstellation: () => getWesternConstellation
+  });
+  var CONSTELLATIONS = [
+    { id: "capricorn", name: "\u6469\u7FAF\u5EA7", english: "Capricorn", start: [12, 22], end: [1, 19] },
+    { id: "aquarius", name: "\u6C34\u74F6\u5EA7", english: "Aquarius", start: [1, 20], end: [2, 18] },
+    { id: "pisces", name: "\u96D9\u9B5A\u5EA7", english: "Pisces", start: [2, 19], end: [3, 20] },
+    { id: "aries", name: "\u7261\u7F8A\u5EA7", english: "Aries", start: [3, 21], end: [4, 19] },
+    { id: "taurus", name: "\u91D1\u725B\u5EA7", english: "Taurus", start: [4, 20], end: [5, 20] },
+    { id: "gemini", name: "\u96D9\u5B50\u5EA7", english: "Gemini", start: [5, 21], end: [6, 21] },
+    { id: "cancer", name: "\u5DE8\u87F9\u5EA7", english: "Cancer", start: [6, 22], end: [7, 22] },
+    { id: "leo", name: "\u7345\u5B50\u5EA7", english: "Leo", start: [7, 23], end: [8, 22] },
+    { id: "virgo", name: "\u8655\u5973\u5EA7", english: "Virgo", start: [8, 23], end: [9, 22] },
+    { id: "libra", name: "\u5929\u79E4\u5EA7", english: "Libra", start: [9, 23], end: [10, 23] },
+    { id: "scorpio", name: "\u5929\u880D\u5EA7", english: "Scorpio", start: [10, 24], end: [11, 22] },
+    { id: "sagittarius", name: "\u5C04\u624B\u5EA7", english: "Sagittarius", start: [11, 23], end: [12, 21] }
+  ];
+  function dayOfYear2(month, day) {
+    const monthDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    return monthDays[month - 1] + day;
+  }
+  function getWesternConstellation(month, day) {
+    const value = dayOfYear2(month, day);
+    const capricornStart = dayOfYear2(12, 22);
+    const capricornEnd = dayOfYear2(1, 19);
+    const definition = value >= capricornStart || value <= capricornEnd ? CONSTELLATIONS[0] : CONSTELLATIONS.slice(1).find((item) => {
+      const start = dayOfYear2(item.start[0], item.start[1]);
+      const end = dayOfYear2(item.end[0], item.end[1]);
+      return value >= start && value <= end;
+    });
+    return definition ? { ...definition } : null;
+  }
+
+  // src/calendar/zodiac.js
+  var zodiac_exports = {};
+  __export(zodiac_exports, {
+    ZODIAC_ANIMALS: () => ZODIAC_ANIMALS,
+    getZodiacAnimal: () => getZodiacAnimal
+  });
+  var ZODIAC_ANIMALS = Object.freeze({
+    \u5B50: { id: "rat", name: "\u9F20" },
+    \u4E11: { id: "ox", name: "\u725B" },
+    \u5BC5: { id: "tiger", name: "\u864E" },
+    \u536F: { id: "rabbit", name: "\u5154" },
+    \u8FB0: { id: "dragon", name: "\u9F8D" },
+    \u5DF3: { id: "snake", name: "\u86C7" },
+    \u5348: { id: "horse", name: "\u99AC" },
+    \u672A: { id: "goat", name: "\u7F8A" },
+    \u7533: { id: "monkey", name: "\u7334" },
+    \u9149: { id: "rooster", name: "\u96DE" },
+    \u620C: { id: "dog", name: "\u72D7" },
+    \u4EA5: { id: "pig", name: "\u8C6C" }
+  });
+  function getZodiacAnimal(branch) {
+    const animal = ZODIAC_ANIMALS[branch];
+    return animal ? { ...animal, branch } : null;
+  }
+
   // src/rules/rule-registry.js
   var rule_registry_exports = {};
   __export(rule_registry_exports, {
@@ -3956,22 +4309,61 @@ var Bazi = (() => {
   };
 
   // src/rules/rule-registry.js
+  var VALID_YEAR_BOUNDARIES = /* @__PURE__ */ new Set(["lichun", "lunar_new_year"]);
+  var VALID_MONTH_BOUNDARIES = /* @__PURE__ */ new Set(["jie", "lunar_month"]);
+  var VALID_DAY_BOUNDARIES = /* @__PURE__ */ new Set(["23:00", "00:00"]);
+  function validateProfile(profile) {
+    const errors = [];
+    if (!profile || typeof profile !== "object") errors.push("profile must be an object");
+    if (!profile?.id || typeof profile.id !== "string") errors.push("id is required");
+    if (!profile?.rules || typeof profile.rules !== "object") errors.push("rules is required");
+    if (profile?.rules?.yearBoundary && !VALID_YEAR_BOUNDARIES.has(profile.rules.yearBoundary.value)) {
+      errors.push("rules.yearBoundary.value is invalid");
+    }
+    if (profile?.rules?.monthBoundary && !VALID_MONTH_BOUNDARIES.has(profile.rules.monthBoundary.value)) {
+      errors.push("rules.monthBoundary.value is invalid");
+    }
+    if (profile?.rules?.dayBoundary && !VALID_DAY_BOUNDARIES.has(profile.rules.dayBoundary.value)) {
+      errors.push("rules.dayBoundary.value is invalid");
+    }
+    if (profile?.rules?.trueSolarTime && typeof profile.rules.trueSolarTime.value !== "boolean") {
+      errors.push("rules.trueSolarTime.value must be boolean");
+    }
+    return errors;
+  }
   var ProfileRegistry = class {
     constructor() {
       this.profiles = /* @__PURE__ */ new Map();
       this.register(CANONICAL_PROFILE);
     }
     register(profile) {
+      const errors = validateProfile(profile);
+      if (errors.length) {
+        throw new BaziRuleError(`Profile \u7121\u6548\uFF1A${errors.join("\uFF1B")}`, "PROFILE_SCHEMA_INVALID", { errors });
+      }
+      if (this.profiles.has(profile.id)) {
+        throw new BaziRuleError(`Profile \u5DF2\u5B58\u5728\uFF1A${profile.id}`, "PROFILE_DUPLICATE", { profileId: profile.id });
+      }
       this.profiles.set(profile.id, profile);
     }
     get(id = "canonical") {
-      return this.profiles.get(id) || this.profiles.get("canonical");
+      return this.profiles.get(id);
+    }
+    require(id = "canonical") {
+      const profile = this.get(id);
+      if (!profile) {
+        throw new BaziRuleError(`\u627E\u4E0D\u5230\u898F\u5247 Profile\uFF1A${id}`, "PROFILE_NOT_FOUND", { profileId: id });
+      }
+      return profile;
     }
     // 建立自訂 Profile（繼承 base，覆寫 overrides）
     createProfile({ id, name, description, base = "canonical", overrides = {} }) {
-      const baseProfile = this.get(base);
-      if (!baseProfile) {
-        throw new Error(`\u627E\u4E0D\u5230\u57FA\u790E Profile: ${base}`);
+      if (!id || typeof id !== "string") {
+        throw new BaziRuleError("\u81EA\u8A02 Profile \u5FC5\u9808\u63D0\u4F9B id", "PROFILE_ID_REQUIRED");
+      }
+      const baseProfile = this.require(base);
+      if (this.profiles.has(id)) {
+        throw new BaziRuleError(`Profile \u5DF2\u5B58\u5728\uFF1A${id}`, "PROFILE_DUPLICATE", { profileId: id });
       }
       const newProfile = JSON.parse(JSON.stringify(baseProfile));
       newProfile.id = id;
@@ -3982,6 +4374,7 @@ var Bazi = (() => {
       newProfile.diff = {};
       for (const [key, val] of Object.entries(overrides)) {
         if (key === "dayBoundary") {
+          if (!VALID_DAY_BOUNDARIES.has(val)) throw new BaziRuleError(`\u7121\u6548 dayBoundary\uFF1A${val}`, "PROFILE_OVERRIDE_INVALID", { key, value: val });
           newProfile.rules.dayBoundary = {
             value: val,
             ruleId: val === "00:00" ? "DAY_BOUNDARY_MIDNIGHT_0000" : "DAY_BOUNDARY_ZISHI_2300",
@@ -3990,6 +4383,7 @@ var Bazi = (() => {
           };
           newProfile.diff[key] = { from: baseProfile.rules.dayBoundary.value, to: val };
         } else if (key === "trueSolarTime") {
+          if (typeof val !== "boolean") throw new BaziRuleError(`trueSolarTime \u5FC5\u9808\u662F boolean`, "PROFILE_OVERRIDE_INVALID", { key, value: val });
           newProfile.rules.trueSolarTime = {
             value: Boolean(val),
             ruleId: val ? "TRUE_SOLAR_TIME_ENABLED" : "TRUE_SOLAR_TIME_DISABLED",
@@ -3998,6 +4392,7 @@ var Bazi = (() => {
           };
           newProfile.diff[key] = { from: baseProfile.rules.trueSolarTime.value, to: val };
         } else if (key === "yearBoundary") {
+          if (!VALID_YEAR_BOUNDARIES.has(val)) throw new BaziRuleError(`\u7121\u6548 yearBoundary\uFF1A${val}`, "PROFILE_OVERRIDE_INVALID", { key, value: val });
           newProfile.rules.yearBoundary = {
             value: val,
             ruleId: `YEAR_BOUNDARY_${val.toUpperCase()}`,
@@ -4006,6 +4401,7 @@ var Bazi = (() => {
           };
           newProfile.diff[key] = { from: baseProfile.rules.yearBoundary.value, to: val };
         } else if (key === "monthBoundary") {
+          if (!VALID_MONTH_BOUNDARIES.has(val)) throw new BaziRuleError(`\u7121\u6548 monthBoundary\uFF1A${val}`, "PROFILE_OVERRIDE_INVALID", { key, value: val });
           newProfile.rules.monthBoundary = {
             value: val,
             ruleId: `MONTH_BOUNDARY_${val.toUpperCase()}`,
@@ -4013,6 +4409,8 @@ var Bazi = (() => {
             overridden: true
           };
           newProfile.diff[key] = { from: baseProfile.rules.monthBoundary.value, to: val };
+        } else {
+          throw new BaziRuleError(`\u4E0D\u652F\u63F4\u7684 Profile \u8986\u5BEB\u6B04\u4F4D\uFF1A${key}`, "PROFILE_OVERRIDE_UNSUPPORTED", { key });
         }
       }
       this.register(newProfile);
@@ -4126,20 +4524,56 @@ var Bazi = (() => {
     };
     return options.compact ? JSON.stringify(context) : context;
   }
+  function buildPillarContext(result, pillarKey, options = {}) {
+    const pillar = result.pillars[pillarKey];
+    const hidden = result.tenGods.hidden[pillarKey] || [];
+    const stage = result.twelveStages.byDayMaster[pillarKey] || null;
+    const selfSeated = result.twelveStages.selfSeated[pillarKey] || null;
+    return {
+      available: pillar.available !== false,
+      ganzhi: pillar.ganzhi,
+      stem: pillar.stem,
+      branch: pillar.branch,
+      sexagenaryIndex: pillar.sexagenaryIndex,
+      tenGod: pillarKey === "day" ? "\u65E5\u4E3B\uFF08\u5143\u795E\uFF09" : result.tenGods.stems[pillarKey] ? result.tenGods.stems[pillarKey].full : null,
+      nayin: result.nayin[pillarKey],
+      hidden: hidden.map((item) => `${item.stem}(${item.tenGod.full})`),
+      hiddenDetails: hidden,
+      stage,
+      selfSeated,
+      xunKong: pillar.ganzhi ? calculateXunKong(pillar.ganzhi) : null,
+      ...options.includeRules ? { source: "BaziJS canonical chart result" } : {}
+    };
+  }
+  function buildTransitPillarContext(result, pillarKey, options = {}) {
+    const pillar = result.transits && result.transits[pillarKey];
+    if (!pillar) return null;
+    return {
+      ganzhi: pillar.ganzhi,
+      stem: pillar.stem,
+      branch: pillar.branch,
+      sexagenaryIndex: pillar.sexagenaryIndex,
+      tenGod: pillar.tenGod || null,
+      stage: pillar.stage || null,
+      nayin: pillar.nayin || null,
+      shenSha: (pillar.shenSha || []).map((item) => buildShenShaItem(item, options))
+    };
+  }
   function toContext(result, options = {}) {
     const {
       compact = true,
       includeRules = true,
       includeEvidence = true,
-      includeShenShaEvidence = true,
+      includeShenShaEvidence = includeEvidence,
       includeStrengthEvidence = true,
       includeInteractions = true,
-      maxLuckCycles = 6
+      maxLuckCycles = 10
     } = options;
     const ctx = {
       metadata: {
         engine: "BaziJS",
         engineVersion: result.meta.engineVersion,
+        resultSchemaVersion: result.meta.resultSchemaVersion || "2.0.0",
         ruleSetVersion: result.meta.ruleSetVersion,
         profileId: result.meta.profileId,
         shenshaPreset: result.meta.shenshaPreset || "classical",
@@ -4151,46 +4585,35 @@ var Bazi = (() => {
         birthTime: result.input.birthTime || "\u672A\u77E5",
         gender: result.input.gender === "male" ? "\u4E7E\u9020\uFF08\u7537\uFF09" : "\u5764\u9020\uFF08\u5973\uFF09",
         timezone: result.input.timezone,
-        trueSolarTimeUsed: result.accuracy.trueSolarTimeUsed
+        trueSolarTimeUsed: result.accuracy.trueSolarTimeUsed,
+        zodiac: result.calendar.zodiac ? result.calendar.zodiac.name : null,
+        constellation: result.calendar.constellation ? result.calendar.constellation.name : null
+      },
+      // AI Context 也必須能重現本次排盤，不只保留人類可讀摘要。
+      input: result.input,
+      accuracy: result.accuracy,
+      calendar: {
+        solar: result.calendar.solar,
+        lunar: result.calendar.lunar,
+        zodiac: result.calendar.zodiac || null,
+        constellation: result.calendar.constellation || null,
+        solarTerms: result.calendar.solarTerms,
+        time: result.calendar.time
       },
       pillars: {
-        year: {
-          ganzhi: result.pillars.year.ganzhi,
-          stem: result.pillars.year.stem,
-          branch: result.pillars.year.branch,
-          tenGod: result.tenGods.stems.year ? result.tenGods.stems.year.full : null,
-          nayin: result.nayin.year,
-          hidden: result.tenGods.hidden.year.map((h) => `${h.stem}(${h.tenGod.full})`)
-        },
-        month: {
-          ganzhi: result.pillars.month.ganzhi,
-          stem: result.pillars.month.stem,
-          branch: result.pillars.month.branch,
-          tenGod: result.tenGods.stems.month ? result.tenGods.stems.month.full : null,
-          nayin: result.nayin.month,
-          hidden: result.tenGods.hidden.month.map((h) => `${h.stem}(${h.tenGod.full})`)
-        },
-        day: {
-          ganzhi: result.pillars.day.ganzhi,
-          stem: result.pillars.day.stem,
-          branch: result.pillars.day.branch,
-          tenGod: "\u65E5\u4E3B\uFF08\u5143\u795E\uFF09",
-          nayin: result.nayin.day,
-          hidden: result.tenGods.hidden.day.map((h) => `${h.stem}(${h.tenGod.full})`)
-        },
-        hour: result.pillars.hour.available ? {
-          ganzhi: result.pillars.hour.ganzhi,
-          stem: result.pillars.hour.stem,
-          branch: result.pillars.hour.branch,
-          tenGod: result.tenGods.stems.hour ? result.tenGods.stems.hour.full : null,
-          nayin: result.nayin.hour,
-          hidden: result.tenGods.hidden.hour.map((h) => `${h.stem}(${h.tenGod.full})`)
-        } : { available: false, reason: "\u6642\u9593\u672A\u77E5" }
+        year: buildPillarContext(result, "year", { includeRules }),
+        month: buildPillarContext(result, "month", { includeRules }),
+        day: buildPillarContext(result, "day", { includeRules }),
+        hour: result.pillars.hour.available ? buildPillarContext(result, "hour", { includeRules }) : { available: false, reason: "\u6642\u9593\u672A\u77E5" }
       },
       dayMaster: {
-        stem: result.strength.dayMaster,
+        stem: result.strength.dayMasterStem || result.pillars.day.stem,
+        element: result.strength.dayMaster,
         elementScore: result.strength.score,
         strengthLevel: result.strength.level,
+        monthState: result.strength.monthState || null,
+        monthCommander: result.strength.monthCommander || null,
+        seasonalStates: result.strength.seasonalStates || {},
         favorableElements: result.strength.favorableElements,
         unfavorableElements: result.strength.unfavorableElements,
         ...includeStrengthEvidence ? { strengthEvidence: result.strength.evidence } : {}
@@ -4201,11 +4624,12 @@ var Bazi = (() => {
         byYear: result.kongWang.byYear.branches
       },
       auxiliary: {
-        taiYuan: result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : null,
-        taiXi: result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : null,
-        mingGong: result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : null,
-        shenGong: result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : null
+        taiYuan: result.auxiliary.taiYuan || null,
+        taiXi: result.auxiliary.taiXi || null,
+        mingGong: result.auxiliary.mingGong || null,
+        shenGong: result.auxiliary.shenGong || null
       },
+      rules: result.rules,
       shenSha: toShenShaContext(result, {
         includeRules,
         includeEvidence: includeShenShaEvidence,
@@ -4224,9 +4648,27 @@ var Bazi = (() => {
       ...includeInteractions ? {
         interactions: {
           stems: result.interactions.stems.map((s) => s.name),
-          branches: result.interactions.branches.map((b) => b.name)
+          branches: result.interactions.branches.map((b) => b.name),
+          details: result.interactions
         }
       } : {},
+      // 畫面會顯示目前流年；AI Context 不能只保留原局與大運摘要。
+      transits: result.transits ? {
+        targetDatetime: result.transits.targetDatetime,
+        year: buildTransitPillarContext(result, "year", { includeRules, includeEvidence: includeShenShaEvidence }),
+        month: buildTransitPillarContext(result, "month", { includeRules, includeEvidence: includeShenShaEvidence }),
+        day: buildTransitPillarContext(result, "day", { includeRules, includeEvidence: includeShenShaEvidence }),
+        hour: buildTransitPillarContext(result, "hour", { includeRules, includeEvidence: includeShenShaEvidence }),
+        interactions: result.transits.interactions || [],
+        shenShaYear: (result.transits.shenShaYear || []).map((item) => buildShenShaItem(item, {
+          includeRules,
+          includeEvidence: includeShenShaEvidence
+        })),
+        shenSha: ((Array.isArray(result.transits.shenSha) ? result.transits.shenSha : result.transits.shenSha && result.transits.shenSha.shenSha) || []).map((item) => buildShenShaItem(item, {
+          includeRules,
+          includeEvidence: includeShenShaEvidence
+        }))
+      } : null,
       luckCyclesSummary: {
         direction: result.luckCycles.directionText,
         startAge: result.luckCycles.startAge.display,
@@ -4234,9 +4676,38 @@ var Bazi = (() => {
         cycles: result.luckCycles.cycles.slice(0, maxLuckCycles).map((c) => ({
           step: c.step,
           ganzhi: c.ganzhi,
+          stem: c.stem,
+          branch: c.branch,
+          sexagenaryIndex: c.sexagenaryIndex,
           ageRange: `${c.fromAge}~${c.toAge}\u6B72`,
+          fromYear: c.fromYear,
+          toYear: c.toYear,
           tenGodStem: c.tenGodStem ? c.tenGodStem.full : "",
-          nayin: c.nayin
+          stage: c.stage || null,
+          nayin: c.nayin,
+          startDate: c.startDate || null,
+          endDate: c.endDate || null,
+          nominalAgeRange: c.nominalFromAge !== void 0 ? `${c.nominalFromAge}~${c.nominalToAge}\u6B72` : null,
+          shenSha: (c.shenSha || []).map((item) => buildShenShaItem(item, {
+            includeRules,
+            includeEvidence: includeShenShaEvidence
+          })),
+          ...options.includeLuckAnnualDetails && Array.isArray(c.annuals) ? {
+            annuals: c.annuals.map((annual) => ({
+              age: annual.age,
+              year: annual.year,
+              ganzhi: annual.ganzhi,
+              tenGod: annual.tenGod,
+              stage: annual.stage,
+              nayin: annual.nayin,
+              xunKong: annual.xunKong,
+              shenSha: (annual.shenSha || []).map((item) => buildShenShaItem(item, {
+                includeRules,
+                includeEvidence: includeShenShaEvidence
+              })),
+              interactions: includeInteractions ? annual.interactions : void 0
+            }))
+          } : {}
         }))
       }
     };
@@ -4247,20 +4718,23 @@ var Bazi = (() => {
   }
 
   // src/chart/index.js
+  function formatTimezoneOffset2(offsetHours) {
+    const sign = offsetHours < 0 ? "-" : "+";
+    const absolute = Math.abs(offsetHours);
+    const hours = Math.floor(absolute);
+    const minutes = Math.round((absolute - hours) * 60);
+    return `${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
   function calculate(input, options = {}) {
     validateInput(input);
     const profileId = input.profile || options.profile || "canonical";
-    const profile = RuleRegistry.get(profileId);
+    const profile = RuleRegistry.require(profileId);
     const yearBoundary = input.yearBoundary || profile.rules.yearBoundary.value;
     const monthBoundary = input.monthBoundary || profile.rules.monthBoundary.value;
     const dayBoundary = input.dayBoundary || profile.rules.dayBoundary.value;
     const enableTrueSolarTime = input.trueSolarTime !== void 0 ? input.trueSolarTime : profile.rules.trueSolarTime.value;
     const timezone = input.timezone || "+08:00";
-    const tzMatch = timezone.match(/^([+-])(\d{1,2})(?::?(\d{2}))?$/);
-    const tzSign = tzMatch[1] === "-" ? -1 : 1;
-    const tzHours = parseInt(tzMatch[2], 10);
-    const tzMins = tzMatch[3] ? parseInt(tzMatch[3], 10) : 0;
-    const timezoneOffsetHours = tzSign * (tzHours + tzMins / 60);
+    const timezoneOffsetHours = parseTimezoneOffset(timezone);
     const [inYear, inMonth, inDay] = input.birthDate.split("-").map(Number);
     const birthTimeMode = input.birthTimeMode || (input.birthTime ? "exact" : "unknown");
     let inHour = 12;
@@ -4307,6 +4781,8 @@ var Bazi = (() => {
       timezoneOffsetHours,
       yearBoundary,
       monthBoundary,
+      lunarYear: lunarInfo.year,
+      lunarMonth: lunarInfo.month,
       dayBoundary
     });
     const tenGods = calculateChartTenGods(pillars);
@@ -4316,21 +4792,48 @@ var Bazi = (() => {
     const kongWang = calculateChartKongWang(pillars);
     const auxiliary = calculateChartAuxiliary(pillars);
     const interactions = calculateInteractions(pillars);
-    const strength = calculateStrength(pillars, interactions);
+    const strength = calculateStrength(pillars, interactions, {
+      currentJD,
+      prevJie: surroundingJieInfo.prevJie
+    });
     const shenshaPreset = input.shenshaPreset || input.shenShaPreset || options.shenshaPreset || options.shenShaPreset || "classical";
+    if (!["minimal", "classical", "full"].includes(shenshaPreset)) {
+      throw new BaziRuleError(`\u627E\u4E0D\u5230 ShenSha preset\uFF1A${shenshaPreset}`, "SHENSHA_PRESET_NOT_FOUND", { preset: shenshaPreset });
+    }
     const shenSha = calculateShenSha(pillars, { preset: shenshaPreset, gender: input.gender });
     const specialRules = calculateSpecialRules(pillars, { gender: input.gender, input });
+    const appliedRule = (profileRule, value, overridden = false, ruleId = profileRule.ruleId) => ({
+      ...profileRule,
+      value,
+      ruleId,
+      overridden: overridden || value !== profileRule.value
+    });
     const luckCycles = calculateLuckCycles({
       pillars,
       gender: input.gender,
       birthDate: input.birthDate,
       birthTime: input.birthTime,
+      birthTimeMode,
+      birthHourBranch: input.birthHourBranch,
+      timingDate: `${calcYear}-${String(calcMonth).padStart(2, "0")}-${String(calcDay).padStart(2, "0")}`,
+      timingTime: birthTimeMode === "exact" ? `${String(calcHour).padStart(2, "0")}:${String(calcMinute).padStart(2, "0")}` : void 0,
       timezoneOffsetHours,
       directionRule: profile.rules.luckCycle.directionRule.value,
-      startAgeMethod: profile.rules.luckCycle.startAgeMethod.value
+      startAgeMethod: profile.rules.luckCycle.startAgeMethod.value,
+      yearBoundary,
+      monthBoundary,
+      dayBoundary,
+      includeAnnualDetails: options.includeLuckAnnualDetails === true,
+      shenshaPreset,
+      includeAnnualShenSha: options.includeAnnualLuckShenSha !== false
     });
-    const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00+08:00`;
-    const transits = calculateTransit(pillars, { datetime: transitDate });
+    const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00${formatTimezoneOffset2(timezoneOffsetHours)}`;
+    const transits = calculateTransit(pillars, {
+      datetime: transitDate,
+      yearBoundary,
+      monthBoundary,
+      dayBoundary
+    });
     if (luckCycles && Array.isArray(luckCycles.cycles)) {
       luckCycles.cycles.forEach((cyc, idx) => {
         cyc.shenSha = calculateShenShaOnPillar(pillars, cyc.stem, cyc.branch, `luck-${idx + 1}`, { preset: shenshaPreset, gender: input.gender });
@@ -4356,16 +4859,34 @@ var Bazi = (() => {
       accuracy: {
         timeKnown: birthTimeMode !== "unknown",
         hourPillarAvailable: pillars.hour.available,
-        trueSolarTimeUsed: Boolean(enableTrueSolarTime && birthTimeMode === "exact")
+        trueSolarTimeUsed: Boolean(enableTrueSolarTime && birthTimeMode === "exact"),
+        boundaryRules: {
+          year: yearBoundary,
+          month: monthBoundary,
+          day: dayBoundary
+        },
+        assumptions: {
+          unknownTime: birthTimeMode === "unknown" ? "\u6642\u67F1\u3001\u547D\u5BAE\u3001\u8EAB\u5BAE\u8207\u8D77\u904B\u6642\u523B\u63A1\u4E0D\u53EF\u78BA\u5B9A\u8655\u7406\uFF1B\u8D77\u904B\u65E5\u671F\u4EE5\u6C11\u7528\u4E2D\u5348\u4F5C\u70BA\u8A08\u6642\u5047\u8A2D\u3002" : null,
+          branchTime: birthTimeMode === "branch" ? "\u6642\u8FB0\u6A21\u5F0F\u53EA\u78BA\u5B9A\u6642\u652F\uFF1B\u8D77\u904B\u65E5\u671F\u4EE5\u8A72\u6642\u8FB0\u4E2D\u9EDE\u4F30\u7B97\u3002" : null,
+          trueSolarTime: enableTrueSolarTime && birthTimeMode === "exact" ? "\u56DB\u67F1\u8207\u8D77\u904B\u8A08\u6642\u4F7F\u7528\u771F\u592A\u967D\u6642\u4FEE\u6B63\u5F8C\u6642\u523B\u3002" : null
+        },
+        precision: {
+          solarTerms: "Meeus low-precision solar longitude; typical boundary uncertainty is approximately \xB110 minutes.",
+          lunarCalendar: "1900-2100 encoded lunisolar table."
+        }
       },
       calendar: {
         solar: {
           year: inYear,
           month: inMonth,
           day: inDay,
-          time: input.birthTime || null
+          time: input.birthTime || null,
+          effectiveDate: `${calcYear}-${String(calcMonth).padStart(2, "0")}-${String(calcDay).padStart(2, "0")}`,
+          effectiveTime: birthTimeMode === "unknown" ? null : `${String(calcHour).padStart(2, "0")}:${String(calcMinute).padStart(2, "0")}`
         },
         lunar: lunarInfo,
+        zodiac: getZodiacAnimal(pillars.year.branch),
+        constellation: getWesternConstellation(inMonth, inDay),
         solarTerms: {
           prevJie: surroundingJieInfo.prevJie ? {
             name: surroundingJieInfo.prevJie.name,
@@ -4382,7 +4903,9 @@ var Bazi = (() => {
           civilTime: input.birthTime || null,
           trueSolarTime: trueSolarInfo ? trueSolarInfo.trueSolarTime : null,
           correctionMinutes: trueSolarInfo ? trueSolarInfo.corrections.totalCorrectionMinutes : 0,
-          usedTrueSolarTime: Boolean(enableTrueSolarTime && birthTimeMode === "exact")
+          usedTrueSolarTime: Boolean(enableTrueSolarTime && birthTimeMode === "exact"),
+          effectiveDate: `${calcYear}-${String(calcMonth).padStart(2, "0")}-${String(calcDay).padStart(2, "0")}`,
+          effectiveTime: birthTimeMode === "unknown" ? null : `${String(calcHour).padStart(2, "0")}:${String(calcMinute).padStart(2, "0")}`
         }
       },
       pillars: {
@@ -4433,9 +4956,9 @@ var Bazi = (() => {
       transits,
       rules: {
         applied: [
-          profile.rules.yearBoundary,
-          profile.rules.monthBoundary,
-          profile.rules.dayBoundary,
+          appliedRule(profile.rules.yearBoundary, yearBoundary, input.yearBoundary !== void 0, `YEAR_BOUNDARY_${yearBoundary.toUpperCase()}`),
+          appliedRule(profile.rules.monthBoundary, monthBoundary, input.monthBoundary !== void 0, `MONTH_BOUNDARY_${monthBoundary.toUpperCase()}`),
+          appliedRule(profile.rules.dayBoundary, dayBoundary, input.dayBoundary !== void 0, dayBoundary === "00:00" ? "DAY_BOUNDARY_MIDNIGHT_0000" : "DAY_BOUNDARY_ZISHI_2300"),
           profile.rules.luckCycle.directionRule,
           profile.rules.luckCycle.startAgeMethod
         ]
@@ -4791,284 +5314,482 @@ var Bazi = (() => {
     hour: "\u6642\u67F1",
     "transit-year": "\u6D41\u5E74"
   };
+  var BASE_LABELS = {
+    yearStem: "\u5E74\u5E72",
+    monthStem: "\u6708\u5E72",
+    dayStem: "\u65E5\u5E72",
+    yearBranch: "\u5E74\u652F",
+    monthBranch: "\u6708\u652F",
+    dayBranch: "\u65E5\u652F",
+    yearPillar: "\u5E74\u67F1",
+    dayPillar: "\u65E5\u67F1",
+    hourPillar: "\u6642\u67F1",
+    wholeChart: "\u6574\u5C40"
+  };
+  var CATEGORY_LABELS = { auspicious: "\u5409", inauspicious: "\u51F6", neutral: "\u4E2D\u6027" };
+  var CONFIDENCE_LABELS = {
+    classical: "\u7D93\u5178",
+    traditional: "\u50B3\u7D71",
+    "modern-common": "\u901A\u884C",
+    "school-specific": "\u6D41\u6D3E",
+    folk: "\u6C11\u4FD7",
+    experimental: "\u5BE6\u9A57"
+  };
+  function escapeXml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&apos;"
+    })[char]);
+  }
+  function formatPillarLabel(value) {
+    if (PILLAR_LABELS[value]) return PILLAR_LABELS[value];
+    const luckMatch = String(value ?? "").match(/^luck-(\d+)$/);
+    if (luckMatch) return `\u521D\u904B\u7B2C${luckMatch[1]}\u6B65`;
+    return value || "\u2014";
+  }
+  function formatBasedOn(values = []) {
+    return values.map((value) => BASE_LABELS[value] || formatPillarLabel(value)).join("\u3001");
+  }
+  function displayName(item) {
+    return item && (item.displayName || item.name) || "\u2014";
+  }
   function formatHitOn(hitOn = []) {
-    return hitOn.map((value) => {
-      if (PILLAR_LABELS[value]) return PILLAR_LABELS[value];
-      const luckMatch = String(value).match(/^luck-(\d+)$/);
-      return luckMatch ? `\u521D\u904B\u7B2C${luckMatch[1]}\u6B65` : value;
-    }).join("\uFF0F");
+    return hitOn.map(formatPillarLabel).join("\uFF0F");
+  }
+  function formatShenShaName(item) {
+    const hitOn = item && item.hitOn && item.hitOn.length ? `\uFF08${formatHitOn(item.hitOn)}\uFF09` : "";
+    return `${displayName(item)}${hitOn}`;
+  }
+  function formatShenShaList(list = []) {
+    return list.length ? list.map(formatShenShaName).join("\u3001 ") : "\u2014";
+  }
+  function wrapText(value, maxUnits = 44) {
+    const text = String(value ?? "\u2014");
+    const lines = [];
+    let line = "";
+    let units = 0;
+    for (const char of text) {
+      if (char === "\n") {
+        lines.push(line || "\u2014");
+        line = "";
+        units = 0;
+        continue;
+      }
+      const charUnits = /[\u0000-\u00ff]/.test(char) ? 0.58 : 1;
+      if (line && units + charUnits > maxUnits) {
+        lines.push(line);
+        line = char;
+        units = charUnits;
+      } else {
+        line += char;
+        units += charUnits;
+      }
+    }
+    if (line || !lines.length) lines.push(line || "\u2014");
+    return lines;
+  }
+  function textNode(x, y, value, className, extra = "") {
+    return `<text x="${x}" y="${y}" class="${className}"${extra ? ` ${extra}` : ""}>${escapeXml(value)}</text>`;
+  }
+  function wrappedText(nodes, value, options = {}) {
+    const {
+      x = 0,
+      y = 0,
+      maxUnits = 44,
+      lineHeight = 24,
+      className = "body",
+      extra = ""
+    } = options;
+    const lines = wrapText(value, maxUnits);
+    lines.forEach((line, index) => nodes.push(textNode(x, y + index * lineHeight, line, className, extra)));
+    return y + lines.length * lineHeight;
+  }
+  function addLabelValue(nodes, label, value, options = {}) {
+    const {
+      x = 0,
+      y = 0,
+      labelWidth = 86,
+      maxUnits = 34,
+      lineHeight = 23,
+      labelClass = "label",
+      valueClass = "value"
+    } = options;
+    nodes.push(textNode(x, y, label, labelClass));
+    const lines = wrapText(value, maxUnits);
+    lines.forEach((line, index) => {
+      nodes.push(textNode(x + labelWidth, y + index * lineHeight, line, valueClass));
+    });
+    return y + Math.max(1, lines.length) * lineHeight;
+  }
+  function sectionFrame(width, height, title, innerNodes) {
+    return `<g>
+    <rect x="0" y="0" width="${width}" height="${height}" class="card" />
+    ${textNode(24, 32, title, "section-title")}
+    <g transform="translate(24, 58)">${innerNodes.join("")}</g>
+  </g>`;
+  }
+  function getPillarColumns(result) {
+    const p = result.pillars;
+    return [
+      { key: "year", title: "\u5E74\u67F1", data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year, selfStage: result.twelveStages.selfSeated.year },
+      { key: "month", title: "\u6708\u67F1", data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month, selfStage: result.twelveStages.selfSeated.month },
+      { key: "day", title: "\u65E5\u67F1", data: p.day, tenGod: { full: "\u65E5\u4E3B" }, hidden: result.tenGods.hidden.day, nayin: result.nayin.day, stage: result.twelveStages.byDayMaster.day, selfStage: result.twelveStages.selfSeated.day },
+      { key: "hour", title: "\u6642\u67F1", data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour, selfStage: result.twelveStages.selfSeated.hour }
+    ];
+  }
+  function renderEvidence(nodes, item, startY, maxUnits) {
+    const evidence = item && item.evidence || {};
+    let y = startY;
+    const details = Array.isArray(evidence.details) ? evidence.details : [];
+    if (details.length) {
+      nodes.push(textNode(20, y, `\u5224\u5B9A\u8B49\u64DA\uFF08${details.length} \u7B46\uFF09`, "evidence-title"));
+      y += 21;
+      details.forEach((detail) => {
+        const detailText = [
+          detail.baseValue ? `\u57FA\u6E96 ${detail.baseValue}` : "",
+          detail.targetValue ? `\u547D\u4E2D ${detail.targetValue}` : "",
+          detail.reason || ""
+        ].filter(Boolean).join(" \xB7 ") || "\u7B26\u5408\u898F\u5247";
+        y = wrappedText(nodes, `\u2022 ${detailText}`, { x: 20, y, maxUnits, lineHeight: 19, className: "evidence" });
+      });
+    }
+    return y;
+  }
+  function renderPillar(result, col, shenSha, width, theme) {
+    const nodes = [];
+    const available = col.data && col.data.available !== false;
+    const stem = available ? col.data.stem : "\uFF1F";
+    const branch = available ? col.data.branch : "\uFF1F";
+    let y = 30;
+    nodes.push(`<rect x="0" y="0" width="${width}" height="1" fill="${theme.border}" />`);
+    nodes.push(textNode(width / 2, y, col.title, "pillar-title", 'text-anchor="middle"'));
+    y += 32;
+    y = addLabelValue(nodes, "\u4E3B\u661F", col.tenGod && (col.tenGod.full || col.tenGod.short), { y, maxUnits: 42, valueClass: "value-accent" });
+    y += 7;
+    nodes.push(`<g class="character-box"><rect x="0" y="${y - 20}" width="${width}" height="78" rx="6" fill="${theme.gridBg}" stroke="${theme.border}" />`);
+    nodes.push(textNode(24, y, "\u5929\u5E72", "label"));
+    nodes.push(textNode(132, y + 6, stem, "character"));
+    nodes.push(textNode(width / 2 + 24, y, "\u5730\u652F", "label"));
+    nodes.push(textNode(width / 2 + 132, y + 6, branch, "character"));
+    nodes.push("</g>");
+    y += 75;
+    nodes.push(textNode(0, y, "\u85CF\u5E79", "label"));
+    y += 21;
+    const hidden = col.hidden || [];
+    if (hidden.length) {
+      hidden.forEach((item) => {
+        const line = `${item.stem}  ${item.tenGod && item.tenGod.full || ""} \xB7 ${item.role || ""} \xB7 ${item.days || ""}\u65E5/${Math.round((Number(item.weight) || 0) * 100)}%`;
+        y = wrappedText(nodes, line, { x: 20, y, maxUnits: 50, lineHeight: 20, className: "body" });
+      });
+    } else {
+      y = wrappedText(nodes, "\u2014", { x: 20, y, maxUnits: 50, lineHeight: 20, className: "body" });
+    }
+    y += 10;
+    nodes.push(`<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="${theme.border}" />`);
+    y += 24;
+    y = addLabelValue(nodes, "\u5730\u52E2", col.stage && col.stage.name, { y, maxUnits: 40 });
+    y = addLabelValue(nodes, "\u81EA\u5750", col.selfStage && col.selfStage.name, { y, maxUnits: 40 });
+    const xunkong = available && col.data.ganzhi ? calculateXunKong(col.data.ganzhi).emptyBranches.join("") : "\u2014";
+    y = addLabelValue(nodes, "\u7A7A\u4EA1", xunkong, { y, maxUnits: 40 });
+    y = addLabelValue(nodes, "\u7D0D\u97F3", col.nayin, { y, maxUnits: 40 });
+    y += 12;
+    nodes.push(`<rect x="0" y="${y - 8}" width="${width}" height="1" fill="${theme.border}" />`);
+    y += 18;
+    nodes.push(textNode(0, y, `\u795E\u715E\uFF08${shenSha.length}\uFF09`, "subsection-title"));
+    y += 25;
+    if (!shenSha.length) {
+      y = wrappedText(nodes, "\u2014 \u6B64\u67F1\u7121\u547D\u4E2D\u795E\u715E", { x: 20, y, maxUnits: 50, lineHeight: 20, className: "muted" });
+    } else {
+      shenSha.forEach((item) => {
+        const itemStart = y;
+        const category = CATEGORY_LABELS[item.category] || item.category || "\u2014";
+        const confidence = CONFIDENCE_LABELS[item.confidence] || item.confidence || "\u2014";
+        const head = `${formatShenShaName(item)}\u3000${category} \xB7 ${confidence}`;
+        y = wrappedText(nodes, head, { x: 20, y, maxUnits: 50, lineHeight: 21, className: "body-strong" });
+        y = addLabelValue(nodes, "\u57FA\u6E96", formatBasedOn(item.basedOn || []), { x: 20, y, labelWidth: 58, maxUnits: 43, lineHeight: 19, labelClass: "meta", valueClass: "meta" });
+        y = addLabelValue(nodes, "\u4F9D\u64DA", item.reference || "\u672A\u63D0\u4F9B", { x: 20, y, labelWidth: 58, maxUnits: 43, lineHeight: 19, labelClass: "meta", valueClass: "meta" });
+        y = renderEvidence(nodes, item, y + 2, 43);
+        y = Math.max(y, itemStart + 28) + 13;
+      });
+    }
+    const height = y + 16;
+    return { height, nodes: [`<g><rect x="0" y="0" width="${width}" height="${height}" rx="8" fill="${theme.cardBg}" stroke="${theme.border}" />${nodes.join("")}</g>`] };
+  }
+  function renderBasicInfo(result, width, theme) {
+    const nodes = [];
+    const dayMasterStem = result.pillars.day.stem;
+    const stem = STEMS[STEM_INDEX[dayMasterStem]] || {};
+    const yearStem = STEMS[STEM_INDEX[result.pillars.year.stem]] || {};
+    const zodiac = result.calendar.zodiac && result.calendar.zodiac.name || "\u2014";
+    const constellation = result.calendar.constellation && result.calendar.constellation.name || "\u2014";
+    const prevJie = result.calendar.solarTerms && result.calendar.solarTerms.prevJie;
+    const seasonNames = { \u5BC5: "\u6625", \u536F: "\u6625", \u8FB0: "\u6625", \u5DF3: "\u590F", \u5348: "\u590F", \u672A: "\u590F", \u7533: "\u79CB", \u9149: "\u79CB", \u620C: "\u79CB", \u4EA5: "\u51AC", \u5B50: "\u51AC", \u4E11: "\u51AC" };
+    const infoItems = [
+      ["\u516C\u66C6", `${result.calendar.solar.year}\u5E74${result.calendar.solar.month}\u6708${result.calendar.solar.day}\u65E5 ${result.input.birthTime || "\u672A\u77E5"}`],
+      ["\u8FB2\u66C6", `${result.calendar.lunar.monthName}${result.calendar.lunar.dayName}`],
+      ["\u9020\u5411", result.input.gender === "male" ? "\u4E7E\u9020\uFF08\u7537\uFF09" : "\u5764\u9020\uFF08\u5973\uFF09"],
+      ["\u9670\u967D", yearStem.yinYang === "yang" ? "\u967D" : "\u9670"],
+      ["\u751F\u8096", zodiac],
+      ["\u661F\u5EA7", constellation],
+      ["\u7BC0\u6C23", prevJie ? prevJie.name : "\u2014"],
+      ["\u5B63\u7BC0", seasonNames[result.pillars.month.branch] || "\u2014"],
+      ["\u53F8\u4EE4", result.strength.monthCommander ? `${result.strength.monthCommander.stem}${result.strength.monthCommander.element}` : "\u2014"],
+      ["\u65E5\u4E3B", `${dayMasterStem}${stem.element || ""}\uFF08${result.strength.level}\uFF09`],
+      ["\u6708\u4EE4\u683C\u5C40", `${result.tenGods.stems.month ? result.tenGods.stems.month.full : "\u2014"}\u683C`],
+      ["\u5F37\u5F31\u5206\u6578", `${result.strength.score} \u5206`],
+      ["\u6708\u4EE4\u65FA\u8870", result.strength.monthState ? result.strength.monthState.name : "\u2014"],
+      ["\u547D\u5BAE\uFF0F\u8EAB\u5BAE", `${result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : "\u2014"}\uFF0F${result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : "\u2014"}`],
+      ["\u80CE\u5143\uFF0F\u80CE\u606F", `${result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : "\u2014"}\uFF0F${result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : "\u2014"}`],
+      ["\u8D77\u904B", result.luckCycles && result.luckCycles.startAge ? `${result.luckCycles.startAge.display}${result.luckCycles.startAge.startDateTime ? `\uFF08${result.luckCycles.startAge.startDateTime}\uFF09` : ""}` : "\u2014"],
+      ["\u898F\u5247\u7248\u672C", `\u795E\u715E ${result.meta.shenShaRuleVersion || "\u2014"}`]
+    ];
+    const columns = width >= 700 ? 2 : 1;
+    const cellWidth = (width - (columns - 1) * 24) / columns;
+    const cellUnits = columns === 2 ? 40 : Math.max(26, Math.floor(cellWidth / 10));
+    const rows = Math.ceil(infoItems.length / columns);
+    const rowHeight = 38;
+    infoItems.forEach(([label, value], index) => {
+      const col = index % columns;
+      const row = Math.floor(index / columns);
+      const x = col * (cellWidth + 24);
+      const y = row * rowHeight + 24;
+      nodes.push(`<rect x="${x}" y="${y - 22}" width="${cellWidth}" height="30" rx="5" fill="${theme.gridBg}" />`);
+      nodes.push(textNode(x + 12, y - 2, label, "label"));
+      const lines = wrapText(value, cellUnits);
+      nodes.push(textNode(x + 92, y - 2, lines[0], "value"));
+      if (lines.length > 1) nodes.push(textNode(x + 92, y + 16, lines.slice(1).join(""), "value"));
+    });
+    return { height: rows * rowHeight + 30, nodes };
+  }
+  function renderSpecialRules(result) {
+    const nodes = [];
+    let y = 0;
+    const rules = result.specialRules || [];
+    if (!rules.length) return { height: 76, nodes: [textNode(0, 24, "\u2014 \u672C\u547D\u76E4\u6C92\u6709\u547D\u4E2D\u7279\u6B8A\u67F1\u4F4D\u6216\u5B63\u7BC0\u689D\u4EF6", "muted")] };
+    rules.forEach((item) => {
+      const evidence = item.evidence || {};
+      const seasonNames = { spring: "\u6625", summer: "\u590F", autumn: "\u79CB", winter: "\u51AC" };
+      const evidenceText = [
+        `\u57FA\u6E96\uFF1A${formatBasedOn(item.baseOn || item.basedOn || [])}`,
+        evidence.targetValue ? `\u547D\u4E2D\uFF1A${evidence.targetValue}` : "",
+        evidence.season ? `\u5B63\u7BC0\uFF1A${seasonNames[evidence.season] || evidence.season}\uFF08\u6708\u4EE4${evidence.monthBranch || "\u2014"}\uFF09` : ""
+      ].filter(Boolean).join(" \xB7 ");
+      nodes.push(textNode(0, y, `${item.name || displayName(item)}`, "body-strong"));
+      y += 23;
+      y = wrappedText(nodes, evidenceText, { x: 18, y, maxUnits: 50, lineHeight: 20, className: "meta" });
+      y = wrappedText(nodes, item.description || "\u2014", { x: 18, y: y + 2, maxUnits: 50, lineHeight: 20, className: "body" });
+      y += 13;
+    });
+    return { height: y + 10, nodes };
+  }
+  function renderStrength(result, width, theme) {
+    const nodes = [];
+    let y = 0;
+    y = addLabelValue(nodes, "\u65E5\u4E3B\u65FA\u8870\u5F97\u5206", `${result.strength.score} \u5206 \xB7 \u3010${result.strength.level}\u3011`, { y, maxUnits: 48, valueClass: "value-accent" });
+    y = addLabelValue(nodes, "\u559C\u7528\u4E94\u884C", (result.strength.favorableElements || []).join("\u3001") || "\u7121\u7279\u5225\u6A19\u8A18", { y, maxUnits: 48 });
+    y = addLabelValue(nodes, "\u5FCC\u4EC7\u4E94\u884C", (result.strength.unfavorableElements || []).join("\u3001") || "\u7121\u7279\u5225\u6A19\u8A18", { y, maxUnits: 48 });
+    if (result.strength.monthState) {
+      y = addLabelValue(nodes, "\u6708\u4EE4\u65FA\u8870", `\u6708\u652F ${result.strength.monthState.branch}\uFF1A${result.strength.monthState.name}\uFF08\u4FC2\u6578 ${result.strength.monthState.factor}\uFF09`, { y, maxUnits: 48 });
+    }
+    y += 12;
+    nodes.push(textNode(0, y, "\u4E94\u884C\u6BD4\u4F8B", "subsection-title"));
+    y += 28;
+    const colors = theme.elementColors || {};
+    ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"].forEach((element) => {
+      const data = result.strength.distribution[element] || { percentage: 0 };
+      const state = result.strength.seasonalStates && result.strength.seasonalStates[element];
+      const percentage = Number(data.percentage) || 0;
+      nodes.push(textNode(0, y + 13, `${element} ${state ? state.name : ""}`, "label", `fill="${colors[element] || theme.textPrimary}"`));
+      nodes.push(`<rect x="86" y="${y + 3}" width="${Math.max(120, width - 190)}" height="13" rx="6" fill="${theme.gridBg}" />`);
+      nodes.push(`<rect x="86" y="${y + 3}" width="${Math.max(0, Math.min(width - 190, (width - 190) * percentage / 100))}" height="13" rx="6" fill="${colors[element] || theme.textPrimary}" />`);
+      nodes.push(textNode(width - 62, y + 14, `${percentage}%`, "value", 'text-anchor="end"'));
+      y += 29;
+    });
+    if (result.strength.evidence && result.strength.evidence.length) {
+      y += 12;
+      nodes.push(textNode(0, y, `\u5F37\u5F31\u5224\u5B9A evidence\uFF08${result.strength.evidence.length} \u7B46\uFF09`, "subsection-title"));
+      y += 24;
+      result.strength.evidence.forEach((item) => {
+        y = wrappedText(nodes, `${item.ruleId || "\u898F\u5247"}\uFF1A${item.reason || ""}`, { x: 18, y, maxUnits: 50, lineHeight: 19, className: "evidence" });
+      });
+    }
+    return { height: y + 12, nodes };
+  }
+  function renderUseGod(result) {
+    const nodes = [];
+    let y = 0;
+    y = wrappedText(nodes, "\u4EE5\u4E0B\u70BA BaziJS canonical \u6276\u6291\u6A21\u578B\u7684\u53EF\u8FFD\u6EAF\u6458\u8981\uFF0C\u4E0D\u662F\u56FA\u5B9A\u65B7\u8A9E\u6216\u91AB\u7642\u3001\u8CA1\u52D9\u5EFA\u8B70\u3002", { y, maxUnits: 52, lineHeight: 21, className: "meta" });
+    y += 10;
+    y = addLabelValue(nodes, "\u6276\u52A9\u65B9\u5411", (result.strength.favorableElements || []).join("\u3001") || "\u2014", { y, maxUnits: 46 });
+    y = addLabelValue(nodes, "\u5FCC\u4EC7\u65B9\u5411", (result.strength.unfavorableElements || []).join("\u3001") || "\u2014", { y, maxUnits: 46 });
+    y = addLabelValue(nodes, "\u5F97\u4EE4\uFF0F\u5F97\u5730\uFF0F\u5F97\u52E2", [result.strength.deLing ? "\u5F97\u4EE4" : "\u4E0D\u5F97\u4EE4", result.strength.deDi ? "\u5F97\u5730" : "\u4E0D\u5F97\u5730", result.strength.deShi ? "\u5F97\u52E2" : "\u4E0D\u5F97\u52E2"].join("\u3001"), { y, maxUnits: 46 });
+    y = addLabelValue(nodes, "\u6708\u4EE4\u53F8\u4EE4", result.strength.monthCommander ? `${result.strength.monthCommander.stem}${result.strength.monthCommander.element}\uFF08\u7B2C${result.strength.monthCommander.phase}\u6BB5\uFF09` : "\u2014", { y, maxUnits: 46 });
+    return { height: y + 10, nodes };
+  }
+  function renderLuckCycles(result, width, theme) {
+    const nodes = [];
+    let y = 0;
+    const currentYear = (/* @__PURE__ */ new Date()).getFullYear();
+    const cycles = (result.luckCycles && result.luckCycles.cycles || []).slice(0, 8);
+    cycles.forEach((cycle, index) => {
+      const cardNodes = [];
+      let cy = 25;
+      cardNodes.push(textNode(18, cy, `${cycle.nominalFromAge ?? cycle.fromAge}\u6B72\u8D77\u3000${cycle.ganzhi}\u3000${cycle.tenGodStem && cycle.tenGodStem.full || cycle.tenGodStem && cycle.tenGodStem.short || ""}`, "body-strong"));
+      cy += 23;
+      cy = addLabelValue(cardNodes, "\u5E74\u4EFD", `${cycle.fromYear}\u2013${cycle.toYear}`, { x: 18, y: cy, labelWidth: 58, maxUnits: 44, labelClass: "meta", valueClass: "meta" });
+      cy = addLabelValue(cardNodes, "\u5927\u904B\u795E\u715E", formatShenShaList(cycle.shenSha || []), { x: 18, y: cy, labelWidth: 78, maxUnits: 39, lineHeight: 20, labelClass: "meta", valueClass: "meta" });
+      const annuals = Array.isArray(cycle.annuals) ? cycle.annuals : [];
+      if (annuals.length) {
+        cy += 8;
+        cardNodes.push(textNode(18, cy, `\u9010\u5E74\u8CC7\u6599\uFF08${annuals.length} \u5E74\uFF09`, "subsection-title"));
+        cy += 24;
+        annuals.forEach((annual) => {
+          const isCurrentYear = Number(annual.year) === currentYear;
+          const annualStartY = cy;
+          const annualNodes = [];
+          const headline = `${annual.age}\u6B72 \xB7 ${annual.year}\u5E74 \xB7 ${annual.ganzhi} \xB7 ${annual.tenGod && (annual.tenGod.full || annual.tenGod.short) || ""}`;
+          annualNodes.push(`<line x1="18" y1="${cy - 17}" x2="${width - 42}" y2="${cy - 17}" stroke="${theme.border}" />`);
+          cy = wrappedText(annualNodes, headline, { x: 24, y: cy, maxUnits: 49, lineHeight: 19, className: "body-strong" });
+          const detail = [
+            annual.stage && annual.stage.name ? `\u5730\u52E2 ${annual.stage.name}` : "",
+            annual.nayin ? `\u7D0D\u97F3 ${annual.nayin}` : "",
+            annual.xunKong && annual.xunKong.emptyBranches ? `\u65EC\u7A7A ${annual.xunKong.emptyBranches.join("")}` : ""
+          ].filter(Boolean).join(" \xB7 ");
+          cy = wrappedText(annualNodes, detail || "\u2014", { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: "meta" });
+          cy = wrappedText(annualNodes, `\u4E92\u52D5\uFF1A${(annual.interactions || []).map((item) => item.description || item.name).join("\u3001") || "\u2014"}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: "body" });
+          cy = wrappedText(annualNodes, `\u795E\u715E\uFF1A${formatShenShaList(annual.shenSha || [])}`, { x: 24, y: cy, maxUnits: 49, lineHeight: 18, className: "body" });
+          if (isCurrentYear) {
+            const annualHeight = cy - annualStartY + 14;
+            cardNodes.push(`<rect x="18" y="${annualStartY - 17}" width="${width - 60}" height="${annualHeight}" rx="5" fill="${theme.accent}" fill-opacity="0.06" stroke="${theme.accent}" stroke-width="2" />`);
+            cardNodes.push(textNode(width - 74, annualStartY + 2, "\u4ECA\u5E74", "current-badge", 'text-anchor="end"'));
+          }
+          cardNodes.push(...annualNodes);
+          cy += 8;
+        });
+      }
+      const cardHeight = cy + 16;
+      nodes.push(`<g transform="translate(0, ${y})"><rect x="0" y="0" width="${width}" height="${cardHeight}" rx="7" fill="${theme.gridBg}" stroke="${theme.border}" />${cardNodes.join("")}</g>`);
+      y += cardHeight + (index < cycles.length - 1 ? 14 : 0);
+    });
+    return { height: Math.max(78, y + 4), nodes };
+  }
+  function renderTransit(result) {
+    const nodes = [];
+    const transit = result.transits && result.transits.year;
+    if (!transit) return { height: 60, nodes: [textNode(0, 24, "\u2014 \u7121\u6D41\u5E74\u8CC7\u6599", "muted")] };
+    let y = 0;
+    y = addLabelValue(nodes, "\u6D41\u5E74", transit.ganzhi, { y, maxUnits: 45 });
+    y = addLabelValue(nodes, "\u5341\u795E", transit.tenGod && (transit.tenGod.full || transit.tenGod.short), { y, maxUnits: 45 });
+    y = addLabelValue(nodes, "\u5730\u52E2\uFF0F\u7D0D\u97F3", `${transit.stage && transit.stage.name || "\u2014"} \xB7 ${transit.nayin || "\u2014"}`, { y, maxUnits: 45 });
+    const list = result.transits.shenShaYear || transit.shenSha || [];
+    y = addLabelValue(nodes, `\u6D41\u5E74\u795E\u715E\uFF08${list.length}\uFF09`, formatShenShaList(list), { y: y + 4, labelWidth: 108, maxUnits: 37, lineHeight: 20 });
+    return { height: y + 10, nodes };
+  }
+  function renderInteractions(result) {
+    const nodes = [];
+    const items = [
+      ...(result.interactions && result.interactions.stems || []).map((item) => `\u5929\u5E72\uFF1A${item.name}`),
+      ...(result.interactions && result.interactions.branches || []).map((item) => `\u5730\u652F\uFF1A${item.name}`)
+    ];
+    if (!items.length) return { height: 60, nodes: [textNode(0, 24, "\u2014 \u7121\u660E\u986F\u4E92\u52D5", "muted")] };
+    let y = 0;
+    items.forEach((item) => {
+      y = wrappedText(nodes, `\u2022 ${item}`, { x: 8, y, maxUnits: 52, lineHeight: 23, className: "body" });
+    });
+    return { height: y + 10, nodes };
+  }
+  function renderShenShaSummary(result) {
+    const nodes = [];
+    let y = 0;
+    const rows = [
+      ["\u539F\u5C40\u795E\u715E", result.shenSha || []],
+      ["\u6D41\u5E74\u795E\u715E", result.transits && result.transits.shenShaYear || []],
+      ["\u521D\u904B\u795E\u715E", result.luckCycles && result.luckCycles.cycles[0] && result.luckCycles.cycles[0].shenSha || []]
+    ];
+    rows.forEach(([label, list]) => {
+      y = addLabelValue(nodes, label, formatShenShaList(list), { y, labelWidth: 92, maxUnits: 42, lineHeight: 21 });
+      y += 4;
+    });
+    const auxiliary = result.auxiliary || {};
+    y = addLabelValue(nodes, "\u80CE\u5143\u547D\u5BAE", `\u80CE\u5143\uFF1A${auxiliary.taiYuan && auxiliary.taiYuan.ganzhi || "\u2014"} \uFF5C \u80CE\u606F\uFF1A${auxiliary.taiXi && auxiliary.taiXi.ganzhi || "\u2014"} \uFF5C \u547D\u5BAE\uFF1A${auxiliary.mingGong && auxiliary.mingGong.ganzhi || "\u2014"} \uFF5C \u8EAB\u5BAE\uFF1A${auxiliary.shenGong && auxiliary.shenGong.ganzhi || "\u2014"}`, { y, labelWidth: 92, maxUnits: 42, lineHeight: 21 });
+    return { height: y + 10, nodes };
   }
   function renderSvg(chartResult, options = {}) {
     const theme = getTheme(options.theme || "modern-oriental");
     const preset = getPreset(options.preset || "full");
-    const { width, height } = preset;
-    const p = chartResult.pillars;
-    const res = chartResult;
-    const shenShaByPillar = groupShenShaByPillar(res.shenSha || []);
-    const pillarCols = [
-      { title: "\u6642\u67F1", data: p.hour, tenGod: res.tenGods.stems.hour, hidden: res.tenGods.hidden.hour, nayin: res.nayin.hour, stage: res.twelveStages.byDayMaster.hour },
-      { title: "\u65E5\u67F1", data: p.day, tenGod: { full: "\u65E5\u4E3B" }, hidden: res.tenGods.hidden.day, nayin: res.nayin.day, stage: res.twelveStages.byDayMaster.day },
-      { title: "\u6708\u67F1", data: p.month, tenGod: res.tenGods.stems.month, hidden: res.tenGods.hidden.month, nayin: res.nayin.month, stage: res.twelveStages.byDayMaster.month },
-      { title: "\u5E74\u67F1", data: p.year, tenGod: res.tenGods.stems.year, hidden: res.tenGods.hidden.year, nayin: res.nayin.year, stage: res.twelveStages.byDayMaster.year }
-    ];
-    const dayMasterEl = (STEMS[STEM_INDEX[res.pillars.day.stem]] || {}).element || "";
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="background-color: ${theme.background}; font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', 'Segoe UI', Roboto, sans-serif;">
+    const result = chartResult;
+    const width = preset.width;
+    const contentWidth = width - 80;
+    const body = [];
+    let y = 36;
+    body.push(textNode(40, y, "\u516B\u5B57\u547D\u76E4 \xB7 \u5B50\u5E73\u56DB\u67F1", "title"));
+    body.push(textNode(40, y + 29, `BaziJS \u547D\u7406\u5F15\u64CE v${result.meta.engineVersion} \xB7 \u898F\u7BC4\u6D41\u6D3E\uFF1A${result.meta.profileName}`, "subtitle"));
+    y += 86;
+    const addSection = (title, builder) => {
+      const built = builder(contentWidth);
+      const height2 = Math.max(76, built.height + 64);
+      body.push(`<g transform="translate(40, ${y})">${sectionFrame(contentWidth, height2, title, built.nodes)}</g>`);
+      y += height2 + 24;
+    };
+    addSection("\u57FA\u672C\u8CC7\u6599", (innerWidth) => renderBasicInfo(result, innerWidth, theme));
+    if (preset.includePillars) {
+      addSection("\u56DB\u67F1\u4E3B\u76E4", (innerWidth) => {
+        const group = groupShenShaByPillar(result.shenSha || []);
+        const nodes = [];
+        let innerY = 0;
+        getPillarColumns(result).forEach((col) => {
+          const rendered = renderPillar(result, col, group[col.key] || [], innerWidth, theme);
+          nodes.push(`<g transform="translate(0, ${innerY})">${rendered.nodes.join("")}</g>`);
+          innerY += rendered.height + 14;
+        });
+        return { height: innerY, nodes };
+      });
+    }
+    if (preset.includeShenSha) addSection("\u7279\u6B8A\u67F1\u4F4D\u8207\u5B63\u7BC0\u689D\u4EF6", (innerWidth) => renderSpecialRules(result, innerWidth, theme));
+    if (preset.includeStrength) {
+      addSection("\u4E94\u884C\u5206\u6790 \xB7 \u6C23\u6578\u8207\u5F37\u5F31\u5E73\u8861", (innerWidth) => renderStrength(result, innerWidth, theme));
+      addSection("\u7528\u795E\u6A21\u578B", (innerWidth) => renderUseGod(result, innerWidth, theme));
+    }
+    if (preset.includeLuckCycles && result.luckCycles) {
+      addSection(`\u8D77\u904B\u8D70\u52E2\uFF08${result.luckCycles.directionText} \xB7 ${result.luckCycles.startAge.display}\u8D77\u904B\uFF09`, (innerWidth) => renderLuckCycles(result, innerWidth, theme));
+    }
+    if (preset.includeShenSha) addSection("\u6D41\u5E74\u8A73\u7D30", (innerWidth) => renderTransit(result, innerWidth, theme));
+    if (preset.includeInteractions) addSection("\u5929\u5E72\u5730\u652F\u4E92\u52D5", (innerWidth) => renderInteractions(result, innerWidth, theme));
+    if (preset.includeShenSha) addSection("\u795E\u715E\u5409\u51F6\u8207\u547D\u5BAE\u8EAB\u5BAE", (innerWidth) => renderShenShaSummary(result, innerWidth, theme));
+    y += 10;
+    const height = y + 42;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-label="BaziJS \u5B8C\u6574\u516B\u5B57\u547D\u76E4">
   <defs>
     <style>
-      .title { font-size: 26px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
-      /* SVG \u5167\u7684\u5C0F\u5B57\u5728\u4E0D\u540C DPR/\u7E2E\u653E\u4E0B\u5BB9\u6613\u8B8A\u6DE1\uFF0C\u4FDD\u7559\u5411\u91CF\u5C3A\u5BF8\u4E26\u63D0\u9AD8\u53EF\u8B80\u6027 */
-      .subtitle { font-size: 15px; fill: ${theme.textPrimary}; font-weight: 600; letter-spacing: 0.1px; }
-      .meta-label { font-size: 13px; fill: ${theme.textMuted}; font-weight: 500; }
-      .meta-value { font-size: 14px; fill: ${theme.textPrimary}; font-weight: 700; }
-      .col-header { font-size: 15px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 700; }
-      .tengod { font-size: 15px; fill: ${theme.gold}; text-anchor: middle; font-weight: 700; }
-      .ganzhi { font-size: 38px; font-weight: 700; text-anchor: middle; }
-      .hidden-stem { font-size: 13px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 500; }
-      .pillar-shen-sha { font-size: 11px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 600; }
-      .badge-text { font-size: 12px; fill: ${theme.cardBg}; font-weight: 700; text-anchor: middle; }
-      .section-title { font-size: 17px; font-weight: 700; fill: ${theme.accent}; letter-spacing: 1px; }
-      .card { fill: ${theme.cardBg}; stroke: ${theme.border}; stroke-width: 1; rx: 6px; }
-      .grid-box { fill: ${theme.gridBg}; stroke: ${theme.border}; stroke-width: 1; }
+      .title { font-size: 28px; font-weight: 800; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
+      .subtitle { font-size: 15px; font-weight: 600; fill: ${theme.textSecondary}; }
+      .section-title { font-size: 20px; font-weight: 800; fill: ${theme.accent}; letter-spacing: 1px; }
+      .pillar-title { font-size: 19px; font-weight: 800; fill: ${theme.accent}; }
+      .subsection-title { font-size: 15px; font-weight: 800; fill: ${theme.accent}; }
+      .label { font-size: 14px; font-weight: 700; fill: ${theme.textSecondary}; }
+      .value { font-size: 15px; font-weight: 700; fill: ${theme.textPrimary}; }
+      .value-accent { font-size: 15px; font-weight: 800; fill: ${theme.accent}; }
+      .character { font-size: 38px; font-weight: 800; fill: ${theme.textPrimary}; }
+      .body { font-size: 14px; font-weight: 600; fill: ${theme.textPrimary}; }
+      .body-strong { font-size: 15px; font-weight: 800; fill: ${theme.textPrimary}; }
+      .meta { font-size: 13px; font-weight: 600; fill: ${theme.textSecondary}; }
+      .evidence-title { font-size: 13px; font-weight: 800; fill: ${theme.accent}; }
+      .evidence { font-size: 12px; font-weight: 600; fill: ${theme.textSecondary}; }
+      .muted { font-size: 14px; font-weight: 600; fill: ${theme.textMuted}; }
+      .current-badge { font-size: 12px; font-weight: 800; fill: ${theme.accent}; }
+      .watermark { font-size: 11px; font-weight: 600; fill: ${theme.textSecondary}; opacity: 0.52; letter-spacing: 0.35px; }
+      .card { fill: ${theme.cardBg}; stroke: ${theme.border}; stroke-width: 1.2; }
     </style>
   </defs>
-
-  <!-- \u80CC\u666F\u5E95\u8272\u8207\u5916\u908A\u6846 -->
   <rect x="0" y="0" width="${width}" height="${height}" fill="${theme.background}" />
-  <rect x="16" y="16" width="${width - 32}" height="${height - 32}" fill="none" stroke="${theme.border}" stroke-width="1.5" rx="8" />
-
-  <!-- \u9802\u90E8 Header -->
-  <g transform="translate(40, 50)">
-    <text x="0" y="0" class="title">\u516B\u5B57\u547D\u76E4 \xB7 \u5B50\u5E73\u56DB\u67F1</text>
-    <text x="0" y="24" class="subtitle">BaziJS \u547D\u7406\u5F15\u64CE v${res.meta.engineVersion} \xB7 \u898F\u7BC4\u6D41\u6D3E: ${res.meta.profileName}</text>
-  </g>
-
-  <!-- \u57FA\u672C\u8CC7\u6599\u8CC7\u8A0A\u5217\uFF08\u96D9\u884C\u6392\u7248\uFF0C\u907F\u514D\u55AE\u884C\u5B57\u4E32\u91CD\u758A\u767C\u7CCA\uFF09 -->
-  <g transform="translate(40, 95)">
-    <rect x="0" y="0" width="${width - 80}" height="88" class="card" />
-    <g transform="translate(20, 30)">
-      <text x="0" y="0" class="meta-label">\u516C\u66C6\uFF1A</text>
-      <text x="52" y="0" class="meta-value">${res.calendar.solar.year}\u5E74${res.calendar.solar.month}\u6708${res.calendar.solar.day}\u65E5 ${res.input.birthTime || "\u672A\u77E5"}</text>
-
-      <text x="340" y="0" class="meta-label">\u8FB2\u66C6\uFF1A</text>
-      <text x="392" y="0" class="meta-value">${res.calendar.lunar.monthName}${res.calendar.lunar.dayName}</text>
-
-      <text x="0" y="34" class="meta-label">\u6027\u5225\uFF1A</text>
-      <text x="52" y="34" class="meta-value">${res.input.gender === "male" ? "\u4E7E\u9020\uFF08\u7537\uFF09" : "\u5764\u9020\uFF08\u5973\uFF09"}</text>
-
-      <text x="340" y="34" class="meta-label">\u65E5\u4E3B\uFF1A</text>
-      <text x="392" y="34" class="meta-value" fill="${theme.accent}">${res.pillars.day.stem}${dayMasterEl}\uFF08${res.strength.level}\uFF09</text>
-    </g>
-  </g>
-
-  <!-- \u56DB\u67F1\u4E3B\u76E4\u8868\u683C -->
-  <g transform="translate(40, 195)">
-    <rect x="0" y="0" width="${width - 80}" height="320" class="card" />
-`;
-    const colWidth = (width - 80) / 4;
-    pillarCols.forEach((col, idx) => {
-      const x = idx * colWidth;
-      const centerX = x + colWidth / 2;
-      const stemChar = col.data.available !== false ? col.data.stem : "\uFF1F";
-      const branchChar = col.data.available !== false ? col.data.branch : "\uFF1F";
-      const tengodName = col.tenGod ? col.tenGod.full || col.tenGod.short : "\u2014";
-      const nayinName = col.nayin || "\u2014";
-      const stageName = col.stage ? col.stage.name : "\u2014";
-      const pillarShenSha = shenShaByPillar[["hour", "day", "month", "year"][idx]] || [];
-      const directNames = pillarShenSha.slice(0, 8).map((item) => item.displayName || item.name);
-      if (pillarShenSha.length > 8) directNames.push(`+${pillarShenSha.length - 8}`);
-      const shenShaLines = [];
-      let shenShaLine = "";
-      directNames.forEach((name) => {
-        const piece = shenShaLine ? `\u3001${name}` : name;
-        if (shenShaLine && (shenShaLine + piece).length > 18) {
-          shenShaLines.push(shenShaLine);
-          shenShaLine = name;
-        } else {
-          shenShaLine += piece;
-        }
-      });
-      if (shenShaLine) shenShaLines.push(shenShaLine);
-      svg += `
-    <!-- \u67F1\u4F4D Header: ${col.title} -->
-    <rect x="${x}" y="0" width="${colWidth}" height="36" class="grid-box" />
-    <text x="${centerX}" y="23" class="col-header">${col.title}</text>
-
-    <!-- \u5929\u5E72\u5341\u795E -->
-    <text x="${centerX}" y="62" class="tengod">${tengodName}</text>
-
-    <!-- \u5929\u5E72\u5B57\u5143 -->
-    <text x="${centerX}" y="105" class="ganzhi" fill="${theme.textPrimary}">${stemChar}</text>
-
-    <!-- \u5730\u652F\u5B57\u5143 -->
-    <text x="${centerX}" y="152" class="ganzhi" fill="${theme.textPrimary}">${branchChar}</text>
-
-    <!-- \u6BCF\u67F1\u795E\u715E\uFF08\u756B\u9762\u53EA\u986F\u793A\u524D 8 \u7B46\uFF1B\u5B8C\u6574\u8CC7\u6599\u4ECD\u4FDD\u7559\u5728 JSON/SVG \u5916\u7684\u5F15\u64CE\u7D50\u679C\uFF09 -->
-    <g transform="translate(${centerX}, 174)">
-    ${shenShaLines.length ? shenShaLines.slice(0, 3).map((line, lineIdx) => `<text x="0" y="${lineIdx * 14}" class="pillar-shen-sha">${line}</text>`).join("") : '<text x="0" y="0" class="pillar-shen-sha">\u2014</text>'}
-    </g>
-
-    <!-- \u85CF\u5E72\u5217\u8868 -->
-    <g transform="translate(${centerX}, 218)">
-    `;
-      if (col.hidden && col.hidden.length > 0) {
-        col.hidden.forEach((h, hIdx) => {
-          const tgShort = h.tenGod ? h.tenGod.short : "";
-          svg += `<text x="0" y="${hIdx * 18}" class="hidden-stem">${h.stem} <tspan fill="${theme.textMuted}">(${tgShort})</tspan></text>`;
-        });
-      } else {
-        svg += `<text x="0" y="0" class="hidden-stem">\u2014</text>`;
-      }
-      svg += `
-    </g>
-
-    <!-- \u7D0D\u97F3\u8207\u9577\u751F -->
-    <text x="${centerX}" y="286" class="meta-label" text-anchor="middle">\u7D0D\u97F3: ${nayinName}</text>
-    <text x="${centerX}" y="304" class="meta-label" text-anchor="middle">\u9577\u751F: ${stageName}</text>
-    `;
-      if (idx > 0) {
-        svg += `<line x1="${x}" y1="0" x2="${x}" y2="320" stroke="${theme.border}" stroke-width="1" />`;
-      }
-    });
-    svg += `  </g>`;
-    if (preset.includeStrength) {
-      const yOffset = 530;
-      svg += `
-    <!-- \u4E94\u884C\u5F37\u5F31\u5206\u6790\u5340\u584A -->
-    <g transform="translate(40, ${yOffset})">
-      <rect x="0" y="0" width="${width - 80}" height="130" class="card" />
-      <text x="24" y="32" class="section-title">\u4E94\u884C\u6C23\u6578\u8207\u5F37\u5F31\u5E73\u8861</text>
-
-      <g transform="translate(24, 52)">
-        <text x="0" y="20" class="meta-label">\u65E5\u4E3B\u65FA\u8870\u5F97\u5206\uFF1A</text>
-        <text x="90" y="20" class="meta-value" font-size="16px" fill="${theme.accent}">${res.strength.score} \u5206 \xB7 \u3010${res.strength.level}\u3011</text>
-
-        <text x="0" y="50" class="meta-label">\u559C\u7528\u4E94\u884C\uFF1A</text>
-        <text x="70" y="50" class="meta-value" fill="${theme.elementColors["\u6728"] || theme.textPrimary}">${res.strength.favorableElements.join("\u3001") || "\u7121\u7279\u5225\u6A19\u8A18"}</text>
-
-        <text x="220" y="50" class="meta-label">\u5FCC\u4EC7\u4E94\u884C\uFF1A</text>
-        <text x="290" y="50" class="meta-value" fill="${theme.elementColors["\u706B"] || theme.textPrimary}">${res.strength.unfavorableElements.join("\u3001") || "\u7121\u7279\u5225\u6A19\u8A18"}</text>
-      </g>
-
-      <!-- \u4E94\u884C\u4F54\u6BD4\u689D\u5F62\u5716 -->
-      <g transform="translate(420, 48)">
-    `;
-      const elementsList = ["\u6728", "\u706B", "\u571F", "\u91D1", "\u6C34"];
-      elementsList.forEach((el, eIdx) => {
-        const elData = res.strength.distribution[el] || { percentage: 20 };
-        const barY = eIdx * 14;
-        const barW = Math.max(4, elData.percentage / 100 * 200);
-        const color = theme.elementColors[el] || theme.textPrimary;
-        svg += `
-        <text x="0" y="${barY + 10}" font-size="11px" fill="${color}">${el}</text>
-        <rect x="24" y="${barY + 2}" width="200" height="9" fill="${theme.gridBg}" rx="2" />
-        <rect x="24" y="${barY + 2}" width="${barW}" height="9" fill="${color}" rx="2" />
-        <text x="232" y="${barY + 10}" font-size="10px" fill="${theme.textMuted}">${elData.percentage}%</text>
-      `;
-      });
-      svg += `
-      </g>
-    </g>
-    `;
-    }
-    if (preset.includeLuckCycles && res.luckCycles) {
-      const yOffset = 665;
-      const cardW = width - 80;
-      const stepW = Math.min(80, (cardW - 40) / Math.min(8, res.luckCycles.cycles.length));
-      svg += `
-    <!-- \u5927\u904B\u8D70\u52E2\u5340\u584A -->
-    <g transform="translate(40, ${yOffset})">
-      <rect x="0" y="0" width="${cardW}" height="160" class="card" />
-      <text x="24" y="32" class="section-title">\u8D77\u904B\u8D70\u52E2\uFF08${res.luckCycles.directionText} \xB7 ${res.luckCycles.startAge.display}\u8D77\u904B\uFF09</text>
-      <g transform="translate(24, 50)">
-    `;
-      res.luckCycles.cycles.slice(0, 8).forEach((cyc, idx) => {
-        const bx = idx * stepW;
-        const bCenterX = bx + stepW / 2;
-        svg += `
-        <rect x="${bx}" y="0" width="${stepW - 6}" height="92" class="grid-box" rx="4" />
-        <text x="${bCenterX - 3}" y="20" font-size="12px" font-weight="600" fill="${theme.textSecondary}" text-anchor="middle">${cyc.fromAge}\u6B72</text>
-        <text x="${bCenterX - 3}" y="48" font-size="19px" font-weight="bold" fill="${theme.textPrimary}" text-anchor="middle">${cyc.ganzhi}</text>
-        <text x="${bCenterX - 3}" y="68" font-size="12px" font-weight="600" fill="${theme.gold}" text-anchor="middle">${cyc.tenGodStem ? cyc.tenGodStem.short : ""}</text>
-        <text x="${bCenterX - 3}" y="84" font-size="11px" fill="${theme.textSecondary}" text-anchor="middle">${cyc.fromYear}\u5E74</text>
-      `;
-      });
-      svg += `
-      </g>
-    </g>
-    `;
-    }
-    if (preset.includeShenSha && height >= 900) {
-      const yOffset = 830;
-      const cardW = width - 80;
-      const maxCharsPerLine = Math.max(18, Math.floor((cardW - 130) / 13.5));
-      const cap = (lines, total, maxL) => {
-        if (lines.length <= maxL) return lines;
-        const cut = lines.slice(0, maxL);
-        cut[maxL - 1] += `\uFF08\u7B49\u5171${total}\u9846\uFF09`;
-        return cut;
-      };
-      const wrapNames = (list, limit) => {
-        const names = (list || []).slice(0, limit).map((s) => `${s.displayName || s.name}\uFF08${formatHitOn(s.hitOn)}\uFF09`);
-        if (names.length === 0) return ["\u2014"];
-        const lines = [];
-        let cur = "";
-        for (const n of names) {
-          const piece = cur ? "\u3001 " + n : n;
-          if ((cur + piece).length > maxCharsPerLine && cur) {
-            lines.push(cur);
-            cur = n;
-          } else {
-            cur += piece;
-          }
-        }
-        if (cur) lines.push(cur);
-        return lines;
-      };
-      const natalLines = cap(wrapNames(res.shenSha, 14), (res.shenSha || []).length, 3);
-      const specialList = res.specialRules || [];
-      const specialLines = cap(wrapNames(specialList, 10), specialList.length, 2);
-      const yearList = res.transits && res.transits.shenShaYear ? res.transits.shenShaYear : [];
-      const yearSSLines = cap(wrapNames(yearList, 10), yearList.length, 1);
-      const firstLuck = res.luckCycles.cycles[0];
-      const luckList = firstLuck && firstLuck.shenSha ? firstLuck.shenSha : [];
-      const luckSSLines = cap(wrapNames(luckList, 10), luckList.length, 1);
-      const luckLabel = firstLuck ? `${firstLuck.ganzhi}\u904B\uFF1A` : "";
-      const rowGap = 24;
-      const blockRows = 1 + natalLines.length + yearSSLines.length + luckSSLines.length + specialLines.length;
-      const cardH = 50 + blockRows * rowGap + 26;
-      let shenShaInner = "";
-      let ry = 0;
-      const addRow = (label, lines) => {
-        lines.forEach((ln, li) => {
-          shenShaInner += `
-        <text x="0" y="${ry}" class="meta-label">${li === 0 ? label : ""}</text>
-        <text x="82" y="${ry}" class="meta-value" font-size="13px">${ln}</text>`;
-          ry += rowGap;
-        });
-      };
-      addRow("\u539F\u5C40\u795E\u715E\uFF1A", natalLines);
-      addRow("\u6D41\u5E74\u795E\u715E\uFF1A", yearSSLines);
-      addRow("\u521D\u904B\u795E\u715E\uFF1A", luckSSLines.map((ln, li) => li === 0 ? luckLabel + ln : ln));
-      addRow("\u7279\u6B8A\u689D\u4EF6\uFF1A", specialLines);
-      svg += `
-    <!-- \u795E\u715E\u8207\u9644\u5BAE -->
-    <g transform="translate(40, ${yOffset})">
-      <rect x="0" y="0" width="${cardW}" height="${cardH}" class="card" />
-      <text x="24" y="30" class="section-title">\u795E\u715E\u5409\u51F6\u8207\u547D\u5BAE\u8EAB\u5BAE</text>
-      <g transform="translate(24, 52)">
-        ${shenShaInner}
-        <text x="0" y="${ry}" class="meta-label">\u80CE\u5143\u547D\u5BAE\uFF1A</text>
-        <text x="82" y="${ry}" class="meta-value" font-size="13px">\u80CE\u5143: ${res.auxiliary.taiYuan ? res.auxiliary.taiYuan.ganzhi : "\u2014"} \uFF5C \u80CE\u606F: ${res.auxiliary.taiXi ? res.auxiliary.taiXi.ganzhi : "\u2014"} \uFF5C \u547D\u5BAE: ${res.auxiliary.mingGong ? res.auxiliary.mingGong.ganzhi : "\u2014"} \uFF5C \u8EAB\u5BAE: ${res.auxiliary.shenGong ? res.auxiliary.shenGong.ganzhi : "\u2014"}</text>
-      </g>
-    </g>
-    `;
-    }
-    svg += `
-  <text x="${width / 2}" y="${height - 24}" font-size="11px" fill="${theme.textMuted}" text-anchor="middle">
-    BaziJS \u958B\u6E90\u547D\u7406\u5F15\u64CE \xB7 Apache-2.0 \u6388\u6B0A
-  </text>
+  <rect x="16" y="16" width="${width - 32}" height="${height - 32}" rx="12" fill="none" stroke="${theme.border}" stroke-width="1.5" />
+  ${body.join("")}
+  ${textNode(width - 40, height - 44, "\u7576\u9EBB\u5BE6\u9A57\u5BA4 \xB7 github.com/donma/bazi-js", "watermark", 'text-anchor="end"')}
+  ${textNode(width / 2, height - 24, "BaziJS \u958B\u6E90\u547D\u7406\u5F15\u64CE \xB7 Apache-2.0 \u6388\u6B0A", "muted", 'text-anchor="middle"')}
 </svg>`;
-    return svg;
   }
 
   // src/renderer/png/index.js
@@ -5089,11 +5810,16 @@ var Bazi = (() => {
         const URL = window.URL || window.webkitURL || window;
         const blobUrl = URL.createObjectURL(svgBlob);
         img.onload = () => {
+          const scale = Number.isFinite(Number(options.pngScale)) && Number(options.pngScale) > 0 ? Number(options.pngScale) : 2;
+          const sourceWidth = img.naturalWidth || img.width || 960;
+          const sourceHeight = img.naturalHeight || img.height || 980;
           const canvas = document.createElement("canvas");
-          canvas.width = img.width || 960;
-          canvas.height = img.height || 980;
+          canvas.width = Math.ceil(sourceWidth * scale);
+          canvas.height = Math.ceil(sourceHeight * scale);
           const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           URL.revokeObjectURL(blobUrl);
           canvas.toBlob((blob) => {
             resolve({
@@ -5101,7 +5827,8 @@ var Bazi = (() => {
               blob,
               dataUrl: canvas.toDataURL("image/png"),
               width: canvas.width,
-              height: canvas.height
+              height: canvas.height,
+              scale
             });
           }, "image/png");
         };
@@ -5151,6 +5878,8 @@ var Bazi = (() => {
     Calendar: solar_terms_exports,
     Solar: solar_exports,
     Lunar: lunar_exports,
+    Constellation: constellation_exports,
+    Zodiac: zodiac_exports,
     Julian: julian_exports,
     TrueSolarTime: true_solar_time_exports,
     Rules: rule_registry_exports,
