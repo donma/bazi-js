@@ -1,0 +1,385 @@
+/* 現代東方高質感美學樣式表 (Modern Oriental Aesthetics) - 支援完整 RWD */
+:root {
+  --bg-color: #faf8f5;
+  --card-bg: #ffffff;
+  --text-main: #1f2328;
+  --text-secondary: #57606a;
+  --text-muted: #8c959f;
+  --accent: #b23a22; /* 朱砂紅 */
+  --accent-light: #fbeee9;
+  --gold: #9a6700;   /* 雅金加深，抗鋸齒清晰 */
+  --border: #d8d0c5;
+  --border-dark: #b8aea0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  /* 優先採用高可讀無襯線黑體，避免小號明體/宋體在 Windows DirectWrite 渲染出現筆畫碎裂發糊 */
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+/* Header */
+header.hero {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.brand-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+h1.hero-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+p.hero-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 580px;
+  margin: 0 auto 16px;
+}
+
+.header-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-links a {
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: rgba(178, 58, 34, 0.06);
+  transition: all 0.2s;
+}
+
+.header-links a:hover {
+  background-color: var(--accent-light);
+}
+
+/* Main Layout: Desktop 雙欄、平板/手機單欄自適應 */
+.main-grid {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* Card */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--text-main);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 5px;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: #ffffff;
+  font-size: 14px;
+  color: var(--text-main);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(178, 58, 34, 0.12);
+}
+
+.segmented-control {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segmented-btn {
+  flex: 1;
+  padding: 8px 6px;
+  background: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.segmented-btn:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.segmented-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-row input {
+  accent-color: var(--accent);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(178, 58, 34, 0.25);
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background: #9c321d;
+}
+
+/* Result Section & Controls Toolbar */
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.controls-left {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.controls-left select {
+  width: auto;
+  min-width: 130px;
+}
+
+.action-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Chart Canvas Container — RWD 縮放核心 */
+.chart-viewer {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* 讓 SVG 自適應容器寬度，並依原始寬高比縮放，避免被壓扁或文字模糊 */
+.chart-viewer svg {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  transform: translateZ(0); /* 啟用硬體加速清晰算繪 */
+}
+
+/* Drawer / Collapsible for JSON */
+.details-toggle {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 14px;
+}
+
+pre.json-view {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 14px;
+  border-radius: 6px;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 12px;
+  max-height: 380px;
+  overflow: auto;
+  margin-top: 10px;
+  word-break: break-all;
+}
+
+footer {
+  margin-top: 48px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+/* ==================== RWD 響應式斷點 ==================== */
+
+/* 平板尺寸 (992px 以下) */
+@media (max-width: 992px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  h1.hero-title {
+    font-size: 28px;
+  }
+}
+
+/* 手機直向尺寸 (600px 以下) */
+@media (max-width: 600px) {
+  .container {
+    padding: 16px 12px 32px;
+  }
+  header.hero {
+    margin-bottom: 24px;
+  }
+  h1.hero-title {
+    font-size: 24px;
+  }
+  p.hero-subtitle {
+    font-size: 13px;
+  }
+  .card {
+    padding: 16px;
+    border-radius: 6px;
+  }
+  .result-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .controls-left, .action-bar {
+    width: 100%;
+  }
+  .controls-left select {
+    flex: 1;
+    min-width: 0;
+  }
+  .action-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .btn-secondary {
+    text-align: center;
+    padding: 8px 6px;
+  }
+  .chart-viewer {
+    padding: 6px;
+  }
+}

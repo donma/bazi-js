@@ -1,0 +1,12 @@
+# 依賴與建置產物以外的本機檔案
+node_modules/
+
+# OpenCode / Agent 工作區（不進版控）
+.opencode/
+
+# 作業系統與編輯器暫存
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BaziJS · 純前端八字排盤 SDK 正式展示</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="brand-badge">Pure Metaphysical JavaScript SDK</div>
+      <h1 class="hero-title">BaziJS 八字排盤引擎</h1>
+      <p class="hero-subtitle">
+        可驗證、可追溯、零後端依賴的純前端八字計算與視覺化開源 SDK。
+      </p>
+      <div class="header-links">
+        <a href="../lab/index.html">Geek Lab 實驗室 →</a>
+        <a href="https://github.com/anomalyco/opencode" target="_blank">GitHub Repo</a>
+      </div>
+    </header>
+
+    <div class="main-grid">
+      <!-- 左側：輸入表單面板 -->
+      <aside class="card">
+        <h2 class="card-title">生辰輸入</h2>
+
+        <form id="bazi-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="birthDate">公曆出生日期</label>
+            <input type="date" id="birthDate" value="1983-05-11" min="1900-01-01" max="2100-12-31" required>
+          </div>
+
+          <div class="form-group">
+            <label>性別造向</label>
+            <div class="segmented-control" id="gender-control">
+              <button type="button" class="segmented-btn active" data-val="male">乾造（男）</button>
+              <button type="button" class="segmented-btn" data-val="female">坤造（女）</button>
+            </div>
+            <input type="hidden" id="gender" value="male">
+          </div>
+
+          <div class="form-group">
+            <label>時間模式</label>
+            <div class="segmented-control" id="time-mode-control">
+              <button type="button" class="segmented-btn active" data-val="exact">精確時間</button>
+              <button type="button" class="segmented-btn" data-val="branch">只知時辰</button>
+              <button type="button" class="segmented-btn" data-val="unknown">未知時間</button>
+            </div>
+          </div>
+
+          <div class="form-group" id="exact-time-group">
+            <label for="birthTime">出生時間 (HH:mm)</label>
+            <input type="time" id="birthTime" value="16:19">
+          </div>
+
+          <div class="form-group" id="branch-time-group" style="display: none;">
+            <label for="birthHourBranch">出生時辰地支</label>
+            <select id="birthHourBranch">
+              <option value="子">子時 (23:00-00:59)</option>
+              <option value="丑">丑時 (01:00-02:59)</option>
+              <option value="寅">寅時 (03:00-04:59)</option>
+              <option value="卯">卯時 (05:00-06:59)</option>
+              <option value="辰">辰時 (07:00-08:59)</option>
+              <option value="巳">巳時 (09:00-10:59)</option>
+              <option value="午">午時 (11:00-12:59)</option>
+              <option value="未">未時 (13:00-14:59)</option>
+              <option value="申" selected>申時 (15:00-16:59)</option>
+              <option value="酉">酉時 (17:00-18:59)</option>
+              <option value="戌">戌時 (19:00-20:59)</option>
+              <option value="亥">亥時 (21:00-22:59)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="timezone">時區 Offset</label>
+            <select id="timezone">
+              <option value="+08:00" selected>UTC+08:00 (台北、北京、香港、新加坡)</option>
+              <option value="+09:00">UTC+09:00 (東京、首爾)</option>
+              <option value="+07:00">UTC+07:00 (曼谷、雅加達)</option>
+              <option value="+00:00">UTC+00:00 (倫敦、格林威治)</option>
+              <option value="-05:00">UTC-05:00 (美東 紐約)</option>
+              <option value="-08:00">UTC-08:00 (美西 舊金山)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-row">
+              <input type="checkbox" id="trueSolarTime">
+              <span>啟用真太陽時修正（經度 + 均時差）</span>
+            </label>
+          </div>
+
+          <div class="form-group" id="location-group" style="display: none;">
+            <label for="longitude">經度（東經為正，西經為負）</label>
+            <input type="number" id="longitude" step="0.0001" value="121.5654" placeholder="例如台北 121.5654">
+          </div>
+
+          <button type="button" id="calc-btn" class="btn-primary">排 盤</button>
+        </form>
+      </aside>
+
+      <!-- 右側：排盤成果呈現與視覺控制 -->
+      <main>
+        <div class="card">
+          <div class="result-header">
+            <div class="controls-left">
+              <select id="theme-select">
+                <option value="modern-oriental" selected>現代東方 (Modern)</option>
+                <option value="classic">古典仿宣 (Classic)</option>
+                <option value="dark">玄黑幽邃 (Dark)</option>
+              </select>
+
+              <select id="preset-select">
+                <option value="full" selected>全覽主盤 (Full)</option>
+                <option value="mobile-share">社群直式 (Mobile)</option>
+                <option value="a4">A4 列印 (A4)</option>
+                <option value="compact">精簡微卡 (Compact)</option>
+              </select>
+            </div>
+
+            <div class="action-bar">
+              <button class="btn-secondary" id="download-svg-btn">下載 SVG</button>
+              <button class="btn-secondary" id="download-png-btn">下載 PNG</button>
+              <button class="btn-secondary" id="copy-json-btn">複製 JSON</button>
+              <button class="btn-secondary" id="copy-ai-btn">複製 AI Context</button>
+            </div>
+          </div>
+
+          <!-- 排盤圖表預覽區 -->
+          <div class="chart-viewer" id="chart-container">
+            <!-- 動態插入 SVG -->
+          </div>
+
+          <!-- 展開檢視結構化 JSON 資料 -->
+          <details style="margin-top: 16px;">
+            <summary class="details-toggle">檢視結構化 JSON 輸出 (Structured SDK Result)</summary>
+            <pre class="json-view" id="json-output"></pre>
+          </details>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <p>BaziJS 核心 SDK 完全在瀏覽器端運算 · Apache-2.0 開源授權</p>
+    </footer>
+  </div>
+
+  <script src="../dist/bazi-sdk.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BaziJS · Geek Lab 實驗室 (Developer Console)</title>
+  <link rel="stylesheet" href="./lab.css">
+</head>
+<body>
+  <div class="lab-header">
+    <div class="lab-title">
+      <span>BaziJS Geek Lab</span>
+      <span class="badge">SDK Core Debugger</span>
+    </div>
+    <div>
+      <a href="../demo/index.html" style="color: var(--lab-blue); font-size: 13px; text-decoration: none;">← 回到首頁展示</a>
+    </div>
+  </div>
+
+  <div class="lab-layout">
+    <!-- 左側：Golden Cases & 邊界案例庫 -->
+    <aside>
+      <div class="panel">
+        <div class="panel-title">測試與案例載入庫</div>
+
+        <div class="case-category">立春交節邊界</div>
+        <button class="case-btn" data-case="lichun-before">立春前 1 分鐘（仍歸上一年）</button>
+        <button class="case-btn" data-case="lichun-after">立春後 1 分鐘（切入新一年）</button>
+
+        <div class="case-category">子初換日邊界 (23:00)</div>
+        <button class="case-btn" data-case="zishi-2259">22:59（當日子夜前）</button>
+        <button class="case-btn" data-case="zishi-2300">23:00（子初換日進次日）</button>
+        <button class="case-btn" data-case="zishi-2359">23:59（夜子時）</button>
+        <button class="case-btn" data-case="zishi-0000">00:00（民用午夜）</button>
+
+        <div class="case-category">時間缺失模式</div>
+        <button class="case-btn" data-case="time-unknown">出生時間完全未知 (Unknown)</button>
+        <button class="case-btn" data-case="time-branch">只知時辰 (午時)</button>
+
+        <div class="case-category">真太陽時與閏月</div>
+        <button class="case-btn" data-case="true-solar">真太陽時（台北經度121.56）</button>
+        <button class="case-btn" data-case="leap-month">農曆閏月（2023 閏二月）</button>
+
+        <div class="case-category">百年跨度邊界</div>
+        <button class="case-btn" data-case="boundary-1900">1900-01-01 邊界</button>
+        <button class="case-btn" data-case="boundary-2100">2100-12-31 邊界</button>
+        <button class="case-btn" data-case="out-of-range" style="border-color: var(--lab-red); color: var(--lab-red);">超出範圍報錯 (1899-12-31)</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Rule Profile & 參數控制</div>
+        <div style="margin-bottom: 10px;">
+          <label style="font-size: 12px; color: var(--lab-text-muted);">換日切換：</label>
+          <select id="ctrl-day-boundary" style="background:#21262d; color:#fff; border:1px solid #30363d; padding:4px 8px; border-radius:4px; font-size:12px; width:100%; margin-top:4px;">
+            <option value="23:00" selected>23:00 子初換日 (Canonical)</option>
+            <option value="00:00">00:00 午夜換日 (Midnight)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="font-size: 12px; color: var(--lab-text-muted);">年柱切年：</label>
+          <select id="ctrl-year-boundary" style="background:#21262d; color:#fff; border:1px solid #30363d; padding:4px 8px; border-radius:4px; font-size:12px; width:100%; margin-top:4px;">
+            <option value="lichun" selected>立春切年 (Canonical)</option>
+            <option value="lunar_new_year">正月初一切年</option>
+          </select>
+        </div>
+
+        <div>
+          <button id="run-benchmark-btn" class="case-btn" style="border-color: var(--lab-gold); color: var(--lab-gold); text-align: center; font-weight: bold; margin-top: 10px;">
+            ⚡ 執行萬次效能 Benchmark
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 右側：Debug Trace、Evidence 與 JSON 檢視器 -->
+    <main>
+      <div class="panel">
+        <div class="lab-tabs">
+          <button class="tab-btn active" data-tab="json">結構化 JSON</button>
+          <button class="tab-btn" data-tab="trace">計算 Debug Trace</button>
+          <button class="tab-btn" data-tab="evidence">神煞與強弱 Evidence</button>
+          <button class="tab-btn" data-tab="svg-source">SVG Raw Source</button>
+        </div>
+
+        <!-- Tab 1: JSON -->
+        <div id="tab-pane-json">
+          <pre class="json-pane" id="lab-json-view"></pre>
+        </div>
+
+        <!-- Tab 2: Trace -->
+        <div id="tab-pane-trace" style="display: none;">
+          <div class="trace-log" id="lab-trace-view"></div>
+        </div>
+
+        <!-- Tab 3: Evidence -->
+        <div id="tab-pane-evidence" style="display: none;">
+          <div class="trace-log" id="lab-evidence-view" style="max-height: 480px; color: #7ee787;"></div>
+        </div>
+
+        <!-- Tab 4: SVG Raw Source -->
+        <div id="tab-pane-svg-source" style="display: none;">
+          <pre class="json-pane" id="lab-svg-view" style="color: #79c0ff;"></pre>
+        </div>
+      </div>
+
+      <!-- Benchmark 輸出容器 -->
+      <div id="benchmark-box" class="panel" style="display: none;">
+        <div class="panel-title">Benchmark 測試報告</div>
+        <div class="benchmark-result">
+          <div class="stat-box">
+            <div style="font-size: 11px; color: var(--lab-text-muted);">計算次數</div>
+            <div id="bench-count" style="font-size: 18px; font-weight: bold; color: var(--lab-blue);">10,000</div>
+          </div>
+          <div class="stat-box">
+            <div style="font-size: 11px; color: var(--lab-text-muted);">總耗時</div>
+            <div id="bench-time" style="font-size: 18px; font-weight: bold; color: var(--lab-green);">— ms</div>
+          </div>
+          <div class="stat-box">
+            <div style="font-size: 11px; color: var(--lab-text-muted);">每秒運算 (Ops/sec)</div>
+            <div id="bench-ops" style="font-size: 18px; font-weight: bold; color: var(--lab-gold);">—</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../dist/bazi-sdk.js"></script>
+  <script src="./lab.js"></script>
+</body>
+</html>

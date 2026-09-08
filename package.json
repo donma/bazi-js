@@ -1,0 +1,33 @@
+{
+  "name": "bazijs",
+  "version": "1.0.0",
+  "description": "Browser-first, zero-dependency BaZi (Four Pillars) calculation SDK in JavaScript.",
+  "main": "dist/bazi-sdk.js",
+  "browser": "dist/bazi-sdk.js",
+  "module": "dist/bazi-sdk.esm.js",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node tests/run.js",
+    "validate": "node scripts/validate-external.js",
+    "gen-golden": "node scripts/generate-golden.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "bazi",
+    "four-pillars",
+    "bazi-sdk",
+    "astrology",
+    "lunar-calendar",
+    "solar-terms",
+    "shensha"
+  ],
+  "author": "BaziJS Contributors",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "esbuild": "^0.23.0"
+  }
+}

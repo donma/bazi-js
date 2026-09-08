@@ -1,0 +1,10 @@
+BaziJS
+Copyright 2026 BaziJS Contributors
+
+This product includes software developed as an open-source BaZi (Four Pillars)
+calculation SDK. Licensed under the Apache License, Version 2.0.
+
+Astronomical methods reference:
+- Jean Meeus, "Astronomical Algorithms", 2nd ed. (solar terms / Julian day)
+- Espenak & Meeus, NASA "Five Millennium Canon of Solar Eclipses" (ΔT polynomials)
+- Purple Mountain Observatory (紫金山天文台) calendar structure for lunar data layout

@@ -1,0 +1,303 @@
+// BaziJS 主入口與統一 SDK 介面
+// 支援：
+// - Bazi.calculate(input, options)
+// - Bazi.calculateSafe(input, options)
+// - new Bazi.Chart(input, options)
+// - 模組導出：Calendar, Chart, Rules, ShenSha, Strength, Luck, Transit, Renderer, AI, Validation
+
+import { validateInput } from '../core/utils/validation.js';
+import { calculateFourPillars } from './chart.js';
+import { calculateChartTenGods } from '../tengods/index.js';
+import { calculateChartHiddenStems } from '../hidden-stems/index.js';
+import { calculateChartNayin } from '../nayin/index.js';
+import { calculateChartTwelveStages } from '../twelve-stages/index.js';
+import { calculateChartKongWang } from '../core/constants/kongwang-calc.js';
+import { calculateChartAuxiliary } from '../auxiliary/index.js';
+import { calculateInteractions } from '../interactions/index.js';
+import { calculateStrength } from '../strength/index.js';
+import { calculateShenSha } from '../shensha/index.js';
+import { calculateLuckCycles } from '../luck/index.js';
+import { calculateTransit } from '../transit/index.js';
+import { calculateTrueSolarTime } from '../calendar/true-solar-time.js';
+import { solarToLunar } from '../calendar/lunar.js';
+import { getYearSolarTerms, getSurroundingJie } from '../calendar/solar-terms.js';
+import { gregorianToJulianDay } from '../calendar/julian.js';
+import { RuleRegistry } from '../rules/rule-registry.js';
+import { toContext } from '../ai/index.js';
+import { VERSIONS } from '../rules/versions.js';
+
+// 主計算函數
+export function calculate(input, options = {}) {
+  // 1. 驗證輸入格式與範圍 (1900-01-01 ~ 2100-12-31)
+  validateInput(input);
+
+  // 2. 解析 Rule Profile
+  const profileId = input.profile || options.profile || 'canonical';
+  const profile = RuleRegistry.get(profileId);
+
+  // 3. 提取規則參數
+  const yearBoundary = input.yearBoundary || profile.rules.yearBoundary.value;
+  const monthBoundary = input.monthBoundary || profile.rules.monthBoundary.value;
+  const dayBoundary = input.dayBoundary || profile.rules.dayBoundary.value;
+  const enableTrueSolarTime = input.trueSolarTime !== undefined
+    ? input.trueSolarTime
+    : profile.rules.trueSolarTime.value;
+
+  // 4. 時區與時間解析
+  const timezone = input.timezone || '+08:00';
+  const tzMatch = timezone.match(/^([+-])(\d{1,2})(?::?(\d{2}))?$/);
+  const tzSign = tzMatch[1] === '-' ? -1 : 1;
+  const tzHours = parseInt(tzMatch[2], 10);
+  const tzMins = tzMatch[3] ? parseInt(tzMatch[3], 10) : 0;
+  const timezoneOffsetHours = tzSign * (tzHours + tzMins / 60);
+
+  const [inYear, inMonth, inDay] = input.birthDate.split('-').map(Number);
+  const birthTimeMode = input.birthTimeMode || (input.birthTime ? 'exact' : 'unknown');
+
+  let inHour = 12;
+  let inMinute = 0;
+  if (birthTimeMode === 'exact' && input.birthTime) {
+    const [h, m] = input.birthTime.split(':').map(Number);
+    inHour = h;
+    inMinute = m;
+  }
+
+  // 5. 真太陽時處理
+  let calcYear = inYear;
+  let calcMonth = inMonth;
+  let calcDay = inDay;
+  let calcHour = inHour;
+  let calcMinute = inMinute;
+  let trueSolarInfo = null;
+
+  if (enableTrueSolarTime && birthTimeMode === 'exact') {
+    const longitude = input.location && typeof input.location.longitude === 'number'
+      ? input.location.longitude
+      : timezoneOffsetHours * 15;
+
+    trueSolarInfo = calculateTrueSolarTime({
+      year: inYear,
+      month: inMonth,
+      day: inDay,
+      hour: inHour,
+      minute: inMinute,
+      longitude,
+      timezoneOffsetHours
+    });
+
+    calcYear = trueSolarInfo.trueYear;
+    calcMonth = trueSolarInfo.trueMonth;
+    calcDay = trueSolarInfo.trueDay;
+    calcHour = trueSolarInfo.trueHour;
+    calcMinute = trueSolarInfo.trueMinute;
+  }
+
+  // 6. 農曆與節氣轉換
+  const lunarInfo = solarToLunar(calcYear, calcMonth, calcDay);
+  // 當地民用時刻 → UT 的 JD（展示用前後節氣比較，須扣除時區）
+  const currentJD = gregorianToJulianDay(calcYear, calcMonth, calcDay + (calcHour + calcMinute / 60) / 24) - timezoneOffsetHours / 24;
+  const surroundingJieInfo = getSurroundingJie(currentJD, timezoneOffsetHours);
+
+  // 7. 排四柱
+  const pillars = calculateFourPillars({
+    year: calcYear,
+    month: calcMonth,
+    day: calcDay,
+    hour: calcHour,
+    minute: calcMinute,
+    birthTimeMode,
+    birthHourBranch: input.birthHourBranch,
+    timezoneOffsetHours,
+    yearBoundary,
+    monthBoundary,
+    dayBoundary
+  });
+
+  // 8. 結構化命理層計算
+  const tenGods = calculateChartTenGods(pillars);
+  const hiddenStems = calculateChartHiddenStems(pillars);
+  const nayin = calculateChartNayin(pillars);
+  const twelveStages = calculateChartTwelveStages(pillars);
+  const kongWang = calculateChartKongWang(pillars);
+  const auxiliary = calculateChartAuxiliary(pillars);
+  const interactions = calculateInteractions(pillars);
+  const strength = calculateStrength(pillars, interactions);
+  const shenSha = calculateShenSha(pillars);
+
+  // 9. 大運計算
+  const luckCycles = calculateLuckCycles({
+    pillars,
+    gender: input.gender,
+    birthDate: input.birthDate,
+    birthTime: input.birthTime,
+    timezoneOffsetHours,
+    directionRule: profile.rules.luckCycle.directionRule.value,
+    startAgeMethod: profile.rules.luckCycle.startAgeMethod.value
+  });
+
+  // 10. 當期流年/流月運勢計算（以當前或指定時刻）
+  const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00+08:00`;
+  const transits = calculateTransit(pillars, { datetime: transitDate });
+
+  const result = {
+    meta: {
+      ...VERSIONS,
+      profileId: profile.id,
+      profileName: profile.name
+    },
+
+    input: {
+      ...input,
+      timezone
+    },
+
+    accuracy: {
+      timeKnown: birthTimeMode !== 'unknown',
+      hourPillarAvailable: pillars.hour.available,
+      trueSolarTimeUsed: Boolean(enableTrueSolarTime && birthTimeMode === 'exact')
+    },
+
+    calendar: {
+      solar: {
+        year: inYear,
+        month: inMonth,
+        day: inDay,
+        time: input.birthTime || null
+      },
+      lunar: lunarInfo,
+      solarTerms: {
+        prevJie: surroundingJieInfo.prevJie ? {
+          name: surroundingJieInfo.prevJie.name,
+          monthBranch: surroundingJieInfo.prevJie.monthBranch,
+          local: surroundingJieInfo.prevJie.local
+        } : null,
+        nextJie: surroundingJieInfo.nextJie ? {
+          name: surroundingJieInfo.nextJie.name,
+          monthBranch: surroundingJieInfo.nextJie.monthBranch,
+          local: surroundingJieInfo.nextJie.local
+        } : null
+      },
+      time: {
+        civilTime: input.birthTime || null,
+        trueSolarTime: trueSolarInfo ? trueSolarInfo.trueSolarTime : null,
+        correctionMinutes: trueSolarInfo ? trueSolarInfo.corrections.totalCorrectionMinutes : 0,
+        usedTrueSolarTime: Boolean(enableTrueSolarTime && birthTimeMode === 'exact')
+      }
+    },
+
+    pillars: {
+      year: {
+        ganzhi: pillars.year.ganzhi,
+        stem: pillars.year.stem,
+        branch: pillars.year.branch,
+        sexagenaryIndex: pillars.year.sexagenaryIndex
+      },
+      month: {
+        ganzhi: pillars.month.ganzhi,
+        stem: pillars.month.stem,
+        branch: pillars.month.branch,
+        sexagenaryIndex: pillars.month.sexagenaryIndex
+      },
+      day: {
+        ganzhi: pillars.day.ganzhi,
+        stem: pillars.day.stem,
+        branch: pillars.day.branch,
+        sexagenaryIndex: pillars.day.sexagenaryIndex,
+        switchedNextDay: pillars.day.switchedNextDay
+      },
+      hour: pillars.hour.available ? {
+        available: true,
+        ganzhi: pillars.hour.ganzhi,
+        stem: pillars.hour.stem,
+        branch: pillars.hour.branch,
+        sexagenaryIndex: pillars.hour.sexagenaryIndex
+      } : {
+        available: false,
+        ganzhi: null,
+        stem: null,
+        branch: null,
+        sexagenaryIndex: null
+      }
+    },
+
+    tenGods,
+    hiddenStems,
+    nayin,
+    twelveStages,
+    kongWang,
+    auxiliary,
+    interactions,
+    strength,
+    shenSha,
+    luckCycles,
+    transits,
+
+    rules: {
+      applied: [
+        profile.rules.yearBoundary,
+        profile.rules.monthBoundary,
+        profile.rules.dayBoundary,
+        profile.rules.luckCycle.directionRule,
+        profile.rules.luckCycle.startAgeMethod
+      ]
+    },
+
+    debug: options.debug ? pillars.debug : undefined
+  };
+
+  return result;
+}
+
+// Safe API：包裝異常，不拋錯
+export function calculateSafe(input, options = {}) {
+  try {
+    const res = calculate(input, options);
+    return {
+      success: true,
+      data: res
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: {
+        code: err.code || 'BAZI_ERROR',
+        message: err.message,
+        field: err.field || null,
+        details: err.details || {}
+      }
+    };
+  }
+}
+
+// 物件型 API: new Bazi.Chart(input)
+export class Chart {
+  constructor(input, options = {}) {
+    this.rawInput = input;
+    this.options = options;
+    this.result = calculate(input, options);
+  }
+
+  getPillars() {
+    return this.result.pillars;
+  }
+
+  getShenSha() {
+    return this.result.shenSha;
+  }
+
+  getStrength() {
+    return this.result.strength;
+  }
+
+  getLuckCycles() {
+    return this.result.luckCycles;
+  }
+
+  getInteractions() {
+    return this.result.interactions;
+  }
+
+  toAIContext(options) {
+    return toContext(this.result, options);
+  }
+}
