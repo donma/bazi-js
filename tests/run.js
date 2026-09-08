@@ -20,7 +20,7 @@ function assert(cond, label, detail) {
 }
 
 // ---------- 單元測試 ----------
-function runUnit() {
+async function runUnit() {
   console.log('== 單元測試 ==');
 
   // 日柱錨點（外部驗證）
@@ -79,6 +79,42 @@ function runUnit() {
   // Transit 結構
   const tr = Bazi.Transit.calculateTransit(d1.pillars, { datetime: '2026-09-08T12:00:00+08:00' });
   assert(tr.year && tr.month && tr.day && tr.hour, 'UT-TRANSIT-STRUCT', '');
+
+  // 新神煞（v1.0.1）：以 2024-01-01 甲子日（年支子）驗紅鸞在卯、天喜在酉
+  const ss24 = Bazi.calculate({ birthDate: '2024-05-15', birthTime: '10:00', gender: 'male' });
+  void ss24;
+  // 年支為子的命：四柱見卯即紅鸞、見酉即天喜（以 2000-01-01 己卯年子月？改用直接引擎驗）
+  const { SHENSHA_CATALOG } = await import('../src/shensha/catalog.js');
+  assert(SHENSHA_CATALOG.length === 22, 'UT-SHENSHACOUNT-22', String(SHENSHA_CATALOG.length));
+  const hl = SHENSHA_CATALOG.find((s) => s.id === 'hong_luan');
+  assert(hl.match({ baseBranch: '子', targetBranch: '卯' }) === true, 'UT-HONGLUAN-ZIMAO', '');
+  assert(hl.match({ baseBranch: '亥', targetBranch: '辰' }) === true, 'UT-HONGLUAN-HAICHEN', '');
+  assert(hl.match({ baseBranch: '子', targetBranch: '午' }) === false, 'UT-HONGLUAN-NEG', '');
+  const tx = SHENSHA_CATALOG.find((s) => s.id === 'tian_xi');
+  assert(tx.match({ baseBranch: '子', targetBranch: '酉' }) === true, 'UT-TIANXI-ZIYOU', '');
+  const ty = SHENSHA_CATALOG.find((s) => s.id === 'tian_yi_star');
+  assert(ty.match({ monthBranch: '巳', targetBranch: '辰' }) === true, 'UT-TIANYI-SICHEN', '');
+  const hy = SHENSHA_CATALOG.find((s) => s.id === 'hong_yan');
+  assert(hy.match({ baseStem: '己', targetBranch: '辰' }) === true, 'UT-HONGYAN-JICHEN', '');
+  const se = SHENSHA_CATALOG.find((s) => s.id === 'shi_e_da_bai');
+  assert(se.matchChart({ day: { stem: '戊', branch: '戌' } }) === true, 'UT-SHIEDABAI-WUXU', '');
+  assert(se.matchChart({ day: { stem: '己', branch: '亥' } }) === false, 'UT-SHIEDABAI-NEG', '');
+
+  // 大運 / 流年神煞結構（v1.0.1）
+  assert(Array.isArray(d1.luckCycles.cycles[0].shenSha), 'UT-LUCK-SHENSHATYPE', '');
+  assert(Array.isArray(d1.transits.shenShaYear), 'UT-TRANSIT-SHENSHATYPE', '');
+  // 2000-01-01（年支子）首步大運若見卯/酉應帶紅鸞/天喜：直接驗引擎
+  const { calculateShenShaOnPillar } = await import('../src/shensha/index.js');
+  const ziChart = Bazi.calculate({ birthDate: '2020-06-15', birthTime: '10:00', gender: 'male' });
+  const hits = calculateShenShaOnPillar(ziChart.pillars, '丁', '卯', 'luck-1');
+  assert(ziChart.pillars.year.branch === '子', 'UT-ZI-YEARBRANCH', ziChart.pillars.year.ganzhi);
+  assert(hits.some((h) => h.id === 'hong_luan'), 'UT-LUCK-HONGLUAN', JSON.stringify(hits.map((h) => h.id)));
+
+  // SVG 日主五行修正（己土不得顯示己木）
+  const jiChart = Bazi.calculate({ birthDate: '1983-05-11', birthTime: '16:19', gender: 'male' });
+  const jiSvg = Bazi.Renderer.render(jiChart, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
+  assert(jiSvg.includes('己土'), 'UT-SVG-DAYMASTER-ELEMENT', '');
+  assert(!jiSvg.includes('己木'), 'UT-SVG-NO-JIMU', '');
 }
 
 // ---------- Golden Cases ----------
@@ -144,7 +180,7 @@ async function runBoundary() {
   }
 }
 
-runUnit();
+await runUnit();
 await runGolden();
 await runBoundary();
 

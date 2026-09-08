@@ -368,5 +368,104 @@ export const SHENSHA_CATALOG = [
       const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
       return ['戊戌', '庚戌', '庚辰', '壬辰'].includes(ganzhi);
     }
+  },
+
+  // 18. 紅鸞星
+  // 以年支查：子見卯、丑見寅、寅見丑、卯見子、辰見亥、巳見戌、
+  // 午見酉、未見申、申見未、酉見午、戌見巳、亥見辰。
+  {
+    id: 'hong_luan',
+    name: '紅鸞星',
+    category: 'auspicious',
+    baseOn: ['yearBranch'],
+    ruleId: 'SS_HONGLUAN_018',
+    version: '1.0.0',
+    reference: '《三命通會》卷三',
+    match: ({ baseBranch, targetBranch }) => {
+      const map = {
+        '子': '卯', '丑': '寅', '寅': '丑', '卯': '子',
+        '辰': '亥', '巳': '戌', '午': '酉', '未': '申',
+        '申': '未', '酉': '午', '戌': '巳', '亥': '辰'
+      };
+      return map[baseBranch] === targetBranch;
+    }
+  },
+
+  // 19. 天喜星（紅鸞對沖位）
+  // 以年支查：子見酉、丑見申、寅見未、卯見午、辰見巳、巳見辰、
+  // 午見卯、未見寅、申見丑、酉見子、戌見亥、亥見戌。
+  {
+    id: 'tian_xi',
+    name: '天喜星',
+    category: 'auspicious',
+    baseOn: ['yearBranch'],
+    ruleId: 'SS_TIANXI_019',
+    version: '1.0.0',
+    reference: '《三命通會》卷三',
+    match: ({ baseBranch, targetBranch }) => {
+      const map = {
+        '子': '酉', '丑': '申', '寅': '未', '卯': '午',
+        '辰': '巳', '巳': '辰', '午': '卯', '未': '寅',
+        '申': '丑', '酉': '子', '戌': '亥', '亥': '戌'
+      };
+      return map[baseBranch] === targetBranch;
+    }
+  },
+
+  // 20. 天醫星
+  // 以月支查：正月生見丑、二月見寅、三月見卯、四月見辰、五月見巳、六月見午、
+  // 七月見未、八月見申、九月見酉、十月見戌、十一月見亥、十二月見子。
+  {
+    id: 'tian_yi_star',
+    name: '天醫星',
+    category: 'auspicious',
+    baseOn: ['monthBranch'],
+    ruleId: 'SS_TIANYI_020',
+    version: '1.0.0',
+    reference: '《三命通會》卷三',
+    match: ({ monthBranch, targetBranch }) => {
+      const map = {
+        '寅': '丑', '卯': '寅', '辰': '卯', '巳': '辰',
+        '午': '巳', '未': '午', '申': '未', '酉': '申',
+        '戌': '酉', '亥': '戌', '子': '亥', '丑': '子'
+      };
+      return map[monthBranch] === targetBranch;
+    }
+  },
+
+  // 21. 紅艷煞
+  // 以年干或日干查：甲乙見午、丙見寅、丁見未、戊己見辰、庚見戌、辛見酉、壬見子、癸見申。
+  {
+    id: 'hong_yan',
+    name: '紅艷煞',
+    category: 'inauspicious',
+    baseOn: ['dayStem', 'yearStem'],
+    ruleId: 'SS_HONGYAN_021',
+    version: '1.0.0',
+    reference: '《三命通會》卷三',
+    match: ({ baseStem, targetBranch }) => {
+      const map = {
+        '甲': '午', '乙': '午', '丙': '寅', '丁': '未',
+        '戊': '辰', '己': '辰', '庚': '戌', '辛': '酉',
+        '壬': '子', '癸': '申'
+      };
+      return map[baseStem] === targetBranch;
+    }
+  },
+
+  // 22. 十惡大敗日
+  // 甲辰、乙巳、丙申、丁亥、戊戌、己丑、庚辰、辛巳、壬申、癸亥十日為十惡大敗日。
+  {
+    id: 'shi_e_da_bai',
+    name: '十惡大敗日',
+    category: 'inauspicious',
+    baseOn: ['dayPillar'],
+    ruleId: 'SS_SHIEDABAI_022',
+    version: '1.0.0',
+    reference: '《三命通會》卷五',
+    matchChart: (pillars) => {
+      const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
+      return ['甲辰', '乙巳', '丙申', '丁亥', '戊戌', '己丑', '庚辰', '辛巳', '壬申', '癸亥'].includes(ganzhi);
+    }
   }
 ];

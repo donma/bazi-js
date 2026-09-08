@@ -9,7 +9,7 @@ export const PRESETS = {
     id: 'full',
     name: '全覽主盤',
     width: 960,
-    height: 980,
+    height: 1080,
     includePillars: true,
     includeStrength: true,
     includeInteractions: true,

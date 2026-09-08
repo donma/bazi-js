@@ -23,7 +23,7 @@ export function calculateShenSha(pillars) {
   ];
 
   for (const rule of SHENSHA_CATALOG) {
-    // 專屬命盤日柱或整體判定（如魁罡）
+    // 整柱型判定（如魁罡、十惡大敗）：以原局日柱為準
     if (rule.matchChart) {
       if (rule.matchChart(pillars)) {
         results.push({
@@ -36,7 +36,7 @@ export function calculateShenSha(pillars) {
           version: rule.version,
           reference: rule.reference,
           evidence: {
-            reason: `日柱為【${pillars.day.stem}${pillars.day.branch}】，符合魁罡條件`
+            reason: `日柱為【${pillars.day.stem}${pillars.day.branch}】，符合${rule.name}條件`
           }
         });
       }
@@ -92,6 +92,65 @@ export function calculateShenSha(pillars) {
         name: rule.name,
         category: rule.category,
         hitOn: hitPillars,
+        basedOn: rule.baseOn,
+        ruleId: rule.ruleId,
+        version: rule.version,
+        reference: rule.reference,
+        evidence: {
+          details: baseUsed
+        }
+      });
+    }
+  }
+
+  return results;
+}
+
+// 以原局為基準，檢查「單一外來柱」（大運干支 / 流年干支）觸發的神煞。
+// 用途：大運神煞、流年神煞（對應 catalog scope: natal / luck / transit）。
+// 參數：natalPillars 原局四柱；stemChar/branchChar 外來柱干支；pillarLabel 標籤（如 'luck-1'、'transit-year'）。
+// 整柱型規則（matchChart）僅屬原局，此處略過。
+export function calculateShenShaOnPillar(natalPillars, stemChar, branchChar, pillarLabel) {
+  const results = [];
+  if (!stemChar || !branchChar) return results;
+
+  for (const rule of SHENSHA_CATALOG) {
+    if (rule.matchChart) continue;
+
+    const baseUsed = [];
+
+    if (rule.baseOn.includes('dayStem')) {
+      if (rule.match({ baseStem: natalPillars.day.stem, targetBranch: branchChar })) {
+        baseUsed.push(`以日干【${natalPillars.day.stem}】查得【${branchChar}】`);
+      }
+    }
+    if (rule.baseOn.includes('yearStem')) {
+      if (rule.match({ baseStem: natalPillars.year.stem, targetBranch: branchChar })) {
+        baseUsed.push(`以年干【${natalPillars.year.stem}】查得【${branchChar}】`);
+      }
+    }
+    if (rule.baseOn.includes('monthBranch')) {
+      if (rule.match({ monthBranch: natalPillars.month.branch, targetStem: stemChar, targetBranch: branchChar })) {
+        baseUsed.push(`以月令【${natalPillars.month.branch}】查得`);
+      }
+    }
+    if (rule.baseOn.includes('dayBranch')) {
+      if (rule.match({ baseBranch: natalPillars.day.branch, targetBranch: branchChar })) {
+        baseUsed.push(`以日支【${natalPillars.day.branch}】查得【${branchChar}】`);
+      }
+    }
+    if (rule.baseOn.includes('yearBranch')) {
+      if (rule.match({ baseBranch: natalPillars.year.branch, targetBranch: branchChar })) {
+        baseUsed.push(`以年支【${natalPillars.year.branch}】查得【${branchChar}】`);
+      }
+    }
+
+    if (baseUsed.length > 0) {
+      results.push({
+        id: rule.id,
+        name: rule.name,
+        category: rule.category,
+        hitOn: [pillarLabel],
         basedOn: rule.baseOn,
         ruleId: rule.ruleId,
         version: rule.version,

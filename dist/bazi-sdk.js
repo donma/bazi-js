@@ -1716,7 +1716,8 @@ var Bazi = (() => {
   // src/shensha/index.js
   var shensha_exports = {};
   __export(shensha_exports, {
-    calculateShenSha: () => calculateShenSha
+    calculateShenSha: () => calculateShenSha,
+    calculateShenShaOnPillar: () => calculateShenShaOnPillar
   });
 
   // src/shensha/catalog.js
@@ -2174,6 +2175,134 @@ var Bazi = (() => {
         const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
         return ["\u620A\u620C", "\u5E9A\u620C", "\u5E9A\u8FB0", "\u58EC\u8FB0"].includes(ganzhi);
       }
+    },
+    // 18. 紅鸞星
+    // 以年支查：子見卯、丑見寅、寅見丑、卯見子、辰見亥、巳見戌、
+    // 午見酉、未見申、申見未、酉見午、戌見巳、亥見辰。
+    {
+      id: "hong_luan",
+      name: "\u7D05\u9E1E\u661F",
+      category: "auspicious",
+      baseOn: ["yearBranch"],
+      ruleId: "SS_HONGLUAN_018",
+      version: "1.0.0",
+      reference: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09",
+      match: ({ baseBranch, targetBranch }) => {
+        const map = {
+          "\u5B50": "\u536F",
+          "\u4E11": "\u5BC5",
+          "\u5BC5": "\u4E11",
+          "\u536F": "\u5B50",
+          "\u8FB0": "\u4EA5",
+          "\u5DF3": "\u620C",
+          "\u5348": "\u9149",
+          "\u672A": "\u7533",
+          "\u7533": "\u672A",
+          "\u9149": "\u5348",
+          "\u620C": "\u5DF3",
+          "\u4EA5": "\u8FB0"
+        };
+        return map[baseBranch] === targetBranch;
+      }
+    },
+    // 19. 天喜星（紅鸞對沖位）
+    // 以年支查：子見酉、丑見申、寅見未、卯見午、辰見巳、巳見辰、
+    // 午見卯、未見寅、申見丑、酉見子、戌見亥、亥見戌。
+    {
+      id: "tian_xi",
+      name: "\u5929\u559C\u661F",
+      category: "auspicious",
+      baseOn: ["yearBranch"],
+      ruleId: "SS_TIANXI_019",
+      version: "1.0.0",
+      reference: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09",
+      match: ({ baseBranch, targetBranch }) => {
+        const map = {
+          "\u5B50": "\u9149",
+          "\u4E11": "\u7533",
+          "\u5BC5": "\u672A",
+          "\u536F": "\u5348",
+          "\u8FB0": "\u5DF3",
+          "\u5DF3": "\u8FB0",
+          "\u5348": "\u536F",
+          "\u672A": "\u5BC5",
+          "\u7533": "\u4E11",
+          "\u9149": "\u5B50",
+          "\u620C": "\u4EA5",
+          "\u4EA5": "\u620C"
+        };
+        return map[baseBranch] === targetBranch;
+      }
+    },
+    // 20. 天醫星
+    // 以月支查：正月生見丑、二月見寅、三月見卯、四月見辰、五月見巳、六月見午、
+    // 七月見未、八月見申、九月見酉、十月見戌、十一月見亥、十二月見子。
+    {
+      id: "tian_yi_star",
+      name: "\u5929\u91AB\u661F",
+      category: "auspicious",
+      baseOn: ["monthBranch"],
+      ruleId: "SS_TIANYI_020",
+      version: "1.0.0",
+      reference: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09",
+      match: ({ monthBranch, targetBranch }) => {
+        const map = {
+          "\u5BC5": "\u4E11",
+          "\u536F": "\u5BC5",
+          "\u8FB0": "\u536F",
+          "\u5DF3": "\u8FB0",
+          "\u5348": "\u5DF3",
+          "\u672A": "\u5348",
+          "\u7533": "\u672A",
+          "\u9149": "\u7533",
+          "\u620C": "\u9149",
+          "\u4EA5": "\u620C",
+          "\u5B50": "\u4EA5",
+          "\u4E11": "\u5B50"
+        };
+        return map[monthBranch] === targetBranch;
+      }
+    },
+    // 21. 紅艷煞
+    // 以年干或日干查：甲乙見午、丙見寅、丁見未、戊己見辰、庚見戌、辛見酉、壬見子、癸見申。
+    {
+      id: "hong_yan",
+      name: "\u7D05\u8277\u715E",
+      category: "inauspicious",
+      baseOn: ["dayStem", "yearStem"],
+      ruleId: "SS_HONGYAN_021",
+      version: "1.0.0",
+      reference: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09",
+      match: ({ baseStem, targetBranch }) => {
+        const map = {
+          "\u7532": "\u5348",
+          "\u4E59": "\u5348",
+          "\u4E19": "\u5BC5",
+          "\u4E01": "\u672A",
+          "\u620A": "\u8FB0",
+          "\u5DF1": "\u8FB0",
+          "\u5E9A": "\u620C",
+          "\u8F9B": "\u9149",
+          "\u58EC": "\u5B50",
+          "\u7678": "\u7533"
+        };
+        return map[baseStem] === targetBranch;
+      }
+    },
+    // 22. 十惡大敗日
+    // 甲辰、乙巳、丙申、丁亥、戊戌、己丑、庚辰、辛巳、壬申、癸亥十日為十惡大敗日。
+    {
+      id: "shi_e_da_bai",
+      name: "\u5341\u60E1\u5927\u6557\u65E5",
+      category: "inauspicious",
+      baseOn: ["dayPillar"],
+      ruleId: "SS_SHIEDABAI_022",
+      version: "1.0.0",
+      reference: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E94",
+      matchChart: (pillars) => {
+        const ganzhi = `${pillars.day.stem}${pillars.day.branch}`;
+        return ["\u7532\u8FB0", "\u4E59\u5DF3", "\u4E19\u7533", "\u4E01\u4EA5", "\u620A\u620C", "\u5DF1\u4E11", "\u5E9A\u8FB0", "\u8F9B\u5DF3", "\u58EC\u7533", "\u7678\u4EA5"].includes(ganzhi);
+      }
     }
   ];
 
@@ -2199,7 +2328,7 @@ var Bazi = (() => {
             version: rule.version,
             reference: rule.reference,
             evidence: {
-              reason: `\u65E5\u67F1\u70BA\u3010${pillars.day.stem}${pillars.day.branch}\u3011\uFF0C\u7B26\u5408\u9B41\u7F61\u689D\u4EF6`
+              reason: `\u65E5\u67F1\u70BA\u3010${pillars.day.stem}${pillars.day.branch}\u3011\uFF0C\u7B26\u5408${rule.name}\u689D\u4EF6`
             }
           });
         }
@@ -2246,6 +2375,55 @@ var Bazi = (() => {
           name: rule.name,
           category: rule.category,
           hitOn: hitPillars,
+          basedOn: rule.baseOn,
+          ruleId: rule.ruleId,
+          version: rule.version,
+          reference: rule.reference,
+          evidence: {
+            details: baseUsed
+          }
+        });
+      }
+    }
+    return results;
+  }
+  function calculateShenShaOnPillar(natalPillars, stemChar, branchChar, pillarLabel) {
+    const results = [];
+    if (!stemChar || !branchChar) return results;
+    for (const rule of SHENSHA_CATALOG) {
+      if (rule.matchChart) continue;
+      const baseUsed = [];
+      if (rule.baseOn.includes("dayStem")) {
+        if (rule.match({ baseStem: natalPillars.day.stem, targetBranch: branchChar })) {
+          baseUsed.push(`\u4EE5\u65E5\u5E72\u3010${natalPillars.day.stem}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
+        }
+      }
+      if (rule.baseOn.includes("yearStem")) {
+        if (rule.match({ baseStem: natalPillars.year.stem, targetBranch: branchChar })) {
+          baseUsed.push(`\u4EE5\u5E74\u5E72\u3010${natalPillars.year.stem}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
+        }
+      }
+      if (rule.baseOn.includes("monthBranch")) {
+        if (rule.match({ monthBranch: natalPillars.month.branch, targetStem: stemChar, targetBranch: branchChar })) {
+          baseUsed.push(`\u4EE5\u6708\u4EE4\u3010${natalPillars.month.branch}\u3011\u67E5\u5F97`);
+        }
+      }
+      if (rule.baseOn.includes("dayBranch")) {
+        if (rule.match({ baseBranch: natalPillars.day.branch, targetBranch: branchChar })) {
+          baseUsed.push(`\u4EE5\u65E5\u652F\u3010${natalPillars.day.branch}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
+        }
+      }
+      if (rule.baseOn.includes("yearBranch")) {
+        if (rule.match({ baseBranch: natalPillars.year.branch, targetBranch: branchChar })) {
+          baseUsed.push(`\u4EE5\u5E74\u652F\u3010${natalPillars.year.branch}\u3011\u67E5\u5F97\u3010${branchChar}\u3011`);
+        }
+      }
+      if (baseUsed.length > 0) {
+        results.push({
+          id: rule.id,
+          name: rule.name,
+          category: rule.category,
+          hitOn: [pillarLabel],
           basedOn: rule.baseOn,
           ruleId: rule.ruleId,
           version: rule.version,
@@ -3188,10 +3366,10 @@ var Bazi = (() => {
   }
 
   // src/rules/versions.js
-  var ENGINE_VERSION = "1.0.0";
+  var ENGINE_VERSION = "1.0.1";
   var RULE_SET_VERSION = "2026.09";
   var CALENDAR_RULE_VERSION = "1.0.0";
-  var SHENSHA_RULE_VERSION = "1.0.0";
+  var SHENSHA_RULE_VERSION = "1.1.0";
   var STRENGTH_RULE_VERSION = "1.0.0";
   var INTERACTION_RULE_VERSION = "1.0.0";
   var LUCK_RULE_VERSION = "1.0.0";
@@ -3288,6 +3466,19 @@ var Bazi = (() => {
     });
     const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00+08:00`;
     const transits = calculateTransit(pillars, { datetime: transitDate });
+    if (luckCycles && Array.isArray(luckCycles.cycles)) {
+      luckCycles.cycles.forEach((cyc, idx) => {
+        cyc.shenSha = calculateShenShaOnPillar(pillars, cyc.stem, cyc.branch, `luck-${idx + 1}`);
+      });
+    }
+    if (transits && transits.year) {
+      transits.shenShaYear = calculateShenShaOnPillar(
+        pillars,
+        transits.year.stem,
+        transits.year.branch,
+        "transit-year"
+      );
+    }
     const result = {
       meta: {
         ...VERSIONS,
@@ -3440,15 +3631,15 @@ var Bazi = (() => {
       name: "\u73FE\u4EE3\u6771\u65B9",
       background: "#faf8f5",
       cardBg: "#ffffff",
-      textPrimary: "#2b2b2b",
-      textSecondary: "#666666",
-      textMuted: "#999999",
-      accent: "#b23a22",
-      // 朱砂紅
-      gold: "#b38d38",
-      // 雅金
-      border: "#e8e2d8",
-      borderDark: "#d4cbbe",
+      textPrimary: "#1f1f1f",
+      textSecondary: "#3d3d3d",
+      textMuted: "#5c5c5c",
+      accent: "#a9321f",
+      // 朱砂紅（加深，確保小字對比）
+      gold: "#7d5f16",
+      // 雅金（加深，淺金在白底上對比不足）
+      border: "#d9cfbf",
+      borderDark: "#b8a88f",
       gridBg: "#f5f1eb",
       tagBg: "#f2eee9",
       elementColors: {
@@ -3465,12 +3656,12 @@ var Bazi = (() => {
       background: "#f4ede1",
       cardBg: "#fdfbf7",
       textPrimary: "#1a1816",
-      textSecondary: "#5a544c",
-      textMuted: "#8a8275",
+      textSecondary: "#3f3830",
+      textMuted: "#5f574a",
       accent: "#8a2b19",
-      gold: "#997327",
-      border: "#dcd1be",
-      borderDark: "#c7b89f",
+      gold: "#7a5c14",
+      border: "#d3c4ab",
+      borderDark: "#b09a78",
       gridBg: "#ece3d2",
       tagBg: "#e6dcce",
       elementColors: {
@@ -3486,13 +3677,13 @@ var Bazi = (() => {
       name: "\u7384\u9ED1\u5E7D\u9083",
       background: "#121417",
       cardBg: "#1c1f24",
-      textPrimary: "#e8eaed",
-      textSecondary: "#9aa0a6",
-      textMuted: "#5f6368",
+      textPrimary: "#f2f4f7",
+      textSecondary: "#c3c9d1",
+      textMuted: "#8f96a0",
       accent: "#e06c53",
       gold: "#dfb15b",
       border: "#2c313a",
-      borderDark: "#3e4451",
+      borderDark: "#4a5160",
       gridBg: "#181b20",
       tagBg: "#252930",
       elementColors: {
@@ -3514,7 +3705,7 @@ var Bazi = (() => {
       id: "full",
       name: "\u5168\u89BD\u4E3B\u76E4",
       width: 960,
-      height: 980,
+      height: 1080,
       includePillars: true,
       includeStrength: true,
       includeInteractions: true,
@@ -3576,20 +3767,21 @@ var Bazi = (() => {
       { title: "\u6708\u67F1", data: p.month, tenGod: res.tenGods.stems.month, hidden: res.tenGods.hidden.month, nayin: res.nayin.month, stage: res.twelveStages.byDayMaster.month },
       { title: "\u5E74\u67F1", data: p.year, tenGod: res.tenGods.stems.year, hidden: res.tenGods.hidden.year, nayin: res.nayin.year, stage: res.twelveStages.byDayMaster.year }
     ];
+    const dayMasterEl = (STEMS[STEM_INDEX[res.pillars.day.stem]] || {}).element || "";
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="background-color: ${theme.background}; font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', 'Segoe UI', Roboto, sans-serif; text-rendering: geometricPrecision; shape-rendering: geometricPrecision;">
   <defs>
     <style>
       text { text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
-      .title { font-size: 22px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
-      .subtitle { font-size: 12px; fill: ${theme.textSecondary}; }
-      .meta-label { font-size: 12px; fill: ${theme.textMuted}; }
-      .meta-value { font-size: 13px; fill: ${theme.textPrimary}; font-weight: 600; }
-      .col-header { font-size: 14px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 600; }
-      .tengod { font-size: 13px; fill: ${theme.gold}; text-anchor: middle; font-weight: 600; }
-      .ganzhi { font-size: 34px; font-weight: 700; text-anchor: middle; }
-      .hidden-stem { font-size: 12px; fill: ${theme.textSecondary}; text-anchor: middle; }
+      .title { font-size: 26px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
+      .subtitle { font-size: 13px; fill: ${theme.textSecondary}; font-weight: 500; }
+      .meta-label { font-size: 13px; fill: ${theme.textMuted}; font-weight: 500; }
+      .meta-value { font-size: 14px; fill: ${theme.textPrimary}; font-weight: 700; }
+      .col-header { font-size: 15px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 700; }
+      .tengod { font-size: 15px; fill: ${theme.gold}; text-anchor: middle; font-weight: 700; }
+      .ganzhi { font-size: 38px; font-weight: 700; text-anchor: middle; }
+      .hidden-stem { font-size: 13px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 500; }
       .badge-text { font-size: 12px; fill: ${theme.cardBg}; font-weight: 700; text-anchor: middle; }
-      .section-title { font-size: 15px; font-weight: 700; fill: ${theme.accent}; letter-spacing: 1px; }
+      .section-title { font-size: 17px; font-weight: 700; fill: ${theme.accent}; letter-spacing: 1px; }
       .card { fill: ${theme.cardBg}; stroke: ${theme.border}; stroke-width: 1; rx: 6px; }
       .grid-box { fill: ${theme.gridBg}; stroke: ${theme.border}; stroke-width: 1; }
     </style>
@@ -3605,26 +3797,26 @@ var Bazi = (() => {
     <text x="0" y="24" class="subtitle">BaziJS Metaphysical Engine v${res.meta.engineVersion} \xB7 \u898F\u7BC4\u6D41\u6D3E: ${res.meta.profileName}</text>
   </g>
 
-  <!-- \u57FA\u672C\u8CC7\u6599\u8CC7\u8A0A\u5217 -->
+  <!-- \u57FA\u672C\u8CC7\u6599\u8CC7\u8A0A\u5217\uFF08\u96D9\u884C\u6392\u7248\uFF0C\u907F\u514D\u55AE\u884C\u5B57\u4E32\u91CD\u758A\u767C\u7CCA\uFF09 -->
   <g transform="translate(40, 95)">
-    <rect x="0" y="0" width="${width - 80}" height="56" class="card" />
-    <g transform="translate(20, 32)">
+    <rect x="0" y="0" width="${width - 80}" height="88" class="card" />
+    <g transform="translate(20, 30)">
       <text x="0" y="0" class="meta-label">\u516C\u66C6\uFF1A</text>
-      <text x="40" y="0" class="meta-value">${res.calendar.solar.year}\u5E74${res.calendar.solar.month}\u6708${res.calendar.solar.day}\u65E5 ${res.input.birthTime || "\u672A\u77E5"}</text>
+      <text x="52" y="0" class="meta-value">${res.calendar.solar.year}\u5E74${res.calendar.solar.month}\u6708${res.calendar.solar.day}\u65E5 ${res.input.birthTime || "\u672A\u77E5"}</text>
 
-      <text x="240" y="0" class="meta-label">\u8FB2\u66C6\uFF1A</text>
-      <text x="280" y="0" class="meta-value">${res.calendar.lunar.monthName}${res.calendar.lunar.dayName}</text>
+      <text x="340" y="0" class="meta-label">\u8FB2\u66C6\uFF1A</text>
+      <text x="392" y="0" class="meta-value">${res.calendar.lunar.monthName}${res.calendar.lunar.dayName}</text>
 
-      <text x="420" y="0" class="meta-label">\u6027\u5225\uFF1A</text>
-      <text x="460" y="0" class="meta-value">${res.input.gender === "male" ? "\u4E7E\u9020\uFF08\u7537\uFF09" : "\u5764\u9020\uFF08\u5973\uFF09"}</text>
+      <text x="0" y="34" class="meta-label">\u6027\u5225\uFF1A</text>
+      <text x="52" y="34" class="meta-value">${res.input.gender === "male" ? "\u4E7E\u9020\uFF08\u7537\uFF09" : "\u5764\u9020\uFF08\u5973\uFF09"}</text>
 
-      <text x="560" y="0" class="meta-label">\u65E5\u4E3B\uFF1A</text>
-      <text x="600" y="0" class="meta-value" fill="${theme.accent}">${res.pillars.day.stem}\u6728\uFF08${res.strength.level}\uFF09</text>
+      <text x="340" y="34" class="meta-label">\u65E5\u4E3B\uFF1A</text>
+      <text x="392" y="34" class="meta-value" fill="${theme.accent}">${res.pillars.day.stem}${dayMasterEl}\uFF08${res.strength.level}\uFF09</text>
     </g>
   </g>
 
   <!-- \u56DB\u67F1\u4E3B\u76E4\u8868\u683C -->
-  <g transform="translate(40, 170)">
+  <g transform="translate(40, 195)">
     <rect x="0" y="0" width="${width - 80}" height="280" class="card" />
 `;
     const colWidth = (width - 80) / 4;
@@ -3674,7 +3866,7 @@ var Bazi = (() => {
     });
     svg += `  </g>`;
     if (preset.includeStrength) {
-      const yOffset = 470;
+      const yOffset = 490;
       svg += `
     <!-- \u4E94\u884C\u5F37\u5F31\u5206\u6790\u5340\u584A -->
     <g transform="translate(40, ${yOffset})">
@@ -3714,7 +3906,7 @@ var Bazi = (() => {
     `;
     }
     if (preset.includeLuckCycles && res.luckCycles) {
-      const yOffset = 620;
+      const yOffset = 635;
       const cardW = width - 80;
       const stepW = Math.min(80, (cardW - 40) / Math.min(8, res.luckCycles.cycles.length));
       svg += `
@@ -3729,10 +3921,10 @@ var Bazi = (() => {
         const bCenterX = bx + stepW / 2;
         svg += `
         <rect x="${bx}" y="0" width="${stepW - 6}" height="92" class="grid-box" rx="4" />
-        <text x="${bCenterX - 3}" y="20" font-size="11px" fill="${theme.textMuted}" text-anchor="middle">${cyc.fromAge}\u6B72</text>
-        <text x="${bCenterX - 3}" y="48" font-size="18px" font-weight="bold" fill="${theme.textPrimary}" text-anchor="middle">${cyc.ganzhi}</text>
-        <text x="${bCenterX - 3}" y="68" font-size="11px" fill="${theme.gold}" text-anchor="middle">${cyc.tenGodStem ? cyc.tenGodStem.short : ""}</text>
-        <text x="${bCenterX - 3}" y="84" font-size="10px" fill="${theme.textMuted}" text-anchor="middle">${cyc.fromYear}\u5E74</text>
+        <text x="${bCenterX - 3}" y="20" font-size="12px" font-weight="600" fill="${theme.textSecondary}" text-anchor="middle">${cyc.fromAge}\u6B72</text>
+        <text x="${bCenterX - 3}" y="48" font-size="19px" font-weight="bold" fill="${theme.textPrimary}" text-anchor="middle">${cyc.ganzhi}</text>
+        <text x="${bCenterX - 3}" y="68" font-size="12px" font-weight="600" fill="${theme.gold}" text-anchor="middle">${cyc.tenGodStem ? cyc.tenGodStem.short : ""}</text>
+        <text x="${bCenterX - 3}" y="84" font-size="11px" fill="${theme.textSecondary}" text-anchor="middle">${cyc.fromYear}\u5E74</text>
       `;
       });
       svg += `
@@ -3743,18 +3935,62 @@ var Bazi = (() => {
     if (preset.includeShenSha && height >= 900) {
       const yOffset = 800;
       const cardW = width - 80;
-      const shenshaNames = res.shenSha.slice(0, 8).map((s) => `${s.name}(${s.hitOn.join("/")})`).join("\u3001 ");
+      const maxCharsPerLine = Math.max(18, Math.floor((cardW - 130) / 13.5));
+      const cap = (lines, total, maxL) => {
+        if (lines.length <= maxL) return lines;
+        const cut = lines.slice(0, maxL);
+        cut[maxL - 1] += `\uFF08\u7B49\u5171${total}\u9846\uFF09`;
+        return cut;
+      };
+      const wrapNames = (list, limit) => {
+        const names = (list || []).slice(0, limit).map((s) => `${s.name}(${s.hitOn.join("/")})`);
+        if (names.length === 0) return ["\u2014"];
+        const lines = [];
+        let cur = "";
+        for (const n of names) {
+          const piece = cur ? "\u3001 " + n : n;
+          if ((cur + piece).length > maxCharsPerLine && cur) {
+            lines.push(cur);
+            cur = n;
+          } else {
+            cur += piece;
+          }
+        }
+        if (cur) lines.push(cur);
+        return lines;
+      };
+      const natalLines = cap(wrapNames(res.shenSha, 14), (res.shenSha || []).length, 3);
+      const yearList = res.transits && res.transits.shenShaYear ? res.transits.shenShaYear : [];
+      const yearSSLines = cap(wrapNames(yearList, 10), yearList.length, 1);
+      const firstLuck = res.luckCycles.cycles[0];
+      const luckList = firstLuck && firstLuck.shenSha ? firstLuck.shenSha : [];
+      const luckSSLines = cap(wrapNames(luckList, 10), luckList.length, 1);
+      const luckLabel = firstLuck ? `${firstLuck.ganzhi}\u904B\uFF1A` : "";
+      const rowGap = 24;
+      const blockRows = 1 + natalLines.length + yearSSLines.length + luckSSLines.length;
+      const cardH = 50 + blockRows * rowGap + 26;
+      let shenShaInner = "";
+      let ry = 0;
+      const addRow = (label, lines) => {
+        lines.forEach((ln, li) => {
+          shenShaInner += `
+        <text x="0" y="${ry}" class="meta-label">${li === 0 ? label : ""}</text>
+        <text x="82" y="${ry}" class="meta-value" font-size="13px">${ln}</text>`;
+          ry += rowGap;
+        });
+      };
+      addRow("\u539F\u5C40\u795E\u715E\uFF1A", natalLines);
+      addRow("\u6D41\u5E74\u795E\u715E\uFF1A", yearSSLines);
+      addRow("\u521D\u904B\u795E\u715E\uFF1A", luckSSLines.map((ln, li) => li === 0 ? luckLabel + ln : ln));
       svg += `
     <!-- \u795E\u715E\u8207\u9644\u5BAE -->
     <g transform="translate(40, ${yOffset})">
-      <rect x="0" y="0" width="${cardW}" height="100" class="card" />
+      <rect x="0" y="0" width="${cardW}" height="${cardH}" class="card" />
       <text x="24" y="30" class="section-title">\u795E\u715E\u5409\u51F6\u8207\u547D\u5BAE\u8EAB\u5BAE</text>
-      <g transform="translate(24, 46)">
-        <text x="0" y="16" class="meta-label">\u547D\u4E2D\u795E\u715E\uFF1A</text>
-        <text x="70" y="16" class="meta-value" font-size="12px">${shenshaNames || "\u7121\u986F\u8457\u4E3B\u795E\u715E"}</text>
-
-        <text x="0" y="38" class="meta-label">\u80CE\u5143\u547D\u5BAE\uFF1A</text>
-        <text x="70" y="38" class="meta-value" font-size="12px">\u80CE\u5143: ${res.auxiliary.taiYuan ? res.auxiliary.taiYuan.ganzhi : "\u2014"} \uFF5C \u80CE\u606F: ${res.auxiliary.taiXi ? res.auxiliary.taiXi.ganzhi : "\u2014"} \uFF5C \u547D\u5BAE: ${res.auxiliary.mingGong ? res.auxiliary.mingGong.ganzhi : "\u2014"} \uFF5C \u8EAB\u5BAE: ${res.auxiliary.shenGong ? res.auxiliary.shenGong.ganzhi : "\u2014"}</text>
+      <g transform="translate(24, 52)">
+        ${shenShaInner}
+        <text x="0" y="${ry}" class="meta-label">\u80CE\u5143\u547D\u5BAE\uFF1A</text>
+        <text x="82" y="${ry}" class="meta-value" font-size="13px">\u80CE\u5143: ${res.auxiliary.taiYuan ? res.auxiliary.taiYuan.ganzhi : "\u2014"} \uFF5C \u80CE\u606F: ${res.auxiliary.taiXi ? res.auxiliary.taiXi.ganzhi : "\u2014"} \uFF5C \u547D\u5BAE: ${res.auxiliary.mingGong ? res.auxiliary.mingGong.ganzhi : "\u2014"} \uFF5C \u8EAB\u5BAE: ${res.auxiliary.shenGong ? res.auxiliary.shenGong.ganzhi : "\u2014"}</text>
       </g>
     </g>
     `;

@@ -7,6 +7,7 @@
 
 import { getTheme } from '../themes/index.js';
 import { getPreset } from '../presets/index.js';
+import { STEMS, STEM_INDEX } from '../../core/constants/stems.js';
 
 export function renderSvg(chartResult, options = {}) {
   const theme = getTheme(options.theme || 'modern-oriental');
@@ -24,21 +25,24 @@ export function renderSvg(chartResult, options = {}) {
     { title: '年柱', data: p.year, tenGod: res.tenGods.stems.year, hidden: res.tenGods.hidden.year, nayin: res.nayin.year, stage: res.twelveStages.byDayMaster.year }
   ];
 
+  // 日主五行（修正：不得寫死為木）
+  const dayMasterEl = (STEMS[STEM_INDEX[res.pillars.day.stem]] || {}).element || '';
+
   // SVG 模板拼接
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="background-color: ${theme.background}; font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', 'Segoe UI', Roboto, sans-serif; text-rendering: geometricPrecision; shape-rendering: geometricPrecision;">
   <defs>
     <style>
       text { text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
-      .title { font-size: 22px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
-      .subtitle { font-size: 12px; fill: ${theme.textSecondary}; }
-      .meta-label { font-size: 12px; fill: ${theme.textMuted}; }
-      .meta-value { font-size: 13px; fill: ${theme.textPrimary}; font-weight: 600; }
-      .col-header { font-size: 14px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 600; }
-      .tengod { font-size: 13px; fill: ${theme.gold}; text-anchor: middle; font-weight: 600; }
-      .ganzhi { font-size: 34px; font-weight: 700; text-anchor: middle; }
-      .hidden-stem { font-size: 12px; fill: ${theme.textSecondary}; text-anchor: middle; }
+      .title { font-size: 26px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
+      .subtitle { font-size: 13px; fill: ${theme.textSecondary}; font-weight: 500; }
+      .meta-label { font-size: 13px; fill: ${theme.textMuted}; font-weight: 500; }
+      .meta-value { font-size: 14px; fill: ${theme.textPrimary}; font-weight: 700; }
+      .col-header { font-size: 15px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 700; }
+      .tengod { font-size: 15px; fill: ${theme.gold}; text-anchor: middle; font-weight: 700; }
+      .ganzhi { font-size: 38px; font-weight: 700; text-anchor: middle; }
+      .hidden-stem { font-size: 13px; fill: ${theme.textSecondary}; text-anchor: middle; font-weight: 500; }
       .badge-text { font-size: 12px; fill: ${theme.cardBg}; font-weight: 700; text-anchor: middle; }
-      .section-title { font-size: 15px; font-weight: 700; fill: ${theme.accent}; letter-spacing: 1px; }
+      .section-title { font-size: 17px; font-weight: 700; fill: ${theme.accent}; letter-spacing: 1px; }
       .card { fill: ${theme.cardBg}; stroke: ${theme.border}; stroke-width: 1; rx: 6px; }
       .grid-box { fill: ${theme.gridBg}; stroke: ${theme.border}; stroke-width: 1; }
     </style>
@@ -54,26 +58,26 @@ export function renderSvg(chartResult, options = {}) {
     <text x="0" y="24" class="subtitle">BaziJS Metaphysical Engine v${res.meta.engineVersion} · 規範流派: ${res.meta.profileName}</text>
   </g>
 
-  <!-- 基本資料資訊列 -->
+  <!-- 基本資料資訊列（雙行排版，避免單行字串重疊發糊） -->
   <g transform="translate(40, 95)">
-    <rect x="0" y="0" width="${width - 80}" height="56" class="card" />
-    <g transform="translate(20, 32)">
+    <rect x="0" y="0" width="${width - 80}" height="88" class="card" />
+    <g transform="translate(20, 30)">
       <text x="0" y="0" class="meta-label">公曆：</text>
-      <text x="40" y="0" class="meta-value">${res.calendar.solar.year}年${res.calendar.solar.month}月${res.calendar.solar.day}日 ${res.input.birthTime || '未知'}</text>
+      <text x="52" y="0" class="meta-value">${res.calendar.solar.year}年${res.calendar.solar.month}月${res.calendar.solar.day}日 ${res.input.birthTime || '未知'}</text>
 
-      <text x="240" y="0" class="meta-label">農曆：</text>
-      <text x="280" y="0" class="meta-value">${res.calendar.lunar.monthName}${res.calendar.lunar.dayName}</text>
+      <text x="340" y="0" class="meta-label">農曆：</text>
+      <text x="392" y="0" class="meta-value">${res.calendar.lunar.monthName}${res.calendar.lunar.dayName}</text>
 
-      <text x="420" y="0" class="meta-label">性別：</text>
-      <text x="460" y="0" class="meta-value">${res.input.gender === 'male' ? '乾造（男）' : '坤造（女）'}</text>
+      <text x="0" y="34" class="meta-label">性別：</text>
+      <text x="52" y="34" class="meta-value">${res.input.gender === 'male' ? '乾造（男）' : '坤造（女）'}</text>
 
-      <text x="560" y="0" class="meta-label">日主：</text>
-      <text x="600" y="0" class="meta-value" fill="${theme.accent}">${res.pillars.day.stem}木（${res.strength.level}）</text>
+      <text x="340" y="34" class="meta-label">日主：</text>
+      <text x="392" y="34" class="meta-value" fill="${theme.accent}">${res.pillars.day.stem}${dayMasterEl}（${res.strength.level}）</text>
     </g>
   </g>
 
   <!-- 四柱主盤表格 -->
-  <g transform="translate(40, 170)">
+  <g transform="translate(40, 195)">
     <rect x="0" y="0" width="${width - 80}" height="280" class="card" />
 `;
 
@@ -135,7 +139,7 @@ export function renderSvg(chartResult, options = {}) {
 
   // 若 preset 包含強弱與五行
   if (preset.includeStrength) {
-    const yOffset = 470;
+    const yOffset = 490;
     svg += `
     <!-- 五行強弱分析區塊 -->
     <g transform="translate(40, ${yOffset})">
@@ -179,7 +183,7 @@ export function renderSvg(chartResult, options = {}) {
 
   // 大運區塊（若 preset 包含）
   if (preset.includeLuckCycles && res.luckCycles) {
-    const yOffset = 620;
+    const yOffset = 635;
     const cardW = width - 80;
     const stepW = Math.min(80, (cardW - 40) / Math.min(8, res.luckCycles.cycles.length));
 
@@ -196,10 +200,10 @@ export function renderSvg(chartResult, options = {}) {
       const bCenterX = bx + stepW / 2;
       svg += `
         <rect x="${bx}" y="0" width="${stepW - 6}" height="92" class="grid-box" rx="4" />
-        <text x="${bCenterX - 3}" y="20" font-size="11px" fill="${theme.textMuted}" text-anchor="middle">${cyc.fromAge}歲</text>
-        <text x="${bCenterX - 3}" y="48" font-size="18px" font-weight="bold" fill="${theme.textPrimary}" text-anchor="middle">${cyc.ganzhi}</text>
-        <text x="${bCenterX - 3}" y="68" font-size="11px" fill="${theme.gold}" text-anchor="middle">${cyc.tenGodStem ? cyc.tenGodStem.short : ''}</text>
-        <text x="${bCenterX - 3}" y="84" font-size="10px" fill="${theme.textMuted}" text-anchor="middle">${cyc.fromYear}年</text>
+        <text x="${bCenterX - 3}" y="20" font-size="12px" font-weight="600" fill="${theme.textSecondary}" text-anchor="middle">${cyc.fromAge}歲</text>
+        <text x="${bCenterX - 3}" y="48" font-size="19px" font-weight="bold" fill="${theme.textPrimary}" text-anchor="middle">${cyc.ganzhi}</text>
+        <text x="${bCenterX - 3}" y="68" font-size="12px" font-weight="600" fill="${theme.gold}" text-anchor="middle">${cyc.tenGodStem ? cyc.tenGodStem.short : ''}</text>
+        <text x="${bCenterX - 3}" y="84" font-size="11px" fill="${theme.textSecondary}" text-anchor="middle">${cyc.fromYear}年</text>
       `;
     });
 
@@ -210,22 +214,70 @@ export function renderSvg(chartResult, options = {}) {
   }
 
   // 神煞與四宮胎命區塊（若空間允許）
+  // 神煞名以「、」連接並按卡片寬度自動換行，避免長串溢出卡片
   if (preset.includeShenSha && height >= 900) {
     const yOffset = 800;
     const cardW = width - 80;
-    const shenshaNames = res.shenSha.slice(0, 8).map(s => `${s.name}(${s.hitOn.join('/')})`).join('、 ');
+    const maxCharsPerLine = Math.max(18, Math.floor((cardW - 130) / 13.5));
+    // 行數上限：保證卡片不超出版面，超出的以「等共X顆」收尾（完整清單見 Lab）
+    const cap = (lines, total, maxL) => {
+      if (lines.length <= maxL) return lines;
+      const cut = lines.slice(0, maxL);
+      cut[maxL - 1] += `（等共${total}顆）`;
+      return cut;
+    };
+    const wrapNames = (list, limit) => {
+      const names = (list || []).slice(0, limit).map((s) => `${s.name}(${s.hitOn.join('/')})`);
+      if (names.length === 0) return ['—'];
+      const lines = [];
+      let cur = '';
+      for (const n of names) {
+        const piece = cur ? '、 ' + n : n;
+        if ((cur + piece).length > maxCharsPerLine && cur) {
+          lines.push(cur);
+          cur = n;
+        } else {
+          cur += piece;
+        }
+      }
+      if (cur) lines.push(cur);
+      return lines;
+    };
+    const natalLines = cap(wrapNames(res.shenSha, 14), (res.shenSha || []).length, 3);
+    const yearList = res.transits && res.transits.shenShaYear ? res.transits.shenShaYear : [];
+    const yearSSLines = cap(wrapNames(yearList, 10), yearList.length, 1);
+    const firstLuck = res.luckCycles.cycles[0];
+    const luckList = firstLuck && firstLuck.shenSha ? firstLuck.shenSha : [];
+    const luckSSLines = cap(wrapNames(luckList, 10), luckList.length, 1);
+    const luckLabel = firstLuck ? `${firstLuck.ganzhi}運：` : '';
+
+    const rowGap = 24;
+    const blockRows = 1 + natalLines.length + yearSSLines.length + luckSSLines.length;
+    const cardH = 50 + blockRows * rowGap + 26;
+
+    let shenShaInner = '';
+    let ry = 0;
+    const addRow = (label, lines) => {
+      lines.forEach((ln, li) => {
+        shenShaInner += `
+        <text x="0" y="${ry}" class="meta-label">${li === 0 ? label : ''}</text>
+        <text x="82" y="${ry}" class="meta-value" font-size="13px">${ln}</text>`;
+        ry += rowGap;
+      });
+    };
+    addRow('原局神煞：', natalLines);
+    addRow('流年神煞：', yearSSLines);
+    addRow('初運神煞：', luckSSLines.map((ln, li) => (li === 0 ? luckLabel + ln : ln)));
 
     svg += `
     <!-- 神煞與附宮 -->
     <g transform="translate(40, ${yOffset})">
-      <rect x="0" y="0" width="${cardW}" height="100" class="card" />
+      <rect x="0" y="0" width="${cardW}" height="${cardH}" class="card" />
       <text x="24" y="30" class="section-title">神煞吉凶與命宮身宮</text>
-      <g transform="translate(24, 46)">
-        <text x="0" y="16" class="meta-label">命中神煞：</text>
-        <text x="70" y="16" class="meta-value" font-size="12px">${shenshaNames || '無顯著主神煞'}</text>
-
-        <text x="0" y="38" class="meta-label">胎元命宮：</text>
-        <text x="70" y="38" class="meta-value" font-size="12px">胎元: ${res.auxiliary.taiYuan ? res.auxiliary.taiYuan.ganzhi : '—'} ｜ 胎息: ${res.auxiliary.taiXi ? res.auxiliary.taiXi.ganzhi : '—'} ｜ 命宮: ${res.auxiliary.mingGong ? res.auxiliary.mingGong.ganzhi : '—'} ｜ 身宮: ${res.auxiliary.shenGong ? res.auxiliary.shenGong.ganzhi : '—'}</text>
+      <g transform="translate(24, 52)">
+        ${shenShaInner}
+        <text x="0" y="${ry}" class="meta-label">胎元命宮：</text>
+        <text x="82" y="${ry}" class="meta-value" font-size="13px">胎元: ${res.auxiliary.taiYuan ? res.auxiliary.taiYuan.ganzhi : '—'} ｜ 胎息: ${res.auxiliary.taiXi ? res.auxiliary.taiXi.ganzhi : '—'} ｜ 命宮: ${res.auxiliary.mingGong ? res.auxiliary.mingGong.ganzhi : '—'} ｜ 身宮: ${res.auxiliary.shenGong ? res.auxiliary.shenGong.ganzhi : '—'}</text>
       </g>
     </g>
     `;

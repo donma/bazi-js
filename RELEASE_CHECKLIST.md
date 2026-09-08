@@ -13,7 +13,7 @@
 - [x] 胎元完成／胎息完成／命宮完成／身宮完成（未知時辰為 null）
 - [x] 合沖刑害完成（三合三會半合拱合六合六沖刑害破＋天干合沖）
 - [x] 強弱引擎完成（非數個數＋evidence＋喜忌；定位聲明已寫）
-- [x] 神煞目錄全部完成（17 條＋ruleId＋文獻，shensha-catalog.md）
+- [x] 神煞目錄全部完成（22 條＋ruleId＋文獻，shensha-catalog.md；另含大運/流年神煞）
 - [x] 大運完成／流年完成／流月完成／流日完成／流時完成
 - [x] Rule Profile 完成（繼承/override/diff/版本/ruleId）
 - [x] AI Context 完成

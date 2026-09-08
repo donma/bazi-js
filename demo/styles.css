@@ -279,19 +279,23 @@ input:focus, select:focus {
   border-radius: 8px;
   padding: 12px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   width: 100%;
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* 讓 SVG 自適應容器寬度，並依原始寬高比縮放，避免被壓扁或文字模糊 */
+/* SVG 保持最小可讀寬度：容器夠寬時置中撐滿，過窄時橫向捲動而非縮成糊字 */
 .chart-viewer svg {
   display: block;
+  flex: 0 0 auto;
   width: 100% !important;
-  max-width: 100% !important;
+  min-width: 620px;
+  max-width: 960px !important;
   height: auto !important;
+  margin: 0 auto;
   transform: translateZ(0); /* 啟用硬體加速清晰算繪 */
 }
 

@@ -15,7 +15,7 @@ import { calculateChartKongWang } from '../core/constants/kongwang-calc.js';
 import { calculateChartAuxiliary } from '../auxiliary/index.js';
 import { calculateInteractions } from '../interactions/index.js';
 import { calculateStrength } from '../strength/index.js';
-import { calculateShenSha } from '../shensha/index.js';
+import { calculateShenSha, calculateShenShaOnPillar } from '../shensha/index.js';
 import { calculateLuckCycles } from '../luck/index.js';
 import { calculateTransit } from '../transit/index.js';
 import { calculateTrueSolarTime } from '../calendar/true-solar-time.js';
@@ -138,6 +138,20 @@ export function calculate(input, options = {}) {
   // 10. 當期流年/流月運勢計算（以當前或指定時刻）
   const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00+08:00`;
   const transits = calculateTransit(pillars, { datetime: transitDate });
+
+  // 11. 大運神煞：每步大運干支以原局為基準觸發的神煞（catalog scope: luck）
+  if (luckCycles && Array.isArray(luckCycles.cycles)) {
+    luckCycles.cycles.forEach((cyc, idx) => {
+      cyc.shenSha = calculateShenShaOnPillar(pillars, cyc.stem, cyc.branch, `luck-${idx + 1}`);
+    });
+  }
+
+  // 12. 流年神煞：當期流年干支以原局為基準觸發的神煞（catalog scope: transit）
+  if (transits && transits.year) {
+    transits.shenShaYear = calculateShenShaOnPillar(
+      pillars, transits.year.stem, transits.year.branch, 'transit-year'
+    );
+  }
 
   const result = {
     meta: {
