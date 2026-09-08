@@ -693,18 +693,20 @@ input:focus, select:focus {
 
 .responsive-luck-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
 .responsive-luck-grid article {
   display: grid;
+  grid-template-columns: minmax(80px, 110px) minmax(78px, 100px) minmax(70px, 100px) minmax(78px, 110px) minmax(0, 1fr);
+  align-items: center;
   gap: 2px;
-  padding: 8px 5px;
+  padding: 10px 12px;
   border: 1px solid var(--responsive-border);
   border-radius: 4px;
   background: var(--responsive-grid);
-  text-align: center;
+  text-align: left;
 }
 
 .responsive-luck-grid span,
@@ -722,7 +724,8 @@ input:focus, select:focus {
 
 .responsive-luck-grid strong {
   color: var(--responsive-text);
-  font-size: 18px;
+  font-size: 22px;
+  text-align: center;
 }
 
 .responsive-shensha .responsive-detail-list {
@@ -906,8 +909,26 @@ footer {
   .responsive-info-grid,
   .responsive-pillar-grid,
   .responsive-strength-summary,
-  .responsive-transit-grid {
+  .responsive-transit-grid,
+  .responsive-luck-grid {
     grid-template-columns: 1fr;
+  }
+  .responsive-luck-grid article {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 3px 10px;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  .responsive-luck-grid article strong {
+    grid-row: span 2;
+    align-self: center;
+    font-size: 22px;
+    text-align: center;
+  }
+  .responsive-luck-grid article .responsive-luck-shensha {
+    grid-column: 1 / -1;
+    padding-top: 6px;
+    border-top: 1px solid var(--responsive-border);
   }
   .responsive-transit-shensha {
     grid-template-columns: 1fr;

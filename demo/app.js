@@ -112,7 +112,7 @@ function updateRender() {
       preset
     });
     chartContainer.innerHTML = svgStr;
-    chartHint.textContent = '窄螢幕請在命盤區內左右滑動，以保留完整文字清晰度。';
+    chartHint.textContent = '窄螢幕會自動換行，文字保持清楚，不需要水平捲軸。';
   }
   document.getElementById('json-output').textContent = JSON.stringify(currentResult, null, 2);
 }
