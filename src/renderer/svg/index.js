@@ -29,10 +29,9 @@ export function renderSvg(chartResult, options = {}) {
   const dayMasterEl = (STEMS[STEM_INDEX[res.pillars.day.stem]] || {}).element || '';
 
   // SVG 模板拼接
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="background-color: ${theme.background}; font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', 'Segoe UI', Roboto, sans-serif; text-rendering: geometricPrecision; shape-rendering: geometricPrecision;">
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="background-color: ${theme.background}; font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', 'Segoe UI', Roboto, sans-serif;">
   <defs>
     <style>
-      text { text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
       .title { font-size: 26px; font-weight: 700; fill: ${theme.textPrimary}; letter-spacing: 1.5px; }
       .subtitle { font-size: 13px; fill: ${theme.textSecondary}; font-weight: 500; }
       .meta-label { font-size: 13px; fill: ${theme.textMuted}; font-weight: 500; }
