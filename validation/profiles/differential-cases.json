@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "bazi-js-profile-differential-cases",
+  "baseProfileId": "canonical",
+  "description": "以高風險切界案例確認 Profile 差異會改變實際結果，而不是只改名稱。",
+  "cases": [
+    {
+      "caseId": "DIFF-DAY-2300-001",
+      "purpose": "23:00 子初換日與 00:00 民用午夜換日",
+      "input": {"birthDate": "2024-01-01", "birthTime": "23:30", "gender": "male"},
+      "profiles": {
+        "canonical": {"pillars": {"year": "癸卯", "month": "甲子", "day": "乙丑", "hour": "丙子"}, "dayBoundary": "23:00"},
+        "civil-midnight": {"pillars": {"year": "癸卯", "month": "甲子", "day": "甲子", "hour": "甲子"}, "dayBoundary": "00:00"}
+      },
+      "differsOn": ["pillars.day.ganzhi", "pillars.hour.ganzhi", "accuracy.boundaryRules.day"]
+    },
+    {
+      "caseId": "DIFF-LUNAR-BOUNDARY-002",
+      "purpose": "立春切年/節令切月與農曆初一切年/月",
+      "input": {"birthDate": "2024-02-04", "birthTime": "17:00", "gender": "male"},
+      "profiles": {
+        "canonical": {"pillars": {"year": "甲辰", "month": "丙寅", "day": "戊戌", "hour": "辛酉"}, "yearBoundary": "lichun", "monthBoundary": "jie"},
+        "lunar-calendar": {"pillars": {"year": "癸卯", "month": "乙丑", "day": "戊戌", "hour": "辛酉"}, "yearBoundary": "lunar_new_year", "monthBoundary": "lunar_month"}
+      },
+      "differsOn": ["pillars.year.ganzhi", "pillars.month.ganzhi", "accuracy.boundaryRules.year", "accuracy.boundaryRules.month"]
+    },
+    {
+      "caseId": "DIFF-TRUE-SOLAR-003",
+      "purpose": "真太陽時修正跨時辰邊界",
+      "input": {"birthDate": "2024-02-04", "birthTime": "17:00", "gender": "male", "timezone": "+08:00", "location": {"country": "TW", "longitude": 121.5654}},
+      "profiles": {
+        "canonical": {"pillars": {"year": "甲辰", "month": "丙寅", "day": "戊戌", "hour": "辛酉"}, "trueSolarTimeUsed": false},
+        "true-solar": {"pillars": {"year": "甲辰", "month": "丙寅", "day": "戊戌", "hour": "庚申"}, "trueSolarTimeUsed": true}
+      },
+      "differsOn": ["pillars.hour.ganzhi", "calendar.time.effectiveTime", "accuracy.trueSolarTimeUsed"]
+    }
+  ]
+}

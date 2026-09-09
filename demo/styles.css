@@ -422,7 +422,7 @@ input:focus, select:focus {
 
 .responsive-pillar-grid {
   display: grid;
-  /* 四柱卡片一柱一列，讓神煞與 evidence 有足夠寬度，桌面也不壓縮文字。 */
+  /* 預設採手機一柱一列；桌面與平板由下方 RWD 規則切回四柱同列。 */
   grid-template-columns: 1fr;
   gap: 10px;
 }
@@ -1442,6 +1442,30 @@ select {
   font-size: 15px;
 }
 
+/* 神煞吉凶使用語意色：吉為綠、兇為紅，中性維持金色識別。 */
+.responsive-pillar-shensha-item.is-auspicious {
+  border-left-color: #2f7d4a;
+}
+
+.responsive-pillar-shensha-item.is-inauspicious {
+  border-left-color: #b33b32;
+}
+
+.responsive-shensha-name strong.is-auspicious,
+.responsive-shensha-name span.is-auspicious {
+  color: var(--responsive-shensha-auspicious, #2f7d4a);
+}
+
+.responsive-shensha-name strong.is-inauspicious,
+.responsive-shensha-name span.is-inauspicious {
+  color: var(--responsive-shensha-inauspicious, #b33b32);
+}
+
+.responsive-shensha-name strong.is-neutral,
+.responsive-shensha-name span.is-neutral {
+  color: var(--responsive-shensha-neutral, var(--responsive-gold));
+}
+
 .responsive-detail-list p {
   line-height: 1.9;
 }
@@ -1480,6 +1504,12 @@ footer {
 }
 
 @media (min-width: 761px) {
+  /* 桌面與平板保留完整四柱主盤同列；只有手機才改為一柱一列。 */
+  .responsive-pillar-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(8px, 1.2vw, 14px);
+  }
+
   #bazi-form {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
@@ -1530,6 +1560,34 @@ footer {
   }
 }
 
+@media (min-width: 601px) and (max-width: 760px) {
+  /* 平板直向寬度較窄，仍維持四柱同列，但收斂卡片留白。 */
+  .responsive-pillar-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .responsive-pillar {
+    padding: 12px 8px;
+  }
+
+  .responsive-pillar-characters {
+    gap: 4px;
+  }
+
+  .responsive-pillar-characters strong {
+    font-size: clamp(26px, 5vw, 32px);
+  }
+
+  .responsive-pillar-shensha-item {
+    padding: 7px 6px;
+  }
+
+  .responsive-shensha-name {
+    display: block;
+  }
+}
+
 @media (max-width: 600px) {
   .container {
     padding: 18px 10px 38px;
@@ -1546,12 +1604,47 @@ footer {
   }
 
   .responsive-chart {
-    padding: 14px;
-    border-radius: 12px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
+  /* 手機移除外層容器與柱卡片的重複側框，避免左右邊緣疊出多條線。 */
+  .responsive-chart-header {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+
+  .responsive-info-grid,
   .responsive-section {
-    padding: 13px;
+    padding: 14px 0;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .responsive-info-grid {
+    margin-top: 14px;
+  }
+
+  .responsive-pillar-grid {
+    gap: 0;
+  }
+
+  .responsive-pillar {
+    padding: 16px 2px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .responsive-pillar + .responsive-pillar {
+    border-top: 1px solid var(--responsive-border);
   }
 }
 

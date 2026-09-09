@@ -20,6 +20,11 @@ export const THEMES = {
     borderDark: '#b8a88f',
     gridBg: '#f5f1eb',
     tagBg: '#f2eee9',
+    shenShaColors: {
+      auspicious: '#2f7d4a',
+      inauspicious: '#b33b32',
+      neutral: '#7d5f16'
+    },
     elementColors: {
       '木': '#2d6a4f',
       '火': '#b23a22',
@@ -43,6 +48,11 @@ export const THEMES = {
     borderDark: '#b09a78',
     gridBg: '#ece3d2',
     tagBg: '#e6dcce',
+    shenShaColors: {
+      auspicious: '#2d6a4f',
+      inauspicious: '#9d2f24',
+      neutral: '#7a5c14'
+    },
     elementColors: {
       '木': '#26543d',
       '火': '#992d19',
@@ -66,6 +76,11 @@ export const THEMES = {
     borderDark: '#4a5160',
     gridBg: '#181b20',
     tagBg: '#252930',
+    shenShaColors: {
+      auspicious: '#65c18c',
+      inauspicious: '#f07961',
+      neutral: '#dfb15b'
+    },
     elementColors: {
       '木': '#40916c',
       '火': '#e06c53',

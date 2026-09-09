@@ -3,6 +3,7 @@
 // 必須可繼承 canonical、可 override 個別規則、可取得 diff、可輸出規則版本、可列出所有 active rules、可追溯 ruleId。
 
 import { CANONICAL_PROFILE } from './profiles/canonical.js';
+import { BUILTIN_PROFILES, PROFILE_CATALOG } from './profiles/catalog.js';
 import { BaziRuleError } from '../core/errors/index.js';
 
 const VALID_YEAR_BOUNDARIES = new Set(['lichun', 'lunar_new_year']);
@@ -34,6 +35,7 @@ class ProfileRegistry {
     this.profiles = new Map();
     // 註冊預設 canonical profile
     this.register(CANONICAL_PROFILE);
+    for (const profile of BUILTIN_PROFILES) this.register(profile);
   }
 
   register(profile) {
@@ -138,9 +140,13 @@ class ProfileRegistry {
       id: p.id,
       name: p.name,
       description: p.description,
-      version: p.version
+      version: p.version,
+      baseId: p.baseId || null,
+      status: p.status || (p.id === 'canonical' ? 'default' : 'custom'),
+      diff: p.diff || {}
     }));
   }
 }
 
 export const RuleRegistry = new ProfileRegistry();
+export { PROFILE_CATALOG };

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/source-catalog.schema.json",
+  "title": "BaziJS Classical Source Catalog",
+  "type": "object",
+  "required": ["schemaVersion", "catalogId", "catalogVersion", "textStatus", "sources", "evidenceRecords"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "catalogId": {"type": "string"},
+    "catalogVersion": {"type": "string"},
+    "textStatus": {"type": "string"},
+    "disclaimer": {"type": "string"},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sourceId", "title", "sourceStatus", "locators", "references"],
+        "properties": {
+          "sourceId": {"type": "string"},
+          "title": {"type": "string"},
+          "author": {"type": "string"},
+          "period": {"type": "string"},
+          "sourceStatus": {"type": "string"},
+          "editionNote": {"type": "string"},
+          "locators": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "references": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+        }
+      }
+    },
+    "evidenceRecords": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidenceId", "sourceIds", "ruleIds", "citation", "originalBasis", "scope", "evidenceStatus", "variants", "researchNotes"],
+        "properties": {
+          "evidenceId": {"type": "string"},
+          "sourceIds": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "ruleIds": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "citation": {"type": "string"},
+          "originalBasis": {"type": "string"},
+          "scope": {"type": "string"},
+          "evidenceStatus": {"enum": ["implemented", "research-only", "conflicted"]},
+          "variants": {"type": "array"},
+          "researchNotes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

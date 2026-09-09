@@ -1,0 +1,196 @@
+{
+  "schemaVersion": "1.0.0",
+  "catalogId": "bazi-js-classical-evidence",
+  "catalogVersion": "2026.09",
+  "textStatus": "bibliographic-and-rule-evidence-index",
+  "disclaimer": "本目錄提供卷次與判定依據索引，不宣稱已完成所有傳本的校勘或全文數位化。",
+  "sources": [
+    {
+      "sourceId": "san-ming-tong-hui",
+      "title": "三命通會",
+      "author": "萬民英",
+      "period": "明",
+      "sourceStatus": "primary",
+      "editionNote": "以可核對的卷次與篇名作為索引；版本、標點與列數差異另記於 evidenceRecords。",
+      "locators": ["卷三：神煞與日例", "卷五：十惡大敗日", "卷六：特殊格與特殊日柱"],
+      "references": [
+        "https://zh.wikisource.org/zh-hant/三命通會/卷六",
+        "https://zh.wikisource.org/zh-hant/三命通會_(四庫全書本)/卷03"
+      ]
+    },
+    {
+      "sourceId": "yuan-hai-zi-ping",
+      "title": "淵海子平",
+      "author": "徐大升傳、後世增訂傳本",
+      "period": "宋元以降傳本",
+      "sourceStatus": "primary",
+      "editionNote": "書名與篇章在不同傳本有編次差異；本專案只保存可回查的篇名，不把後世摘要當原文。",
+      "locators": ["魁罡", "十惡大敗", "日貴、日德", "八專、金神", "天赦、四廢"],
+      "references": ["https://zh.wikisource.org/zh-hant/淵海子平"]
+    },
+    {
+      "sourceId": "xie-ji-bian-fang-shu",
+      "title": "欽定協紀辨方書",
+      "author": "清廷纂修",
+      "period": "清",
+      "sourceStatus": "primary-reference",
+      "editionNote": "作為天赦等擇日類條目的交叉來源；它與子平命理的使用目的不同。",
+      "locators": ["卷五：天赦"],
+      "references": ["https://zh.wikisource.org/wiki/欽定協紀辨方書_(四庫全書本)/卷05"]
+    },
+    {
+      "sourceId": "di-tian-sui-yan-wei",
+      "title": "滴天髓闡微",
+      "author": "任鐵樵注",
+      "period": "清",
+      "sourceStatus": "commentary",
+      "editionNote": "作為人元司令、月令與全局取用的理論參考，不用來替代固定日柱原始條文。",
+      "locators": ["人元司令", "月令與全局取用"],
+      "references": ["docs/references/sample1-audit.md"]
+    },
+    {
+      "sourceId": "zi-ping-zhen-quan",
+      "title": "子平真詮",
+      "author": "沈孝瞻",
+      "period": "清",
+      "sourceStatus": "classical-commentary",
+      "editionNote": "用於月令、格局概念的背景對讀；不將格局條件簡化成神煞命中。",
+      "locators": ["月令取格", "格局與用神"],
+      "references": ["docs/references/rule-differences.md"]
+    }
+  ],
+  "evidenceRecords": [
+    {
+      "evidenceId": "EV-SP-KUIGANG-001",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "ruleIds": ["SP_KUIGANG_001"],
+      "citation": "《三命通會》卷六〈魁罡〉；《淵海子平》〈魁罡〉",
+      "originalBasis": "日柱為庚辰、壬辰、戊戌、庚戌之一；此記錄固定日柱條件，不等同完整魁罡格成格。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [],
+      "researchNotes": "固定日柱與整局成格分離。"
+    },
+    {
+      "evidenceId": "EV-SP-SHIEDABAI-002",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "ruleIds": ["SP_SHIEDABAI_002"],
+      "citation": "《三命通會》卷五〈十惡大敗日〉；《淵海子平》〈十惡大敗〉",
+      "originalBasis": "甲辰、乙巳、丙申、丁亥、戊戌、己丑、庚辰、辛巳、壬申、癸亥十日。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [],
+      "researchNotes": "名稱與吉凶解讀不代表整局必然凶敗。"
+    },
+    {
+      "evidenceId": "EV-SP-RIGUI-003",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "ruleIds": ["SP_RIGUI_003"],
+      "citation": "《三命通會》卷六〈日貴〉；《淵海子平》〈日貴〉",
+      "originalBasis": "丁酉、丁亥、癸巳、癸卯四日。晝貴、夜貴分配另有版本差異。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "day-night", "note": "晝貴/夜貴分配需按版本保存。"}],
+      "researchNotes": "目前只識別日柱，不代替完整日貴格判定。"
+    },
+    {
+      "evidenceId": "EV-SP-RIDE-004",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "ruleIds": ["SP_RIDE_004"],
+      "citation": "《三命通會》卷六〈日德〉；《淵海子平》〈日德〉",
+      "originalBasis": "甲寅、丙辰、戊辰、庚辰、壬戌五日。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [],
+      "researchNotes": "完整日德格仍須整局考察。"
+    },
+    {
+      "evidenceId": "EV-SP-BAZHUAN-005",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "ruleIds": ["SP_BAZHUAN_005"],
+      "citation": "《三命通會》卷六〈八專祿旺〉；《淵海子平》〈八專〉",
+      "originalBasis": "甲寅、乙卯、己未、丁未、庚申、辛酉、戊戌、癸丑八日。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "four-day-core", "note": "部分傳本或註家只取甲寅、乙卯、庚申、辛酉四日。"}],
+      "researchNotes": "四日核心與八日擴展不可視為沒有差異。"
+    },
+    {
+      "evidenceId": "EV-SP-JIUCHOU-006",
+      "sourceIds": ["san-ming-tong-hui"],
+      "ruleIds": ["SP_JIUCHOU_006"],
+      "citation": "《三命通會》卷三〈九醜日〉",
+      "originalBasis": "戊子、戊午、己卯、己酉、辛卯、辛酉、壬子、壬午、丁酉、乙卯十日。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "later-nine-day-list", "note": "後世常見九日表有刪減或改列。"}],
+      "researchNotes": "九醜之名與原文十日列法有數目衝突，預設採可回查的卷三列法。"
+    },
+    {
+      "evidenceId": "EV-SP-GULUAN-007",
+      "sourceIds": ["san-ming-tong-hui"],
+      "ruleIds": ["SP_GULUAN_007"],
+      "citation": "《三命通會》卷三〈孤鸞煞〉、卷六〈孤鸞〉",
+      "originalBasis": "乙巳、丁巳、辛亥、戊申、甲寅、丙午、戊午、壬子八日。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "legacy-conservative-five", "note": "舊 BaziJS vNext 曾採五柱。"}],
+      "researchNotes": "本版預設原典八日，保留舊版五柱差異。"
+    },
+    {
+      "evidenceId": "EV-SP-YYCC-008",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "ruleIds": ["SP_YYCC_008"],
+      "citation": "《三命通會》卷三〈陰陽差錯〉；《淵海子平》〈陰陽差錯〉",
+      "originalBasis": "丙子、丁丑、戊寅、辛卯、壬辰、癸巳、丙午、丁未、戊申、辛酉、壬戌、癸亥十二日。",
+      "scope": "dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [],
+      "researchNotes": "固定日柱識別，不直接輸出婚姻結論。"
+    },
+    {
+      "evidenceId": "EV-SP-JINSHEN-009",
+      "sourceIds": ["yuan-hai-zi-ping", "san-ming-tong-hui"],
+      "ruleIds": ["SP_JINSHEN_009"],
+      "citation": "《淵海子平》〈金神〉；《三命通會》卷六〈金神〉",
+      "originalBasis": "時柱為癸酉、己巳、乙丑之一；火制、月令與全局取用另行判斷。",
+      "scope": "hourPillar",
+      "evidenceStatus": "implemented",
+      "variants": [],
+      "researchNotes": "金神時識別與完整金神格取用分離。"
+    },
+    {
+      "evidenceId": "EV-SE-TIANSHE-001",
+      "sourceIds": ["yuan-hai-zi-ping", "xie-ji-bian-fang-shu"],
+      "ruleIds": ["SE_TIANSHE_001"],
+      "citation": "《淵海子平》〈天赦〉；《欽定協紀辨方書》卷五〈天赦〉",
+      "originalBasis": "春戊寅、夏甲午、秋戊申、冬甲子；季節依節令月支，不依國曆月份硬切。",
+      "scope": "season + dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "calendar-variants", "note": "其他曆書日例或季節界線可能有異文。"}],
+      "researchNotes": "evidence 必須保留 season、seasonSource、monthBranch。"
+    },
+    {
+      "evidenceId": "EV-SE-SIFEI-002",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "ruleIds": ["SE_SIFEI_002"],
+      "citation": "《三命通會》卷六〈四廢日例〉；《淵海子平》〈四廢〉",
+      "originalBasis": "春庚申辛酉、夏壬子癸亥、秋甲寅乙卯、冬丙午丁巳。",
+      "scope": "season + dayPillar",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "season-boundary", "note": "季節以寅卯辰、巳午未、申酉戌、亥子丑歸類。"}],
+      "researchNotes": "不能只用 dayPillar 判定。"
+    },
+    {
+      "evidenceId": "EV-PT-CLASSICAL-006",
+      "sourceIds": ["san-ming-tong-hui", "zi-ping-zhen-quan", "di-tian-sui-yan-wei"],
+      "ruleIds": ["PT_RENQILONG_001", "PT_LIUYIN_002", "PT_LIUYI_003", "PT_RILUGUI_004", "PT_GONGLU_005", "PT_GONGGUI_006", "PT_FUDE_007"],
+      "citation": "《三命通會》卷六各特殊格條目；並以子平格局注家作概念對讀",
+      "originalBasis": "壬騎龍背、六陰朝陽、六乙鼠貴、日祿歸時、拱祿、拱貴、福德秀氣均需日時、月令、透干、合局、刑沖破害等全局條件。",
+      "scope": "wholeChart",
+      "evidenceStatus": "research-only",
+      "variants": [{"id": "textual-and-school-variants", "note": "各格的核心日干、時柱、虛神與破格條件需逐條校勘。"}],
+      "researchNotes": "這些是 SpecialPatterns，不得放入 ShenSha Catalog；目前只登錄架構。"
+    }
+  ]
+}

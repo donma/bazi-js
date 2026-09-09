@@ -316,10 +316,143 @@ async function runBoundary() {
   }
 }
 
+// ---------- sources / profiles / schemas / external fixtures ----------
+function readJson(relativePath) {
+  return JSON.parse(fs.readFileSync(new URL(relativePath, import.meta.url), 'utf8'));
+}
+
+function resolveJsonPointer(root, pointer) {
+  return pointer.split('/').slice(1).reduce((value, part) => value?.[part.replaceAll('~1', '/').replaceAll('~0', '~')], root);
+}
+
+function schemaErrors(value, schema, root = schema, path = '$') {
+  if (schema.$ref) return schemaErrors(value, resolveJsonPointer(root, schema.$ref), root, path);
+  const errors = [];
+  if (schema.enum && !schema.enum.some((candidate) => JSON.stringify(candidate) === JSON.stringify(value))) {
+    errors.push(`${path} must be one of ${schema.enum.join(', ')}`);
+  }
+  if (schema.const !== undefined && JSON.stringify(value) !== JSON.stringify(schema.const)) errors.push(`${path} must equal const`);
+  if (schema.type) {
+    const types = Array.isArray(schema.type) ? schema.type : [schema.type];
+    const matches = types.some((type) => (
+      type === 'null' ? value === null :
+      type === 'array' ? Array.isArray(value) :
+      type === 'object' ? value !== null && typeof value === 'object' && !Array.isArray(value) :
+      type === 'integer' ? Number.isInteger(value) : typeof value === type
+    ));
+    if (!matches) return [`${path} type mismatch (${schema.type})`];
+  }
+  if (schema.pattern && typeof value === 'string' && !(new RegExp(schema.pattern)).test(value)) errors.push(`${path} pattern mismatch`);
+  if (schema.minItems !== undefined && Array.isArray(value) && value.length < schema.minItems) errors.push(`${path} needs ${schema.minItems} items`);
+  if (schema.required && value && typeof value === 'object') {
+    for (const key of schema.required) if (!(key in value)) errors.push(`${path}.${key} is required`);
+  }
+  if (schema.properties && value && typeof value === 'object' && !Array.isArray(value)) {
+    for (const [key, childSchema] of Object.entries(schema.properties)) {
+      if (key in value) errors.push(...schemaErrors(value[key], childSchema, root, `${path}.${key}`));
+    }
+  }
+  if (schema.items && Array.isArray(value)) value.forEach((item, index) => errors.push(...schemaErrors(item, schema.items, root, `${path}[${index}]`)));
+  return errors;
+}
+
+function pillarMap(result) {
+  return Object.fromEntries(Object.entries(result.pillars).map(([key, pillar]) => [key, pillar.ganzhi]));
+}
+
+function getPath(value, path) {
+  return path.split('.').reduce((current, key) => current?.[key], value);
+}
+
+function serializableRuleMetadata(rule) {
+  return {
+    ...rule,
+    match: { kind: rule.implemented === false ? 'research-only' : 'predicate', expression: rule.description },
+    evidence: { kind: rule.implemented === false ? 'research-only' : 'runtime-evidence', fields: ['matched', 'basedOn'] }
+  };
+}
+
+async function runDataContracts() {
+  console.log('== Data Contracts / 外部資料 ==');
+  const sourceCatalog = readJson('../sources/classical-texts.json');
+  const profileCatalog = readJson('../profiles/catalog.json');
+  const differential = readJson('../validation/profiles/differential-cases.json');
+  const external = readJson('../validation/external/round-01-samples.json');
+  const schemaFiles = [
+    ['../schemas/source-catalog.schema.json', sourceCatalog],
+    ['../schemas/profile.schema.json', profileCatalog.profiles[0]],
+    ['../schemas/profile-differential.schema.json', differential],
+    ['../schemas/external-validation.schema.json', external]
+  ];
+
+  for (const [file, sample] of schemaFiles) {
+    const schema = readJson(file);
+    assert(schema.$schema === 'https://json-schema.org/draft/2020-12/schema', `UT-SCHEMA-DRAFT-${file}`, schema.$schema);
+    assert(schemaErrors(sample, schema).length === 0, `UT-SCHEMA-${file}`, schemaErrors(sample, schema).join('; '));
+  }
+
+  const profileSchema = readJson('../schemas/profile.schema.json');
+  const ruleSchema = readJson('../schemas/rule.schema.json');
+  for (const rule of [...Bazi.SpecialRules.SPECIAL_RULE_REGISTRY, ...Bazi.Patterns.SPECIAL_PATTERN_REGISTRY]) {
+    const errors = schemaErrors(serializableRuleMetadata(rule), ruleSchema);
+    assert(errors.length === 0, `UT-RULE-SCHEMA-${rule.ruleId}`, errors.join('; '));
+  }
+  const chart = Bazi.calculate({ birthDate: '1983-05-11', birthTime: '16:19', gender: 'male' }, { includeLuckAnnualDetails: true });
+  const chartSchema = readJson('../schemas/chart-result.schema.json');
+  assert(schemaErrors(chart, chartSchema).length === 0, 'UT-CHART-RESULT-SCHEMA', schemaErrors(chart, chartSchema).join('; '));
+
+  assert(sourceCatalog.sources.length >= 5 && sourceCatalog.evidenceRecords.length >= 12, 'UT-SOURCES-CATALOG-COMPLETE', `${sourceCatalog.sources.length}/${sourceCatalog.evidenceRecords.length}`);
+  const sourceIds = new Set(sourceCatalog.sources.map((source) => source.sourceId));
+  for (const record of sourceCatalog.evidenceRecords) {
+    assert(record.sourceIds.every((id) => sourceIds.has(id)), `UT-SOURCE-REF-${record.evidenceId}`, JSON.stringify(record.sourceIds));
+  }
+
+  const runtimeProfiles = new Map(Bazi.Rules.RuleRegistry.listProfiles().map((profile) => [profile.id, profile]));
+  for (const profile of profileCatalog.profiles) {
+    const profileErrors = schemaErrors(profile, profileSchema);
+    assert(profileErrors.length === 0, `UT-PROFILE-SCHEMA-${profile.id}`, profileErrors.join('; '));
+    const runtime = runtimeProfiles.get(profile.id);
+    assert(Boolean(runtime), `UT-PROFILE-CATALOG-${profile.id}`, 'JSON catalog 與 SDK 內建 Profile 不同步');
+    assert(runtime?.version === profile.version, `UT-PROFILE-VERSION-${profile.id}`, `${runtime?.version}/${profile.version}`);
+    assert(Bazi.Rules.RuleRegistry.get(profile.id)?.rules?.dayBoundary?.value === profile.rules.dayBoundary.value, `UT-PROFILE-RULE-${profile.id}`, 'dayBoundary 不同步');
+  }
+
+  for (const fixture of differential.cases) {
+    const results = {};
+    for (const [profileId, expected] of Object.entries(fixture.profiles)) {
+      const result = Bazi.calculate(fixture.input, { profile: profileId });
+      results[profileId] = result;
+      assert(JSON.stringify(pillarMap(result)) === JSON.stringify(expected.pillars), `${fixture.caseId}-${profileId}-PILLARS`, JSON.stringify(pillarMap(result)));
+      if (expected.dayBoundary) assert(result.accuracy.boundaryRules.day === expected.dayBoundary, `${fixture.caseId}-${profileId}-DAY-RULE`, result.accuracy.boundaryRules.day);
+      if (expected.yearBoundary) assert(result.accuracy.boundaryRules.year === expected.yearBoundary, `${fixture.caseId}-${profileId}-YEAR-RULE`, result.accuracy.boundaryRules.year);
+      if (expected.monthBoundary) assert(result.accuracy.boundaryRules.month === expected.monthBoundary, `${fixture.caseId}-${profileId}-MONTH-RULE`, result.accuracy.boundaryRules.month);
+      if (expected.trueSolarTimeUsed !== undefined) assert(result.accuracy.trueSolarTimeUsed === expected.trueSolarTimeUsed, `${fixture.caseId}-${profileId}-SOLAR-RULE`, String(result.accuracy.trueSolarTimeUsed));
+    }
+    const [baseId, variantId] = Object.keys(results);
+    for (const field of fixture.differsOn) {
+      assert(JSON.stringify(getPath(results[baseId], field)) !== JSON.stringify(getPath(results[variantId], field)), `${fixture.caseId}-${field}-DIFF`, `${baseId}/${variantId}`);
+    }
+  }
+
+  for (const sample of external.cases) {
+    const result = Bazi.calculate(sample.input);
+    if (sample.expected.pillars) assert(JSON.stringify(pillarMap(result)) === JSON.stringify(sample.expected.pillars), `${sample.caseId}-PILLARS`, JSON.stringify(pillarMap(result)));
+    if (sample.expected.lunar) assert(JSON.stringify(result.calendar.lunar) === JSON.stringify(sample.expected.lunar), `${sample.caseId}-LUNAR`, JSON.stringify(result.calendar.lunar));
+  }
+  for (const sample of external.solarTermCases) {
+    const observedJd = Bazi.Calendar.calculateSolarTermJD(sample.year, sample.term);
+    const reference = new Date(sample.referenceUtc);
+    const referenceJd = Bazi.Julian.gregorianToJulianDay(reference.getUTCFullYear(), reference.getUTCMonth() + 1, reference.getUTCDate() + (reference.getUTCHours() + reference.getUTCMinutes() / 60 + reference.getUTCSeconds() / 3600) / 24);
+    const differenceMinutes = Math.abs(observedJd - referenceJd) * 1440;
+    assert(differenceMinutes <= sample.maxDifferenceMinutes, `${sample.caseId}-SOLAR-TERM`, `${differenceMinutes.toFixed(1)} min`);
+  }
+}
+
 await runUnit();
 await runShenShaVNext();
 await runGolden();
 await runBoundary();
+await runDataContracts();
 
 console.log(`\n測試結果：通過 ${pass} / 失敗 ${fail}`);
 if (fail > 0) {

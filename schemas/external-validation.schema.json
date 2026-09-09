@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/external-validation.schema.json",
+  "title": "BaziJS External Validation Dataset",
+  "type": "object",
+  "required": ["schemaVersion", "datasetId", "sources", "cases", "solarTermCases"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "datasetId": {"type": "string"},
+    "status": {"type": "string"},
+    "sources": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["sourceId", "name", "scope"]}},
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["caseId", "input", "external", "expected"],
+        "properties": {
+          "caseId": {"type": "string"},
+          "input": {"type": "object", "required": ["birthDate", "birthTime"]},
+          "external": {"type": "object", "required": ["sources", "classification"]},
+          "expected": {"type": "object"}
+        }
+      }
+    },
+    "solarTermCases": {"type": "array", "items": {"type": "object", "required": ["caseId", "year", "term", "referenceUtc", "maxDifferenceMinutes"]}}
+  }
+}

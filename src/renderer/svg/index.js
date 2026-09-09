@@ -55,6 +55,13 @@ function formatShenShaName(item) {
   return `${displayName(item)}${hitOn}`;
 }
 
+function shenShaToneClass(category) {
+  if (category === 'auspicious') return 'shensha-auspicious';
+  if (category === 'inauspicious') return 'shensha-inauspicious';
+  if (category === 'neutral') return 'shensha-neutral';
+  return 'body-strong';
+}
+
 function formatShenShaList(list = []) {
   return list.length ? list.map(formatShenShaName).join('、 ') : '—';
 }
@@ -203,7 +210,7 @@ function renderPillar(result, col, shenSha, width, theme) {
       const category = CATEGORY_LABELS[item.category] || item.category || '—';
       const confidence = CONFIDENCE_LABELS[item.confidence] || item.confidence || '—';
       const head = `${formatShenShaName(item)}　${category} · ${confidence}`;
-      y = wrappedText(nodes, head, { x: 20, y, maxUnits: 50, lineHeight: 21, className: 'body-strong' });
+      y = wrappedText(nodes, head, { x: 20, y, maxUnits: 50, lineHeight: 21, className: shenShaToneClass(item.category) });
       y = addLabelValue(nodes, '基準', formatBasedOn(item.basedOn || []), { x: 20, y, labelWidth: 58, maxUnits: 43, lineHeight: 19, labelClass: 'meta', valueClass: 'meta' });
       y = addLabelValue(nodes, '依據', item.reference || '未提供', { x: 20, y, labelWidth: 58, maxUnits: 43, lineHeight: 19, labelClass: 'meta', valueClass: 'meta' });
       y = renderEvidence(nodes, item, y + 2, 43);
@@ -487,6 +494,9 @@ export function renderSvg(chartResult, options = {}) {
       .character { font-size: 38px; font-weight: 800; fill: ${theme.textPrimary}; }
       .body { font-size: 14px; font-weight: 600; fill: ${theme.textPrimary}; }
       .body-strong { font-size: 15px; font-weight: 800; fill: ${theme.textPrimary}; }
+      .shensha-auspicious { font-size: 15px; font-weight: 800; fill: ${theme.shenShaColors?.auspicious || theme.textPrimary}; }
+      .shensha-inauspicious { font-size: 15px; font-weight: 800; fill: ${theme.shenShaColors?.inauspicious || theme.textPrimary}; }
+      .shensha-neutral { font-size: 15px; font-weight: 800; fill: ${theme.shenShaColors?.neutral || theme.textPrimary}; }
       .meta { font-size: 13px; font-weight: 600; fill: ${theme.textSecondary}; }
       .evidence-title { font-size: 13px; font-weight: 800; fill: ${theme.accent}; }
       .evidence { font-size: 12px; font-weight: 600; fill: ${theme.textSecondary}; }

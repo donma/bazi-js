@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/chart-result.schema.json",
+  "title": "BaziJS Chart Result",
+  "type": "object",
+  "required": ["meta", "input", "accuracy", "calendar", "pillars", "shenSha", "specialRules", "rules"],
+  "properties": {
+    "meta": {"type": "object", "required": ["engineVersion", "ruleSetVersion", "profileId", "resultSchemaVersion"]},
+    "input": {"type": "object"},
+    "accuracy": {"type": "object", "required": ["timeKnown", "hourPillarAvailable", "boundaryRules", "assumptions", "precision"]},
+    "calendar": {"type": "object", "required": ["solar", "lunar", "solarTerms", "time"]},
+    "pillars": {
+      "type": "object",
+      "required": ["year", "month", "day", "hour"],
+      "properties": {
+        "year": {"$ref": "#/$defs/pillar"},
+        "month": {"$ref": "#/$defs/pillar"},
+        "day": {"$ref": "#/$defs/pillar"},
+        "hour": {"$ref": "#/$defs/pillar"}
+      }
+    },
+    "shenSha": {"type": "array"},
+    "specialRules": {"type": "array"},
+    "luckCycles": {"type": ["object", "null"]},
+    "transits": {"type": ["object", "null"]},
+    "rules": {"type": "object", "required": ["applied"]}
+  },
+  "$defs": {
+    "pillar": {"type": "object", "required": ["ganzhi", "stem", "branch"]}
+  }
+}

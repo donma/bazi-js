@@ -10,6 +10,7 @@ Input（ birthDate/gender/time/timezone/location/profile ）
   ↓  Renderer / AI Context / UI（純消費結果，不重算）
 ```
 
+- 可追溯資料層與計算層分開：`sources/` 保存古籍 evidence 索引，`profiles/` 保存可重現的流派差異，`schemas/` 定義資料契約，`validation/` 保存外部抽樣與差異 fixture。
 - 核心零依賴、Browser-only runtime；Node 僅作 build/test。
 - 所有流派差異經 RuleRegistry Profile 化；每條規則輸出 ruleId + version。
 - UI（demo/lab）僅消費 SDK，不得內嵌命理計算。

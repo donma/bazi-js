@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/rule.schema.json",
+  "title": "BaziJS Serializable Rule Metadata",
+  "type": "object",
+  "required": ["id", "name", "aliases", "tradition", "conceptType", "ruleFamily", "baseOn", "scope", "category", "confidence", "ruleId", "version", "references", "description", "match", "evidence"],
+  "properties": {
+    "id": {"type": "string"},
+    "name": {"type": "string"},
+    "aliases": {"type": "array", "items": {"type": "string"}},
+    "tradition": {"type": "string"},
+    "conceptType": {"enum": ["shensha", "special-pillar", "seasonal-special", "special-pattern"]},
+    "ruleFamily": {"enum": ["day-pillar-special", "hour-pillar-special", "seasonal-day-special", "whole-chart-pattern"]},
+    "baseOn": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "scope": {"type": "string"},
+    "category": {"enum": ["auspicious", "inauspicious", "neutral"]},
+    "confidence": {"type": "string"},
+    "ruleId": {"type": "string"},
+    "version": {"type": "string"},
+    "references": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["title", "locator"]}},
+    "description": {"type": "string"},
+    "match": {"type": "object", "required": ["kind"], "properties": {"kind": {"type": "string"}, "expression": {"type": "string"}}},
+    "evidence": {"type": "object", "required": ["kind"], "properties": {"kind": {"type": "string"}, "fields": {"type": "array"}}},
+    "variants": {"type": "array"},
+    "researchNotes": {"type": "object"}
+  }
+}

@@ -361,14 +361,21 @@ function renderPillarShenSha(items) {
   if (!items || !items.length) return '<p class="responsive-shensha-empty">— 此柱無命中神煞</p>';
   return `<ul class="responsive-pillar-shensha-list">${items.map((item) => {
     const category = SHENSHA_CATEGORY_LABELS[item.category] || item.category || '—';
+    const categoryClass = item.category === 'auspicious'
+      ? 'is-auspicious'
+      : item.category === 'inauspicious'
+        ? 'is-inauspicious'
+        : item.category === 'neutral'
+          ? 'is-neutral'
+          : '';
     const confidence = SHENSHA_CONFIDENCE_LABELS[item.confidence] || item.confidence || '—';
     const evidence = (item.evidence && item.evidence.details || []).map((detail) => {
       const base = detail.baseValue ? `基準 ${detail.baseValue}` : '';
       const target = detail.targetValue ? `命中 ${detail.targetValue}` : '';
       return `<li>${displayText([base, target, detail.reason].filter(Boolean).join(' · '), '符合規則')}</li>`;
     }).join('');
-    return `<li class="responsive-pillar-shensha-item">
-      <div class="responsive-shensha-name"><strong>${displayText(item.displayName || item.name)}</strong><span>${displayText(category)} · ${displayText(confidence)}</span></div>
+    return `<li class="responsive-pillar-shensha-item ${categoryClass}">
+      <div class="responsive-shensha-name"><strong class="${categoryClass}">${displayText(item.displayName || item.name)}</strong><span class="${categoryClass}">${displayText(category)} · ${displayText(confidence)}</span></div>
       <div class="responsive-shensha-meta">基準：${displayText(formatBasedOn(item.basedOn))}</div>
       <div class="responsive-shensha-reference">依據：${displayText(item.reference, '未提供')}</div>
       ${evidence ? `<details><summary>判定證據（${(item.evidence.details || []).length} 筆）</summary><ul>${evidence}</ul></details>` : ''}
@@ -387,6 +394,9 @@ function renderResponsivePreview(result, options) {
     `--responsive-muted:${theme.textMuted}`,
     `--responsive-accent:${theme.accent}`,
     `--responsive-gold:${theme.gold}`,
+    `--responsive-shensha-auspicious:${theme.shenShaColors?.auspicious || '#2f7d4a'}`,
+    `--responsive-shensha-inauspicious:${theme.shenShaColors?.inauspicious || '#b33b32'}`,
+    `--responsive-shensha-neutral:${theme.shenShaColors?.neutral || theme.gold}`,
     `--responsive-border:${theme.border}`,
     `--responsive-grid:${theme.gridBg}`
   ].join(';');

@@ -330,7 +330,40 @@ console.log(detailed.luckCycles.cycles[0].annuals[0]);
 
 逐年資料包含流年干支、十神、十二長生、納音、旬空、流年神煞，以及流年與原局的互動。
 
-## 6. SVG、PNG 與 AI Context
+## 6. 可追溯資料、Profile 與 Schema
+
+這三層是給程式與維護者使用的資料，不會自動增加 Demo 畫面文字：
+
+| 位置 | 內容 | 讀取目的 |
+| --- | --- | --- |
+| [`sources/`](sources/) | 古籍書目、卷次、原始判定依據、版本差異與 evidence | 查「這條規則從哪裡來」 |
+| [`profiles/`](profiles/) | canonical 與比較用多流派設定 | 查「這次用哪套切界」 |
+| [`schemas/`](schemas/) | 規則、Profile、命盤結果與驗證資料的 JSON Schema | 驗證資料格式 |
+| [`validation/external/`](validation/external/) | 公開來源抽樣資料與擷取日期 | 重跑外部交叉比對 |
+
+使用內建 Profile：
+
+```js
+console.log(Bazi.Rules.RuleRegistry.listProfiles());
+
+const chart = Bazi.calculate(input, { profile: 'civil-midnight' });
+console.log(chart.meta.profileId);              // 實際使用的 Profile
+console.log(chart.rules.applied);               // 實際採用的規則
+console.log(Bazi.Rules.RuleRegistry.getDiff('civil-midnight'));
+```
+
+目前內建 `canonical`、`civil-midnight`、`lunar-calendar`、`true-solar`。`canonical` 是預設的官方正統（子平術規範）；其他三個是明確標示的比較模型，不會假裝不同傳承沒有差異。每次讀取命盤時，請一起保存 `result.meta`、`result.rules.applied`、`result.accuracy`，之後才能重現同一份結果。
+
+需要在自己的工具查看證據索引時：
+
+```js
+const evidence = await fetch('./sources/classical-texts.json').then((res) => res.json());
+console.log(evidence.evidenceRecords);
+```
+
+Schema 是資料格式契約；它不替古籍裁決流派。遇到異文，請讀 `variants` 與 `researchNotes`；`SpecialPatterns` 目前只在 `Bazi.Patterns` 登錄研究架構，不會混進一般 `result.shenSha`。
+
+## 7. SVG、PNG 與 AI Context
 
 ### SVG
 
@@ -393,7 +426,7 @@ console.log(context.luckCyclesSummary.cycles);
 
 設定 `compact: true` 時，回傳 JSON 字串；設定 `false` 時，回傳 JavaScript 物件。
 
-## 7. 真太陽時
+## 8. 真太陽時
 
 需要依出生地修正時間時，提供經度並開啟 `trueSolarTime`：
 
@@ -419,7 +452,7 @@ console.log(result.accuracy.trueSolarTimeUsed);
 
 只知道時辰或完全不知道時間時，SDK 會在 `accuracy.assumptions` 說明起運時間的估算方式。
 
-## 8. 常見使用問題
+## 9. 常見使用問題
 
 | 情況 | 處理方式 |
 | --- | --- |
@@ -430,6 +463,17 @@ console.log(result.accuracy.trueSolarTimeUsed);
 | 想知道神煞為何命中 | 讀取 `item.evidence` |
 | 想知道採用哪套規則 | 讀取 `result.meta` 與 `result.rules.applied` |
 | 要在畫面顯示柱位 | 將 `year/month/day/hour` 轉成中文，不要直接顯示內部代碼 |
+
+## 更新紀錄
+
+### 2026-09-09
+
+- 新增 `sources/classical-texts.json` 古籍證據索引：6 筆書目、12 組規則／研究 evidence，保留卷次、原始判定依據、版本差異與未實作狀態。
+- 新增多流派 Profile 目錄與 SDK 內建 Profile：`canonical`、`civil-midnight`、`lunar-calendar`、`true-solar`；新增 `validation/profiles/differential-cases.json` 驗證切界差異會反映到實際四柱。
+- 新增 `schemas/` 正式 JSON Schema：古籍來源、Profile、規則 metadata、命盤結果、外部驗證資料集。
+- 新增 `validation/external/round-01-samples.json`，保存公開抽樣的日柱、農曆與節氣資料，並接入自動驗證。
+- `sources/`、`profiles/`、`schemas/` 已納入發布檔案清單，使用端可取得同一份證據與資料契約。
+- 驗證結果：`npm test` 通過 363/363；`npm run validate` 的 3 組日柱錨點與 2 組節氣精度檢查全部通過；瀏覽器 bundle 已重新編譯。
 
 ## License
 

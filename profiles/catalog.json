@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0.0",
+  "catalogId": "bazi-js-rule-profiles",
+  "catalogVersion": "2026.09",
+  "defaultProfileId": "canonical",
+  "profiles": [
+    {
+      "id": "canonical",
+      "name": "官方正統（子平術規範）",
+      "description": "立春切年、十二節切月、23:00 子初換日、陰陽年與性別順逆大運、節氣差除以三起運。",
+      "tradition": "classical-ziping",
+      "profileType": "reference",
+      "status": "default",
+      "version": "1.0.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"},
+        "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"},
+        "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"},
+        "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"},
+        "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+      },
+      "references": ["docs/references/rule-differences.md", "docs/architecture/quality-gates.md"]
+    },
+    {
+      "id": "civil-midnight",
+      "name": "民用午夜換日比較",
+      "description": "只將換日界線改為 00:00，供與民用曆法或其他排盤系統逐案比對。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "comparison",
+      "baseId": "canonical",
+      "version": "1.0.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"},
+        "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"},
+        "dayBoundary": {"value": "00:00", "ruleId": "DAY_BOUNDARY_MIDNIGHT_0000", "version": "1.0.0", "overridden": true},
+        "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"},
+        "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+      },
+      "diff": {"dayBoundary": {"from": "23:00", "to": "00:00"}},
+      "references": ["docs/references/day-boundary.md", "docs/references/rule-differences.md"]
+    },
+    {
+      "id": "lunar-calendar",
+      "name": "農曆初一切界比較",
+      "description": "以農曆正月初一切年、農曆初一切月並以 00:00 換日，僅作差異研究。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "comparison",
+      "baseId": "canonical",
+      "version": "1.0.0",
+      "rules": {
+        "yearBoundary": {"value": "lunar_new_year", "ruleId": "YEAR_BOUNDARY_LUNAR_NEW_YEAR", "version": "1.0.0", "overridden": true},
+        "monthBoundary": {"value": "lunar_month", "ruleId": "MONTH_BOUNDARY_LUNAR_MONTH", "version": "1.0.0", "overridden": true},
+        "dayBoundary": {"value": "00:00", "ruleId": "DAY_BOUNDARY_MIDNIGHT_0000", "version": "1.0.0", "overridden": true},
+        "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"},
+        "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+      },
+      "diff": {"yearBoundary": {"from": "lichun", "to": "lunar_new_year"}, "monthBoundary": {"from": "jie", "to": "lunar_month"}, "dayBoundary": {"from": "23:00", "to": "00:00"}},
+      "references": ["docs/references/rule-differences.md", "docs/references/four-pillars.md"]
+    },
+    {
+      "id": "true-solar",
+      "name": "真太陽時比較",
+      "description": "保留 canonical 的子平切界，改以出生地經度修正真太陽時；未提供地點時使用時區中央經線。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "comparison",
+      "baseId": "canonical",
+      "version": "1.0.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"},
+        "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"},
+        "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"},
+        "trueSolarTime": {"value": true, "ruleId": "TRUE_SOLAR_TIME_ENABLED", "version": "1.0.0", "overridden": true},
+        "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+      },
+      "diff": {"trueSolarTime": {"from": false, "to": true}},
+      "references": ["docs/references/rule-differences.md", "docs/references/calendar.md"]
+    }
+  ]
+}

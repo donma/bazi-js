@@ -19,6 +19,7 @@
 - Renderer 不得重新推算四柱；AI Context 不得用自然語言猜算四柱。
 - 一般神煞放在 `ShenSha`；固定柱位條件放在 `SpecialRules`；整局格局保留在 `Patterns` 研究登錄。
 - 每個可能改變命盤的選擇，都必須出現在 `result.meta`、`result.accuracy` 或 `result.rules.applied`。
+- `sources/`、`profiles/`、`schemas/` 與 `validation/` 是可審核資料層；它們不應被 Demo 當成額外解說文字，也不能繞過 `src/` 的唯一計算來源。
 
 ## 二、不可違反的不變量
 
@@ -47,6 +48,7 @@ git diff --check
 | Golden | 140 組跨年份四柱完整比對 | 防止公式或時區改動造成大面積偏移 |
 | Boundary | 立春、子初、午夜、未知時間、時辰、真太陽時、1900/2100 | 覆蓋高風險邊界 |
 | ShenSha vNext | Catalog schema、證據、流運神煞、特殊規則分類 | 防止概念分類污染 |
+| Data Contracts | sources、profiles、schemas、Profile differential、外部資料集 | 防止證據、流派設定與結果格式漂移 |
 | External | 日柱錨點與節氣公布時刻 | 確認生產算法不是只對自己生成的 expected |
 
 ## 四、可接受限制與使用者提示

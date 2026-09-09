@@ -1114,13 +1114,13 @@ var STEM_CHANGSHENG_MAP = {
   "\u7678": { startBranch: "\u536F", forward: false }
 };
 function getTwelveStage(stemChar, branchChar) {
-  const rule2 = STEM_CHANGSHENG_MAP[stemChar];
-  if (!rule2) return null;
-  const startIdx = BRANCH_INDEX[rule2.startBranch];
+  const rule3 = STEM_CHANGSHENG_MAP[stemChar];
+  if (!rule3) return null;
+  const startIdx = BRANCH_INDEX[rule3.startBranch];
   const targetIdx = BRANCH_INDEX[branchChar];
   if (targetIdx === void 0) return null;
   let step;
-  if (rule2.forward) {
+  if (rule3.forward) {
     step = (targetIdx - startIdx + 12) % 12;
   } else {
     step = (startIdx - targetIdx + 12) % 12;
@@ -2575,37 +2575,37 @@ var LEGACY_DISPLAY = {
   tian_yi_star: { name: "\u5929\u91AB", displayName: "\u5929\u91AB", aliases: ["\u5929\u91AB\u661F"] },
   hong_luan: { name: "\u7D05\u9E1E", displayName: "\u7D05\u9E1E", aliases: ["\u7D05\u9E1E\u661F"] }
 };
-function legacyMatcher(rule2, context) {
-  if (rule2.matchChart) return context.target.pillar === "day" && rule2.matchChart(context.pillars);
+function legacyMatcher(rule3, context) {
+  if (rule3.matchChart) return context.target.pillar === "day" && rule3.matchChart(context.pillars);
   const baseKey = context.activeBase;
-  if (baseKey === "dayStem") return rule2.match({ baseStem: context.bases.dayStem, targetBranch: context.target.branch, targetStem: context.target.stem });
-  if (baseKey === "yearStem") return rule2.match({ baseStem: context.bases.yearStem, targetBranch: context.target.branch, targetStem: context.target.stem });
-  if (baseKey === "monthBranch") return rule2.match({ monthBranch: context.bases.monthBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
-  if (baseKey === "dayBranch") return rule2.match({ baseBranch: context.bases.dayBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
-  if (baseKey === "yearBranch") return rule2.match({ baseBranch: context.bases.yearBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
+  if (baseKey === "dayStem") return rule3.match({ baseStem: context.bases.dayStem, targetBranch: context.target.branch, targetStem: context.target.stem });
+  if (baseKey === "yearStem") return rule3.match({ baseStem: context.bases.yearStem, targetBranch: context.target.branch, targetStem: context.target.stem });
+  if (baseKey === "monthBranch") return rule3.match({ monthBranch: context.bases.monthBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
+  if (baseKey === "dayBranch") return rule3.match({ baseBranch: context.bases.dayBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
+  if (baseKey === "yearBranch") return rule3.match({ baseBranch: context.bases.yearBranch, targetBranch: context.target.branch, targetStem: context.target.stem });
   return false;
 }
-function normalizeLegacyRule(rule2) {
-  const override = LEGACY_DISPLAY[rule2.id] || {};
-  const isPillarRule = Boolean(rule2.matchChart || rule2.baseOn.includes("dayPillar"));
+function normalizeLegacyRule(rule3) {
+  const override = LEGACY_DISPLAY[rule3.id] || {};
+  const isPillarRule = Boolean(rule3.matchChart || rule3.baseOn.includes("dayPillar"));
   return {
-    ...rule2,
-    name: override.name || rule2.name,
-    displayName: override.displayName || rule2.name,
+    ...rule3,
+    name: override.name || rule3.name,
+    displayName: override.displayName || rule3.name,
     aliases: override.aliases || [],
     tradition: "classical-ziping",
     conceptType: "shensha",
     ruleFamily: "general-shensha",
     scope: "natal",
-    tags: ["legacy", rule2.category === "auspicious" ? "noble" : rule2.category],
+    tags: ["legacy", rule3.category === "auspicious" ? "noble" : rule3.category],
     tier: "core",
     priority: 100,
     confidence: "classical",
     schools: ["canonical", "legacy-catalog"],
     target: isPillarRule ? "pillar" : "branch",
-    description: `\u7531 BaziJS v1 catalog adapter \u4FDD\u7559\u7684${rule2.name}\u898F\u5247\u3002`,
-    references: [{ type: "classical", title: rule2.reference, note: "Legacy catalog adapter\uFF1B\u4FDD\u7559\u539F\u59CB\u5224\u5B9A\u51FD\u6578\u3002" }],
-    match: (context) => legacyMatcher(rule2, context)
+    description: `\u7531 BaziJS v1 catalog adapter \u4FDD\u7559\u7684${rule3.name}\u898F\u5247\u3002`,
+    references: [{ type: "classical", title: rule3.reference, note: "Legacy catalog adapter\uFF1B\u4FDD\u7559\u539F\u59CB\u5224\u5B9A\u51FD\u6578\u3002" }],
+    match: (context) => legacyMatcher(rule3, context)
   };
 }
 var SHENSHA_REGISTRY = Object.freeze([
@@ -2616,45 +2616,45 @@ function validateShenShaRegistry(registry = SHENSHA_REGISTRY) {
   const errors = [];
   const ids = /* @__PURE__ */ new Set();
   const ruleIds = /* @__PURE__ */ new Set();
-  for (const rule2 of registry) {
-    if (!rule2.id || ids.has(rule2.id)) errors.push(`duplicate id: ${rule2.id || "(empty)"}`);
-    ids.add(rule2.id);
-    if (!rule2.ruleId || ruleIds.has(rule2.ruleId)) errors.push(`duplicate ruleId: ${rule2.ruleId || "(empty)"}`);
-    ruleIds.add(rule2.ruleId);
-    if (!rule2.name || !rule2.displayName) errors.push(`${rule2.id}: name/displayName is required`);
+  for (const rule3 of registry) {
+    if (!rule3.id || ids.has(rule3.id)) errors.push(`duplicate id: ${rule3.id || "(empty)"}`);
+    ids.add(rule3.id);
+    if (!rule3.ruleId || ruleIds.has(rule3.ruleId)) errors.push(`duplicate ruleId: ${rule3.ruleId || "(empty)"}`);
+    ruleIds.add(rule3.ruleId);
+    if (!rule3.name || !rule3.displayName) errors.push(`${rule3.id}: name/displayName is required`);
     for (const field of ["tradition", "conceptType", "ruleFamily", "scope"]) {
-      if (!rule2[field]) errors.push(`${rule2.id}: ${field} is required`);
+      if (!rule3[field]) errors.push(`${rule3.id}: ${field} is required`);
     }
-    if (!SHENSHA_CATEGORIES.includes(rule2.category)) errors.push(`${rule2.id}: invalid category`);
-    if (!SHENSHA_TIERS.includes(rule2.tier)) errors.push(`${rule2.id}: invalid tier`);
-    if (!SHENSHA_CONFIDENCES.includes(rule2.confidence)) errors.push(`${rule2.id}: invalid confidence`);
-    if (!Array.isArray(rule2.baseOn) || rule2.baseOn.length === 0) errors.push(`${rule2.id}: baseOn is required`);
-    if (typeof rule2.match !== "function") errors.push(`${rule2.id}: match must be a function`);
-    if (!rule2.version) errors.push(`${rule2.id}: version is required`);
-    if (!Array.isArray(rule2.references) || rule2.references.length === 0) errors.push(`${rule2.id}: references is required`);
+    if (!SHENSHA_CATEGORIES.includes(rule3.category)) errors.push(`${rule3.id}: invalid category`);
+    if (!SHENSHA_TIERS.includes(rule3.tier)) errors.push(`${rule3.id}: invalid tier`);
+    if (!SHENSHA_CONFIDENCES.includes(rule3.confidence)) errors.push(`${rule3.id}: invalid confidence`);
+    if (!Array.isArray(rule3.baseOn) || rule3.baseOn.length === 0) errors.push(`${rule3.id}: baseOn is required`);
+    if (typeof rule3.match !== "function") errors.push(`${rule3.id}: match must be a function`);
+    if (!rule3.version) errors.push(`${rule3.id}: version is required`);
+    if (!Array.isArray(rule3.references) || rule3.references.length === 0) errors.push(`${rule3.id}: references is required`);
   }
   return { valid: errors.length === 0, errors, count: registry.length };
 }
 var validation = validateShenShaRegistry();
 if (!validation.valid) throw new Error(`ShenSha registry invalid: ${validation.errors.join("; ")}`);
 function getShenShaRule(id) {
-  return SHENSHA_REGISTRY.find((rule2) => rule2.id === id) || null;
+  return SHENSHA_REGISTRY.find((rule3) => rule3.id === id) || null;
 }
 function getShenShaCatalog() {
   return SHENSHA_REGISTRY.slice();
 }
 
 // src/shensha/engine.js
-function isRuleEnabled(rule2, preset) {
-  return preset.tiers.includes(rule2.tier) && !(preset.excludeExperimental && rule2.confidence === "experimental");
+function isRuleEnabled(rule3, preset) {
+  return preset.tiers.includes(rule3.tier) && !(preset.excludeExperimental && rule3.confidence === "experimental");
 }
 function matchedValue(value) {
   if (typeof value === "object" && value !== null) return value.matched !== false;
   return Boolean(value);
 }
-function matchNote(value, rule2) {
-  if (value && typeof value === "object") return value.evidence || value.reason || rule2.description;
-  return rule2.description;
+function matchNote(value, rule3) {
+  if (value && typeof value === "object") return value.evidence || value.reason || rule3.description;
+  return rule3.description;
 }
 function normalizeTarget(target) {
   return {
@@ -2666,34 +2666,34 @@ function normalizeTarget(target) {
     sexagenaryIndex: target.sexagenaryIndex ?? null
   };
 }
-function resultFor(rule2, hits, evidence) {
-  const references = rule2.references || [];
+function resultFor(rule3, hits, evidence) {
+  const references = rule3.references || [];
   return {
-    id: rule2.id,
-    name: rule2.name,
-    displayName: rule2.displayName || rule2.name,
-    aliases: rule2.aliases || [],
-    tradition: rule2.tradition,
-    conceptType: rule2.conceptType,
-    ruleFamily: rule2.ruleFamily,
-    scope: rule2.scope,
-    category: rule2.category,
-    tags: rule2.tags || [],
-    tier: rule2.tier,
-    priority: rule2.priority,
-    confidence: rule2.confidence,
-    schools: rule2.schools || [],
+    id: rule3.id,
+    name: rule3.name,
+    displayName: rule3.displayName || rule3.name,
+    aliases: rule3.aliases || [],
+    tradition: rule3.tradition,
+    conceptType: rule3.conceptType,
+    ruleFamily: rule3.ruleFamily,
+    scope: rule3.scope,
+    category: rule3.category,
+    tags: rule3.tags || [],
+    tier: rule3.tier,
+    priority: rule3.priority,
+    confidence: rule3.confidence,
+    schools: rule3.schools || [],
     hitOn: [...new Set(hits)],
-    baseOn: rule2.baseOn,
-    basedOn: rule2.baseOn,
-    target: rule2.target,
-    ruleId: rule2.ruleId,
-    version: rule2.version,
+    baseOn: rule3.baseOn,
+    basedOn: rule3.baseOn,
+    target: rule3.target,
+    ruleId: rule3.ruleId,
+    version: rule3.version,
     reference: references[0] ? references[0].title : void 0,
     references,
-    description: rule2.description || "",
-    ...rule2.variants ? { variants: rule2.variants } : {},
-    ...rule2.researchNotes ? { researchNotes: rule2.researchNotes } : {},
+    description: rule3.description || "",
+    ...rule3.variants ? { variants: rule3.variants } : {},
+    ...rule3.researchNotes ? { researchNotes: rule3.researchNotes } : {},
     evidence: { details: evidence }
   };
 }
@@ -2702,19 +2702,19 @@ function evaluateRules(pillars, targets, options = {}) {
   const baseContext = createShenShaContext(pillars, { gender: options.gender });
   const external = options.external === true;
   const results = [];
-  for (const rule2 of SHENSHA_REGISTRY) {
-    if (!isRuleEnabled(rule2, preset)) continue;
-    if (external && rule2.baseOn.includes("dayPillar")) continue;
+  for (const rule3 of SHENSHA_REGISTRY) {
+    if (!isRuleEnabled(rule3, preset)) continue;
+    if (external && rule3.baseOn.includes("dayPillar")) continue;
     const hits = [];
     const evidence = [];
     for (const rawTarget of targets) {
       const target = normalizeTarget(rawTarget);
       if (!target.available) continue;
-      for (const baseKey of rule2.baseOn) {
+      for (const baseKey of rule3.baseOn) {
         const context = { ...baseContext, target, activeBase: baseKey };
         let value = false;
         try {
-          value = rule2.match(context);
+          value = rule3.match(context);
         } catch (error) {
           evidence.push({ basedOn: baseKey, matched: false, error: error.message });
           continue;
@@ -2727,11 +2727,11 @@ function evaluateRules(pillars, targets, options = {}) {
           targetPillar: target.pillar,
           targetValue: target.ganzhi || target.branch,
           matched: true,
-          reason: matchNote(value, rule2)
+          reason: matchNote(value, rule3)
         });
       }
     }
-    if (hits.length > 0) results.push(resultFor(rule2, hits, evidence));
+    if (hits.length > 0) results.push(resultFor(rule3, hits, evidence));
   }
   return results;
 }
@@ -3251,46 +3251,46 @@ var SEASONAL_SPECIAL_RULES = Object.freeze(SEASONAL_RULES);
 var SPECIAL_RULE_REGISTRY = Object.freeze([...PILLAR_RULES, ...SEASONAL_RULES]);
 
 // src/special-rules/engine.js
-function resultFor2(rule2, context, evidence) {
+function resultFor2(rule3, context, evidence) {
   return {
-    id: rule2.id,
-    name: rule2.name,
-    displayName: rule2.displayName || rule2.name,
-    aliases: rule2.aliases || [],
-    tradition: rule2.tradition,
-    conceptType: rule2.conceptType,
-    ruleFamily: rule2.ruleFamily,
-    baseOn: rule2.baseOn,
-    scope: rule2.scope,
-    category: rule2.category,
-    tags: rule2.tags || [],
-    tier: rule2.tier,
-    priority: rule2.priority,
-    confidence: rule2.confidence,
-    schools: rule2.schools || [],
-    hitOn: rule2.ruleFamily === "hour-pillar-special" ? ["hour"] : ["day"],
-    target: rule2.ruleFamily === "hour-pillar-special" ? "hour" : "day",
-    ruleId: rule2.ruleId,
-    version: rule2.version,
-    reference: rule2.references[0] ? rule2.references[0].title : void 0,
-    references: rule2.references,
-    description: rule2.description || "",
-    ...rule2.variants ? { variants: rule2.variants } : {},
-    ...rule2.researchNotes ? { researchNotes: rule2.researchNotes } : {},
+    id: rule3.id,
+    name: rule3.name,
+    displayName: rule3.displayName || rule3.name,
+    aliases: rule3.aliases || [],
+    tradition: rule3.tradition,
+    conceptType: rule3.conceptType,
+    ruleFamily: rule3.ruleFamily,
+    baseOn: rule3.baseOn,
+    scope: rule3.scope,
+    category: rule3.category,
+    tags: rule3.tags || [],
+    tier: rule3.tier,
+    priority: rule3.priority,
+    confidence: rule3.confidence,
+    schools: rule3.schools || [],
+    hitOn: rule3.ruleFamily === "hour-pillar-special" ? ["hour"] : ["day"],
+    target: rule3.ruleFamily === "hour-pillar-special" ? "hour" : "day",
+    ruleId: rule3.ruleId,
+    version: rule3.version,
+    reference: rule3.references[0] ? rule3.references[0].title : void 0,
+    references: rule3.references,
+    description: rule3.description || "",
+    ...rule3.variants ? { variants: rule3.variants } : {},
+    ...rule3.researchNotes ? { researchNotes: rule3.researchNotes } : {},
     evidence
   };
 }
 function calculateFromRegistry(pillars, registry, options = {}) {
   const context = createSpecialRuleContext(pillars, options);
-  return registry.flatMap((rule2) => {
+  return registry.flatMap((rule3) => {
     let matched = false;
     try {
-      matched = rule2.match(context) === true;
+      matched = rule3.match(context) === true;
     } catch (error) {
       return [];
     }
     if (!matched) return [];
-    return [resultFor2(rule2, context, rule2.evidence(context))];
+    return [resultFor2(rule3, context, rule3.evidence(context))];
   });
 }
 function calculateSpecialPillarRules(pillars, options = {}) {
@@ -3306,25 +3306,25 @@ function validateSpecialRuleRegistry(registry = SPECIAL_RULE_REGISTRY) {
   const errors = [];
   const ids = /* @__PURE__ */ new Set();
   const ruleIds = /* @__PURE__ */ new Set();
-  for (const rule2 of registry) {
-    if (!rule2.id || ids.has(rule2.id)) errors.push(`duplicate id: ${rule2.id || "(empty)"}`);
-    ids.add(rule2.id);
-    if (!rule2.ruleId || ruleIds.has(rule2.ruleId)) errors.push(`duplicate ruleId: ${rule2.ruleId || "(empty)"}`);
-    ruleIds.add(rule2.ruleId);
+  for (const rule3 of registry) {
+    if (!rule3.id || ids.has(rule3.id)) errors.push(`duplicate id: ${rule3.id || "(empty)"}`);
+    ids.add(rule3.id);
+    if (!rule3.ruleId || ruleIds.has(rule3.ruleId)) errors.push(`duplicate ruleId: ${rule3.ruleId || "(empty)"}`);
+    ruleIds.add(rule3.ruleId);
     for (const field of ["name", "tradition", "conceptType", "ruleFamily", "scope", "category", "confidence", "version", "description"]) {
-      if (!rule2[field]) errors.push(`${rule2.id}: ${field} is required`);
+      if (!rule3[field]) errors.push(`${rule3.id}: ${field} is required`);
     }
-    if (!Array.isArray(rule2.baseOn) || rule2.baseOn.length === 0) errors.push(`${rule2.id}: baseOn is required`);
-    if (typeof rule2.match !== "function") errors.push(`${rule2.id}: match must be a function`);
-    if (typeof rule2.evidence !== "function") errors.push(`${rule2.id}: evidence must be a function`);
-    if (!Array.isArray(rule2.references) || rule2.references.length === 0) errors.push(`${rule2.id}: references is required`);
+    if (!Array.isArray(rule3.baseOn) || rule3.baseOn.length === 0) errors.push(`${rule3.id}: baseOn is required`);
+    if (typeof rule3.match !== "function") errors.push(`${rule3.id}: match must be a function`);
+    if (typeof rule3.evidence !== "function") errors.push(`${rule3.id}: evidence must be a function`);
+    if (!Array.isArray(rule3.references) || rule3.references.length === 0) errors.push(`${rule3.id}: references is required`);
   }
   return { valid: errors.length === 0, errors, count: registry.length };
 }
 var validation2 = validateSpecialRuleRegistry();
 if (!validation2.valid) throw new Error(`Special rule registry invalid: ${validation2.errors.join("; ")}`);
 function getSpecialRule(id) {
-  return SPECIAL_RULE_REGISTRY.find((rule2) => rule2.id === id) || null;
+  return SPECIAL_RULE_REGISTRY.find((rule3) => rule3.id === id) || null;
 }
 function getSpecialRuleCatalog() {
   return SPECIAL_RULE_REGISTRY.slice();
@@ -4219,6 +4219,7 @@ function getZodiacAnimal(branch) {
 // src/rules/rule-registry.js
 var rule_registry_exports = {};
 __export(rule_registry_exports, {
+  PROFILE_CATALOG: () => PROFILE_CATALOG,
   RuleRegistry: () => RuleRegistry
 });
 
@@ -4277,6 +4278,84 @@ var CANONICAL_PROFILE = {
   }
 };
 
+// src/rules/profiles/catalog.js
+var CLASSICAL_ZIPING2 = "classical-ziping";
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+function rule2(value, ruleId, overridden = false) {
+  return { value, ruleId, version: "1.0.0", ...overridden ? { overridden: true } : {} };
+}
+function buildComparisonProfile({ id, name, description, overrides, differences, status = "comparison" }) {
+  const profile = clone(CANONICAL_PROFILE);
+  profile.id = id;
+  profile.name = name;
+  profile.description = description;
+  profile.tradition = CLASSICAL_ZIPING2;
+  profile.profileType = "comparison";
+  profile.status = status;
+  profile.baseId = "canonical";
+  profile.version = "1.0.0";
+  profile.diff = differences;
+  if (overrides.dayBoundary) {
+    profile.rules.dayBoundary = rule2(
+      overrides.dayBoundary,
+      overrides.dayBoundary === "00:00" ? "DAY_BOUNDARY_MIDNIGHT_0000" : "DAY_BOUNDARY_ZISHI_2300",
+      true
+    );
+  }
+  if (overrides.yearBoundary) {
+    profile.rules.yearBoundary = rule2(overrides.yearBoundary, `YEAR_BOUNDARY_${overrides.yearBoundary.toUpperCase()}`, true);
+  }
+  if (overrides.monthBoundary) {
+    profile.rules.monthBoundary = rule2(overrides.monthBoundary, `MONTH_BOUNDARY_${overrides.monthBoundary.toUpperCase()}`, true);
+  }
+  if (typeof overrides.trueSolarTime === "boolean") {
+    profile.rules.trueSolarTime = rule2(
+      overrides.trueSolarTime,
+      overrides.trueSolarTime ? "TRUE_SOLAR_TIME_ENABLED" : "TRUE_SOLAR_TIME_DISABLED",
+      true
+    );
+  }
+  return profile;
+}
+var CANONICAL_DESCRIPTOR = {
+  ...clone(CANONICAL_PROFILE),
+  tradition: CLASSICAL_ZIPING2,
+  profileType: "reference",
+  status: "default",
+  references: ["docs/references/rule-differences.md", "docs/architecture/quality-gates.md"]
+};
+var PROFILE_CATALOG = Object.freeze([
+  CANONICAL_DESCRIPTOR,
+  buildComparisonProfile({
+    id: "civil-midnight",
+    name: "\u6C11\u7528\u5348\u591C\u63DB\u65E5\u6BD4\u8F03",
+    description: "\u53EA\u5C07\u63DB\u65E5\u754C\u7DDA\u6539\u70BA 00:00\uFF0C\u4F9B\u8207\u6C11\u7528\u66C6\u6CD5\u6216\u5176\u4ED6\u6392\u76E4\u7CFB\u7D71\u9010\u6848\u6BD4\u5C0D\u3002",
+    overrides: { dayBoundary: "00:00" },
+    differences: { dayBoundary: { from: "23:00", to: "00:00" } }
+  }),
+  buildComparisonProfile({
+    id: "lunar-calendar",
+    name: "\u8FB2\u66C6\u521D\u4E00\u5207\u754C\u6BD4\u8F03",
+    description: "\u4EE5\u8FB2\u66C6\u6B63\u6708\u521D\u4E00\u5207\u5E74\u3001\u8FB2\u66C6\u521D\u4E00\u5207\u6708\u4E26\u4EE5 00:00 \u63DB\u65E5\uFF0C\u50C5\u4F5C\u5DEE\u7570\u7814\u7A76\u3002",
+    overrides: { yearBoundary: "lunar_new_year", monthBoundary: "lunar_month", dayBoundary: "00:00" },
+    differences: {
+      yearBoundary: { from: "lichun", to: "lunar_new_year" },
+      monthBoundary: { from: "jie", to: "lunar_month" },
+      dayBoundary: { from: "23:00", to: "00:00" }
+    }
+  }),
+  buildComparisonProfile({
+    id: "true-solar",
+    name: "\u771F\u592A\u967D\u6642\u6BD4\u8F03",
+    description: "\u4FDD\u7559 canonical \u7684\u5B50\u5E73\u5207\u754C\uFF0C\u6539\u4EE5\u51FA\u751F\u5730\u7D93\u5EA6\u4FEE\u6B63\u771F\u592A\u967D\u6642\uFF1B\u672A\u63D0\u4F9B\u5730\u9EDE\u6642\u4F7F\u7528\u6642\u5340\u4E2D\u592E\u7D93\u7DDA\u3002",
+    overrides: { trueSolarTime: true },
+    differences: { trueSolarTime: { from: false, to: true } }
+  })
+]);
+var BUILTIN_PROFILES = Object.freeze(PROFILE_CATALOG.filter((profile) => profile.id !== CANONICAL_PROFILE.id));
+
 // src/rules/rule-registry.js
 var VALID_YEAR_BOUNDARIES = /* @__PURE__ */ new Set(["lichun", "lunar_new_year"]);
 var VALID_MONTH_BOUNDARIES = /* @__PURE__ */ new Set(["jie", "lunar_month"]);
@@ -4304,6 +4383,7 @@ var ProfileRegistry = class {
   constructor() {
     this.profiles = /* @__PURE__ */ new Map();
     this.register(CANONICAL_PROFILE);
+    for (const profile of BUILTIN_PROFILES) this.register(profile);
   }
   register(profile) {
     const errors = validateProfile(profile);
@@ -4397,7 +4477,10 @@ var ProfileRegistry = class {
       id: p.id,
       name: p.name,
       description: p.description,
-      version: p.version
+      version: p.version,
+      baseId: p.baseId || null,
+      status: p.status || (p.id === "canonical" ? "default" : "custom"),
+      diff: p.diff || {}
     }));
   }
 };
@@ -4994,7 +5077,7 @@ __export(patterns_exports, {
 });
 
 // src/patterns/registry.js
-var CLASSICAL_ZIPING2 = "classical-ziping";
+var CLASSICAL_ZIPING3 = "classical-ziping";
 var refs3 = (...references) => references.map(([title, locator, url, note]) => ({
   type: "classical",
   title,
@@ -5004,7 +5087,7 @@ var refs3 = (...references) => references.map(([title, locator, url, note]) => (
 }));
 var researchPattern = (definition) => ({
   aliases: [],
-  tradition: CLASSICAL_ZIPING2,
+  tradition: CLASSICAL_ZIPING3,
   conceptType: "special-pattern",
   ruleFamily: "whole-chart-pattern",
   scope: "natal",
@@ -5111,18 +5194,18 @@ function validateSpecialPatternRegistry(registry = SPECIAL_PATTERN_REGISTRY) {
   const errors = [];
   const ids = /* @__PURE__ */ new Set();
   const ruleIds = /* @__PURE__ */ new Set();
-  for (const rule2 of registry) {
-    if (!rule2.id || ids.has(rule2.id)) errors.push(`duplicate id: ${rule2.id || "(empty)"}`);
-    ids.add(rule2.id);
-    if (!rule2.ruleId || ruleIds.has(rule2.ruleId)) errors.push(`duplicate ruleId: ${rule2.ruleId || "(empty)"}`);
-    ruleIds.add(rule2.ruleId);
+  for (const rule3 of registry) {
+    if (!rule3.id || ids.has(rule3.id)) errors.push(`duplicate id: ${rule3.id || "(empty)"}`);
+    ids.add(rule3.id);
+    if (!rule3.ruleId || ruleIds.has(rule3.ruleId)) errors.push(`duplicate ruleId: ${rule3.ruleId || "(empty)"}`);
+    ruleIds.add(rule3.ruleId);
     for (const field of ["name", "tradition", "conceptType", "ruleFamily", "scope", "category", "confidence", "version", "description"]) {
-      if (!rule2[field]) errors.push(`${rule2.id}: ${field} is required`);
+      if (!rule3[field]) errors.push(`${rule3.id}: ${field} is required`);
     }
-    if (!Array.isArray(rule2.baseOn) || rule2.baseOn.length === 0) errors.push(`${rule2.id}: baseOn is required`);
-    if (rule2.implemented && typeof rule2.match !== "function") errors.push(`${rule2.id}: implemented patterns require match`);
-    if (typeof rule2.evidence !== "function") errors.push(`${rule2.id}: evidence must be a function`);
-    if (!Array.isArray(rule2.references) || rule2.references.length === 0) errors.push(`${rule2.id}: references is required`);
+    if (!Array.isArray(rule3.baseOn) || rule3.baseOn.length === 0) errors.push(`${rule3.id}: baseOn is required`);
+    if (rule3.implemented && typeof rule3.match !== "function") errors.push(`${rule3.id}: implemented patterns require match`);
+    if (typeof rule3.evidence !== "function") errors.push(`${rule3.id}: evidence must be a function`);
+    if (!Array.isArray(rule3.references) || rule3.references.length === 0) errors.push(`${rule3.id}: references is required`);
   }
   return { valid: errors.length === 0, errors, count: registry.length };
 }
@@ -5131,17 +5214,17 @@ if (!validation3.valid) throw new Error(`Special pattern registry invalid: ${val
 
 // src/patterns/index.js
 function getSpecialPattern(id) {
-  return (SPECIAL_PATTERN_REGISTRY || []).find((rule2) => rule2.id === id) || null;
+  return (SPECIAL_PATTERN_REGISTRY || []).find((rule3) => rule3.id === id) || null;
 }
 function listResearchPatterns() {
-  return SPECIAL_PATTERN_REGISTRY.map((rule2) => ({
-    id: rule2.id,
-    name: rule2.name,
-    conceptType: rule2.conceptType,
-    ruleFamily: rule2.ruleFamily,
-    implemented: rule2.implemented,
-    status: rule2.status,
-    references: rule2.references
+  return SPECIAL_PATTERN_REGISTRY.map((rule3) => ({
+    id: rule3.id,
+    name: rule3.name,
+    conceptType: rule3.conceptType,
+    ruleFamily: rule3.ruleFamily,
+    implemented: rule3.implemented,
+    status: rule3.status,
+    references: rule3.references
   }));
 }
 
@@ -5163,6 +5246,11 @@ var THEMES = {
     borderDark: "#b8a88f",
     gridBg: "#f5f1eb",
     tagBg: "#f2eee9",
+    shenShaColors: {
+      auspicious: "#2f7d4a",
+      inauspicious: "#b33b32",
+      neutral: "#7d5f16"
+    },
     elementColors: {
       "\u6728": "#2d6a4f",
       "\u706B": "#b23a22",
@@ -5185,6 +5273,11 @@ var THEMES = {
     borderDark: "#b09a78",
     gridBg: "#ece3d2",
     tagBg: "#e6dcce",
+    shenShaColors: {
+      auspicious: "#2d6a4f",
+      inauspicious: "#9d2f24",
+      neutral: "#7a5c14"
+    },
     elementColors: {
       "\u6728": "#26543d",
       "\u706B": "#992d19",
@@ -5207,6 +5300,11 @@ var THEMES = {
     borderDark: "#4a5160",
     gridBg: "#181b20",
     tagBg: "#252930",
+    shenShaColors: {
+      auspicious: "#65c18c",
+      inauspicious: "#f07961",
+      neutral: "#dfb15b"
+    },
     elementColors: {
       "\u6728": "#40916c",
       "\u706B": "#e06c53",
@@ -5331,6 +5429,12 @@ function formatHitOn(hitOn = []) {
 function formatShenShaName(item) {
   const hitOn = item && item.hitOn && item.hitOn.length ? `\uFF08${formatHitOn(item.hitOn)}\uFF09` : "";
   return `${displayName(item)}${hitOn}`;
+}
+function shenShaToneClass(category) {
+  if (category === "auspicious") return "shensha-auspicious";
+  if (category === "inauspicious") return "shensha-inauspicious";
+  if (category === "neutral") return "shensha-neutral";
+  return "body-strong";
 }
 function formatShenShaList(list = []) {
   return list.length ? list.map(formatShenShaName).join("\u3001 ") : "\u2014";
@@ -5477,7 +5581,7 @@ function renderPillar(result, col, shenSha, width, theme) {
       const category = CATEGORY_LABELS[item.category] || item.category || "\u2014";
       const confidence = CONFIDENCE_LABELS[item.confidence] || item.confidence || "\u2014";
       const head = `${formatShenShaName(item)}\u3000${category} \xB7 ${confidence}`;
-      y = wrappedText(nodes, head, { x: 20, y, maxUnits: 50, lineHeight: 21, className: "body-strong" });
+      y = wrappedText(nodes, head, { x: 20, y, maxUnits: 50, lineHeight: 21, className: shenShaToneClass(item.category) });
       y = addLabelValue(nodes, "\u57FA\u6E96", formatBasedOn(item.basedOn || []), { x: 20, y, labelWidth: 58, maxUnits: 43, lineHeight: 19, labelClass: "meta", valueClass: "meta" });
       y = addLabelValue(nodes, "\u4F9D\u64DA", item.reference || "\u672A\u63D0\u4F9B", { x: 20, y, labelWidth: 58, maxUnits: 43, lineHeight: 19, labelClass: "meta", valueClass: "meta" });
       y = renderEvidence(nodes, item, y + 2, 43);
@@ -5747,6 +5851,9 @@ function renderSvg(chartResult, options = {}) {
       .character { font-size: 38px; font-weight: 800; fill: ${theme.textPrimary}; }
       .body { font-size: 14px; font-weight: 600; fill: ${theme.textPrimary}; }
       .body-strong { font-size: 15px; font-weight: 800; fill: ${theme.textPrimary}; }
+      .shensha-auspicious { font-size: 15px; font-weight: 800; fill: ${theme.shenShaColors?.auspicious || theme.textPrimary}; }
+      .shensha-inauspicious { font-size: 15px; font-weight: 800; fill: ${theme.shenShaColors?.inauspicious || theme.textPrimary}; }
+      .shensha-neutral { font-size: 15px; font-weight: 800; fill: ${theme.shenShaColors?.neutral || theme.textPrimary}; }
       .meta { font-size: 13px; font-weight: 600; fill: ${theme.textSecondary}; }
       .evidence-title { font-size: 13px; font-weight: 800; fill: ${theme.accent}; }
       .evidence { font-size: 12px; font-weight: 600; fill: ${theme.textSecondary}; }

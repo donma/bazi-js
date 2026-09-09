@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/profile.schema.json",
+  "title": "BaziJS Rule Profile",
+  "type": "object",
+  "required": ["id", "name", "description", "version", "rules"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "tradition": {"type": "string"},
+    "profileType": {"enum": ["reference", "comparison", "custom"]},
+    "status": {"type": "string"},
+    "baseId": {"type": ["string", "null"]},
+    "version": {"type": "string"},
+    "rules": {
+      "type": "object",
+      "required": ["yearBoundary", "monthBoundary", "dayBoundary", "trueSolarTime", "luckCycle", "strength"],
+      "properties": {
+        "yearBoundary": {"$ref": "#/$defs/valueRule"},
+        "monthBoundary": {"$ref": "#/$defs/valueRule"},
+        "dayBoundary": {"$ref": "#/$defs/valueRule"},
+        "trueSolarTime": {"$ref": "#/$defs/valueRule"},
+        "luckCycle": {
+          "type": "object",
+          "required": ["directionRule", "startAgeMethod"],
+          "properties": {"directionRule": {"$ref": "#/$defs/valueRule"}, "startAgeMethod": {"$ref": "#/$defs/valueRule"}}
+        },
+        "strength": {"type": "object", "required": ["ruleId", "version"]}
+      }
+    },
+    "diff": {"type": "object"},
+    "references": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "valueRule": {
+      "type": "object",
+      "required": ["value", "ruleId", "version"],
+      "properties": {"value": {}, "ruleId": {"type": "string"}, "version": {"type": "string"}, "overridden": {"type": "boolean"}}
+    }
+  }
+}
