@@ -214,6 +214,7 @@ function updateRender() {
   const chartContainer = document.getElementById('chart-container');
   const chartHint = document.querySelector('.chart-hint');
   chartContainer.classList.toggle('is-responsive-preview', responsivePreview);
+  document.body.classList.toggle('theme-dark-preview', theme === 'dark');
 
   if (responsivePreview) {
     chartContainer.innerHTML = renderResponsivePreview(currentResult, { theme, preset });

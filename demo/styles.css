@@ -1657,3 +1657,75 @@ footer {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ==================== v3 框線減量：用留白與底色取代巢狀外框 ==================== */
+/* 結果卡片只保留內容層次；避免 main/card、responsive-chart、section 疊出多條左右直線。 */
+.main-grid > main > .card {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.responsive-chart {
+  border: 0;
+  border-radius: 0;
+  background: var(--responsive-bg);
+  box-shadow: none;
+}
+
+.responsive-info-grid {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.responsive-section {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--responsive-border) 72%, transparent);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.responsive-pillars-section {
+  border-top: 0;
+}
+
+.responsive-pillar {
+  border-color: color-mix(in srgb, var(--responsive-border) 78%, transparent);
+  background: color-mix(in srgb, var(--responsive-grid) 68%, transparent);
+  box-shadow: 0 2px 8px rgba(38, 32, 24, 0.025);
+}
+
+@media (max-width: 600px) {
+  /* 手機維持完全扁平的閱讀流，只用區塊上方分隔線與卡片內容底色。 */
+  .main-grid > main > .card {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .responsive-section {
+    border-top-color: color-mix(in srgb, var(--responsive-border) 58%, transparent);
+  }
+
+  .responsive-pillar {
+    border-right: 0;
+    border-left: 0;
+    box-shadow: none;
+  }
+}
+
+/* 暗色主題的命盤會帶著自己的深色底；頁面外的提示與資料抽屜也同步提高對比。 */
+body.theme-dark-preview .main-grid > main > .card {
+  background: #121417;
+  color: #f2f4f7;
+}
+
+body.theme-dark-preview .chart-hint,
+body.theme-dark-preview .details-toggle {
+  color: #d1d7df;
+}
+
+body.theme-dark-preview .details-toggle:hover {
+  color: #ffffff;
+}
