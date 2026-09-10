@@ -31,6 +31,7 @@ import { VERSIONS } from '../rules/versions.js';
 import { BaziRuleError } from '../core/errors/index.js';
 import { buildClassicalSummary } from '../summary/index.js';
 import { buildAnalysisResult } from '../analysis/index.js';
+import { VALIDATION_MANIFEST_VERSION } from '../validation/index.js';
 
 function formatTimezoneOffset(offsetHours) {
   const sign = offsetHours < 0 ? '-' : '+';
@@ -61,6 +62,7 @@ export function calculate(input, options = {}) {
   // 4. 時區與時間解析
   const timezone = input.timezone || '+08:00';
   const timezoneOffsetHours = parseTimezoneOffset(timezone);
+  const dstRequested = input.dstOffset !== undefined;
 
   const [inYear, inMonth, inDay] = input.birthDate.split('-').map(Number);
   const birthTimeMode = input.birthTimeMode || (input.birthTime ? 'exact' : 'unknown');
@@ -217,7 +219,20 @@ export function calculate(input, options = {}) {
       profileName: profile.name,
       profileStatus: profile.status || (profile.id === 'canonical' ? 'default' : 'custom'),
       profileVersion: profile.version,
-      shenshaPreset
+      shenshaPreset,
+      profile: {
+        id: profile.id,
+        name: profile.name,
+        status: profile.status || (profile.id === 'canonical' ? 'default' : 'custom'),
+        profileType: profile.profileType || (profile.id === 'canonical' ? 'reference' : null),
+        tradition: profile.tradition || 'classical-ziping',
+        version: profile.version,
+        baseId: profile.baseId || null,
+        diff: profile.diff || {},
+        rules: profile.rules,
+        references: profile.references || ['docs/governance/authority-model.md'],
+        validationManifestVersion: VALIDATION_MANIFEST_VERSION
+      }
     },
 
     input: {
@@ -241,8 +256,37 @@ export function calculate(input, options = {}) {
       },
       precision: {
         solarTerms: 'Meeus low-precision solar longitude; typical boundary uncertainty is approximately ±10 minutes.',
-        lunarCalendar: '1900-2100 encoded lunisolar table.'
-      }
+        lunarCalendar: '1900-2100 encoded lunisolar table.',
+        solarTermsModel: {
+          modelId: 'meeus-solar-longitude-low-precision',
+          ruleVersion: VERSIONS.calendarRuleVersion,
+          class: 'approximate',
+          boundaryUncertaintyMinutes: 10,
+          externalValidation: 'round-03',
+          note: '節氣分鐘邊界應保留前後節氣 evidence；不可視為秒級天文年曆。'
+        },
+        timezone: {
+          modelId: 'fixed-utc-offset',
+          offsetHours: timezoneOffsetHours,
+          input: timezone,
+          dstSupported: false,
+          dstRequested,
+          note: dstRequested
+            ? '目前只保存固定 UTC offset；未自動套用政治時區或歷史夏令時間。'
+            : '未提供政治時區資料庫；固定 UTC offset 可重現。'
+        },
+        trueSolarTime: {
+          modelId: 'longitude-plus-equation-of-time',
+          used: Boolean(enableTrueSolarTime && birthTimeMode === 'exact'),
+          longitude: trueSolarInfo?.corrections ? (input.location?.longitude ?? timezoneOffsetHours * 15) : null,
+          correctionMinutes: trueSolarInfo?.corrections?.totalCorrectionMinutes ?? 0,
+          note: '依經度差與均時差修正；若需其他天文模型，應透過 Profile／版本明確指定。'
+        }
+      },
+      limitations: [
+        ...(dstRequested ? [{ id: 'historical-dst', status: 'unsupported', affects: 'civil-time-normalization' }] : []),
+        { id: 'solar-term-minute-precision', status: 'approximate', affects: 'jieqi-boundary' }
+      ]
     },
 
     calendar: {

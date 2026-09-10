@@ -7,6 +7,7 @@ let responsivePreview = true;
 
 const LAST_INPUT_STORAGE_KEY = 'bazijs.demo.last-input.v1';
 const VALID_TIME_MODES = ['exact', 'branch', 'unknown'];
+const VALID_YEAR_BOUNDARIES = ['lichun', 'lunar_new_year'];
 
 function setStorageStatus(message, isError = false) {
   const status = document.getElementById('storage-status');
@@ -57,6 +58,7 @@ function saveLastInput(input) {
 
   const payload = {
     birthDate: input.birthDate,
+    yearBoundary: input.yearBoundary || 'lunar_new_year',
     gender: input.gender,
     birthTimeMode: input.birthTimeMode,
     birthTime: input.birthTime || '',
@@ -80,6 +82,7 @@ function restoreLastInput(saved) {
   if (!saved) return;
 
   const birthDate = document.getElementById('birthDate');
+  const yearBoundary = document.getElementById('yearBoundary');
   const birthTime = document.getElementById('birthTime');
   const birthHourBranch = document.getElementById('birthHourBranch');
   const timezone = document.getElementById('timezone');
@@ -87,6 +90,7 @@ function restoreLastInput(saved) {
   const trueSolarTime = document.getElementById('trueSolarTime');
 
   if (saved.birthDate) birthDate.value = saved.birthDate;
+  if (VALID_YEAR_BOUNDARIES.includes(saved.yearBoundary)) yearBoundary.value = saved.yearBoundary;
   if (saved.birthTime) birthTime.value = saved.birthTime;
   if (saved.birthHourBranch && [...birthHourBranch.options].some((option) => option.value === saved.birthHourBranch)) {
     birthHourBranch.value = saved.birthHourBranch;
@@ -125,6 +129,9 @@ function init() {
       runCalculation();
     });
   });
+
+  // 年柱切年方式：預設正月初一，也允許使用者切換至立春。
+  document.getElementById('yearBoundary').addEventListener('change', runCalculation);
 
   // 時間模式切換
   const modeBtns = document.querySelectorAll('#time-mode-control button');
@@ -223,6 +230,7 @@ function init() {
 
 function runCalculation() {
   const birthDate = document.getElementById('birthDate').value;
+  const yearBoundary = document.getElementById('yearBoundary').value;
   const gender = document.getElementById('gender').value;
   const activeModeBtn = document.querySelector('#time-mode-control button.active');
   const birthTimeMode = activeModeBtn ? activeModeBtn.getAttribute('data-val') : 'exact';
@@ -234,6 +242,7 @@ function runCalculation() {
 
   const input = {
     birthDate,
+    yearBoundary: VALID_YEAR_BOUNDARIES.includes(yearBoundary) ? yearBoundary : 'lunar_new_year',
     gender,
     birthTimeMode,
     birthTime: birthTimeMode === 'exact' ? birthTime : undefined,

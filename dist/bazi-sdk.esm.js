@@ -3247,6 +3247,9 @@ __export(special_rules_exports, {
 
 // src/rules/versions.js
 var ENGINE_VERSION = "1.0.2";
+var API_VERSION = "1.0.0";
+var GOVERNANCE_VERSION = "1.0.0";
+var VALIDATION_MANIFEST_VERSION = "1.0.0";
 var RULE_SET_VERSION = "2026.09";
 var CALENDAR_RULE_VERSION = "1.0.0";
 var SHENSHA_RULE_VERSION = "2.1.0";
@@ -3262,6 +3265,9 @@ var LUCK_RULE_VERSION = "1.1.0";
 var RESULT_SCHEMA_VERSION = "2.1.0";
 var VERSIONS = {
   engineVersion: ENGINE_VERSION,
+  apiVersion: API_VERSION,
+  governanceVersion: GOVERNANCE_VERSION,
+  validationManifestVersion: VALIDATION_MANIFEST_VERSION,
   ruleSetVersion: RULE_SET_VERSION,
   calendarRuleVersion: CALENDAR_RULE_VERSION,
   shenShaRuleVersion: SHENSHA_RULE_VERSION,
@@ -4275,7 +4281,10 @@ function calculateTransit(chartPillars, options = {}) {
   const monthBoundary = options.monthBoundary || "jie";
   const dayBoundary = options.dayBoundary || "23:00";
   const needsLunarBoundary = yearBoundary === "lunar_new_year" || monthBoundary === "lunar_month";
-  const lunarInfo = needsLunarBoundary ? solarToLunar(y, m, d) : null;
+  const lunarInfo = needsLunarBoundary ? Number.isInteger(options.lunarYear) ? {
+    year: options.lunarYear,
+    month: Number.isInteger(options.lunarMonth) ? options.lunarMonth : null
+  } : solarToLunar(y, m, d) : null;
   const transitPillars = calculateFourPillars({
     year: y,
     month: m,
@@ -4475,7 +4484,10 @@ function buildAnnualDetails({ pillars, cycle, birthYear, startLocal, timezoneOff
       datetime: `${year}-06-01T12:00:00${formatTimezoneOffset(timezoneOffsetHours)}`,
       yearBoundary,
       monthBoundary,
-      dayBoundary
+      dayBoundary,
+      // 年中必已過正月初一；直接把該年度的農曆年傳給 Transit，
+      // 讓大運逐年展開不因 2100 年以後的農曆查表範圍而失敗。
+      lunarYear: year
     });
     const yearPillar = transit.year;
     const transitShenSha = includeAnnualShenSha ? calculateTransitShenSha(pillars, transit, { preset: shenshaPreset, gender }).shenSha : [];
@@ -6029,6 +6041,114 @@ function buildClassicalSummary(result) {
   };
 }
 
+// src/validation/index.js
+var validation_exports2 = {};
+__export(validation_exports2, {
+  VALIDATION_MANIFEST_VERSION: () => VALIDATION_MANIFEST_VERSION2,
+  getValidationManifest: () => getValidationManifest,
+  summarizeValidationDataset: () => summarizeValidationDataset,
+  summarizeValidationDatasets: () => summarizeValidationDatasets
+});
+var VALIDATION_MANIFEST = {
+  schemaVersion: "1.0.0",
+  manifestId: "bazi-js-validation-manifest",
+  manifestVersion: "1.0.0",
+  generatedAt: "2026-09-10",
+  datasets: [
+    {
+      datasetId: "bazi-js-independent-boundary-round-03",
+      label: "\u7B2C\u4E00\u8F2A\u8DE8\u908A\u754C\u4EA4\u53C9\u9A57\u8B49",
+      capturedAt: "2026-09-10",
+      fixture: "validation/external/round-03-boundary-samples.json",
+      report: "validation/reports/round-03-boundary-cross-validation.md",
+      sourceIds: ["openfate-bazi-engine"],
+      scope: ["pillars", "solar-term-boundary", "timezone", "zi-hour", "true-solar-time"],
+      cases: 34,
+      classifications: { match: 28, difference: 6, undetermined: 0 },
+      canonicalChangeRequired: 0,
+      status: "pinned-observation"
+    },
+    {
+      datasetId: "bazi-js-independent-second-engine-round-04",
+      label: "\u7B2C\u4E8C\u7368\u7ACB\u5F15\u64CE\u4EA4\u53C9\u9A57\u8B49",
+      capturedAt: "2026-09-10",
+      fixture: "validation/external/round-04-second-engine.json",
+      report: "validation/reports/round-04-second-engine.md",
+      sourceIds: ["baziflow-core"],
+      scope: ["pillars", "true-solar-time"],
+      cases: 16,
+      classifications: { match: 16, difference: 0, undetermined: 0 },
+      canonicalChangeRequired: 0,
+      status: "pinned-observation"
+    }
+  ],
+  totals: {
+    cases: 50,
+    classifications: { match: 44, difference: 6, undetermined: 0 },
+    sources: 2
+  }
+};
+function clone2(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+function increment(target, key) {
+  target[key] = (target[key] || 0) + 1;
+}
+function getValidationManifest() {
+  return clone2(VALIDATION_MANIFEST);
+}
+function summarizeValidationDataset(dataset) {
+  const cases = Array.isArray(dataset?.cases) ? dataset.cases : [];
+  const classifications = { match: 0, difference: 0, undetermined: 0 };
+  const groups = {};
+  const sourceIds = /* @__PURE__ */ new Set();
+  let observations = 0;
+  for (const item of cases) {
+    const classification = item?.adjudication?.classification;
+    if (Object.prototype.hasOwnProperty.call(classifications, classification)) increment(classifications, classification);
+    increment(groups, item?.group || "ungrouped");
+    for (const observation of Array.isArray(item?.observations) ? item.observations : []) {
+      observations++;
+      if (observation.sourceId) sourceIds.add(observation.sourceId);
+    }
+  }
+  return {
+    datasetId: dataset?.datasetId || null,
+    capturedAt: dataset?.capturedAt || null,
+    totalCases: cases.length,
+    observations,
+    classifications,
+    groups,
+    sourceIds: Array.from(sourceIds).sort()
+  };
+}
+function summarizeValidationDatasets(datasets) {
+  const list = Array.isArray(datasets) ? datasets.map(summarizeValidationDataset) : [];
+  const total = {
+    cases: 0,
+    observations: 0,
+    classifications: { match: 0, difference: 0, undetermined: 0 },
+    groups: {},
+    sourceIds: /* @__PURE__ */ new Set()
+  };
+  for (const item of list) {
+    total.cases += item.totalCases;
+    total.observations += item.observations;
+    for (const key of Object.keys(total.classifications)) total.classifications[key] += item.classifications[key] || 0;
+    for (const [group, count] of Object.entries(item.groups)) total.groups[group] = (total.groups[group] || 0) + count;
+    item.sourceIds.forEach((sourceId) => total.sourceIds.add(sourceId));
+  }
+  return {
+    datasets: list,
+    totalCases: total.cases,
+    totalObservations: total.observations,
+    classifications: total.classifications,
+    groups: total.groups,
+    sourceIds: Array.from(total.sourceIds).sort()
+  };
+}
+var VALIDATION_MANIFEST_VERSION2 = VALIDATION_MANIFEST.manifestVersion;
+
 // src/chart/index.js
 function formatTimezoneOffset2(offsetHours) {
   const sign = offsetHours < 0 ? "-" : "+";
@@ -6048,6 +6168,7 @@ function calculate(input, options = {}) {
   const enableTrueSolarTime = input.trueSolarTime !== void 0 ? input.trueSolarTime : profile.rules.trueSolarTime.value;
   const timezone = input.timezone || "+08:00";
   const timezoneOffsetHours = parseTimezoneOffset(timezone);
+  const dstRequested = input.dstOffset !== void 0;
   const [inYear, inMonth, inDay] = input.birthDate.split("-").map(Number);
   const birthTimeMode = input.birthTimeMode || (input.birthTime ? "exact" : "unknown");
   let inHour = 12;
@@ -6176,7 +6297,20 @@ function calculate(input, options = {}) {
       profileName: profile.name,
       profileStatus: profile.status || (profile.id === "canonical" ? "default" : "custom"),
       profileVersion: profile.version,
-      shenshaPreset
+      shenshaPreset,
+      profile: {
+        id: profile.id,
+        name: profile.name,
+        status: profile.status || (profile.id === "canonical" ? "default" : "custom"),
+        profileType: profile.profileType || (profile.id === "canonical" ? "reference" : null),
+        tradition: profile.tradition || "classical-ziping",
+        version: profile.version,
+        baseId: profile.baseId || null,
+        diff: profile.diff || {},
+        rules: profile.rules,
+        references: profile.references || ["docs/governance/authority-model.md"],
+        validationManifestVersion: VALIDATION_MANIFEST_VERSION2
+      }
     },
     input: {
       ...input,
@@ -6198,8 +6332,35 @@ function calculate(input, options = {}) {
       },
       precision: {
         solarTerms: "Meeus low-precision solar longitude; typical boundary uncertainty is approximately \xB110 minutes.",
-        lunarCalendar: "1900-2100 encoded lunisolar table."
-      }
+        lunarCalendar: "1900-2100 encoded lunisolar table.",
+        solarTermsModel: {
+          modelId: "meeus-solar-longitude-low-precision",
+          ruleVersion: VERSIONS.calendarRuleVersion,
+          class: "approximate",
+          boundaryUncertaintyMinutes: 10,
+          externalValidation: "round-03",
+          note: "\u7BC0\u6C23\u5206\u9418\u908A\u754C\u61C9\u4FDD\u7559\u524D\u5F8C\u7BC0\u6C23 evidence\uFF1B\u4E0D\u53EF\u8996\u70BA\u79D2\u7D1A\u5929\u6587\u5E74\u66C6\u3002"
+        },
+        timezone: {
+          modelId: "fixed-utc-offset",
+          offsetHours: timezoneOffsetHours,
+          input: timezone,
+          dstSupported: false,
+          dstRequested,
+          note: dstRequested ? "\u76EE\u524D\u53EA\u4FDD\u5B58\u56FA\u5B9A UTC offset\uFF1B\u672A\u81EA\u52D5\u5957\u7528\u653F\u6CBB\u6642\u5340\u6216\u6B77\u53F2\u590F\u4EE4\u6642\u9593\u3002" : "\u672A\u63D0\u4F9B\u653F\u6CBB\u6642\u5340\u8CC7\u6599\u5EAB\uFF1B\u56FA\u5B9A UTC offset \u53EF\u91CD\u73FE\u3002"
+        },
+        trueSolarTime: {
+          modelId: "longitude-plus-equation-of-time",
+          used: Boolean(enableTrueSolarTime && birthTimeMode === "exact"),
+          longitude: trueSolarInfo?.corrections ? input.location?.longitude ?? timezoneOffsetHours * 15 : null,
+          correctionMinutes: trueSolarInfo?.corrections?.totalCorrectionMinutes ?? 0,
+          note: "\u4F9D\u7D93\u5EA6\u5DEE\u8207\u5747\u6642\u5DEE\u4FEE\u6B63\uFF1B\u82E5\u9700\u5176\u4ED6\u5929\u6587\u6A21\u578B\uFF0C\u61C9\u900F\u904E Profile\uFF0F\u7248\u672C\u660E\u78BA\u6307\u5B9A\u3002"
+        }
+      },
+      limitations: [
+        ...dstRequested ? [{ id: "historical-dst", status: "unsupported", affects: "civil-time-normalization" }] : [],
+        { id: "solar-term-minute-precision", status: "approximate", affects: "jieqi-boundary" }
+      ]
     },
     calendar: {
       solar: {
@@ -7235,6 +7396,7 @@ var Renderer = {
 };
 
 // src/index.js
+var Validation = Object.freeze({ ...validation_exports, ...validation_exports2 });
 var Bazi = {
   version: VERSIONS.engineVersion,
   rules: {
@@ -7271,7 +7433,8 @@ var Bazi = {
   Transit: transit_exports,
   AI: ai_exports,
   Renderer,
-  Validation: validation_exports,
+  Validation,
+  ValidationData: validation_exports2,
   Errors: errors_exports,
   Constants: stems_exports
 };
@@ -7300,7 +7463,8 @@ export {
   transit_exports as Transit,
   true_solar_time_exports as TrueSolarTime,
   VERSIONS,
-  validation_exports as Validation,
+  Validation,
+  validation_exports2 as ValidationData,
   zodiac_exports as Zodiac,
   calculate,
   calculateSafe,

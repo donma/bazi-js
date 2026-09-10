@@ -78,6 +78,12 @@ async function runUnit() {
   const ctx = Bazi.AI.toContext(d1, { compact: false });
   assert(ctx.pillars && ctx.pillars.day.ganzhi === '戊午' && ctx.metadata.profileId === 'canonical', 'UT-AI-CONTEXT', '');
   assert(ctx.dayMaster.fiveCategory && ctx.auxiliary.mingGua && ctx.luckCyclesSummary.variants.length === 2, 'UT-AI-NEW-SYSTEMS', 'AI Context 必須保留五分類、命卦與起運方法 variants');
+  assert(d1.meta.apiVersion === '1.0.0' && d1.meta.governanceVersion === '1.0.0', 'UT-API-GOVERNANCE-VERSIONS', JSON.stringify(d1.meta));
+  assert(d1.meta.profile?.rules?.dayBoundary?.value === '23:00' && d1.meta.profile?.tradition === 'classical-ziping', 'UT-PROFILE-SNAPSHOT', JSON.stringify(d1.meta.profile));
+  assert(d1.accuracy.precision.timezone.offsetHours === 8 && d1.accuracy.precision.timezone.dstSupported === false, 'UT-ACCURACY-TIMEZONE-MODEL', JSON.stringify(d1.accuracy.precision.timezone));
+  assert(d1.accuracy.precision.solarTermsModel.modelId === 'meeus-solar-longitude-low-precision' && d1.accuracy.limitations.some((item) => item.id === 'solar-term-minute-precision'), 'UT-ACCURACY-SOLAR-TERM-LIMIT', JSON.stringify(d1.accuracy));
+  const validationManifest = Bazi.Validation.getValidationManifest();
+  assert(validationManifest.manifestId === 'bazi-js-validation-manifest' && validationManifest.totals.cases === 50 && validationManifest.datasets.length === 2, 'UT-VALIDATION-MANIFEST', JSON.stringify(validationManifest));
 
   // 新增的可選系統：五分類、八宅命卦、起運方法 variants。
   const mingGua2020 = Bazi.Auxiliary.calculateMingGua({ effectiveYear: 2020, gender: 'female' });
@@ -151,6 +157,14 @@ async function runUnit() {
   assert(lunarMonth.pillars.month.ganzhi === '丁丑' && lunarMonth.rules.applied.find((rule) => rule.ruleId === 'MONTH_BOUNDARY_LUNAR_MONTH'), 'UT-MONTH-BOUNDARY-LUNAR-MONTH', JSON.stringify(lunarMonth.pillars.month));
   assert(lunarMonth.rules.applied.find((rule) => rule.ruleId === 'MONTH_BOUNDARY_LUNAR_MONTH')?.overridden === true, 'UT-RULES-ACTUAL-OVERRIDE', JSON.stringify(lunarMonth.rules));
   assert(lunarMonth.accuracy.boundaryRules.month === 'lunar_month' && lunarMonth.accuracy.precision, 'UT-ACCURACY-PROVENANCE', JSON.stringify(lunarMonth.accuracy));
+  const lunarBoundaryAnnualDetails = Bazi.calculateSafe({
+    birthDate: '2020-08-31',
+    birthTime: '20:06',
+    gender: 'male',
+    yearBoundary: 'lunar_new_year'
+  }, { includeLuckAnnualDetails: true, includeAnnualLuckShenSha: true });
+  assert(lunarBoundaryAnnualDetails.success === true, 'UT-LUNAR-YEAR-ANNUAL-DETAILS-SAFE', lunarBoundaryAnnualDetails.error?.message);
+  assert(lunarBoundaryAnnualDetails.data?.luckCycles?.cycles?.some((cycle) => cycle.annuals?.some((annual) => annual.year > 2100)), 'UT-LUNAR-YEAR-ANNUAL-DETAILS-2101', '2101 年逐年資料未產生');
 
   // sample1.html 抽樣對照：只比對可由 SDK 規則重現的結構，不比對第三方吉凶文案。
   const sample1 = Bazi.calculate({ birthDate: '1983-05-11', birthTime: '16:19', gender: 'male' }, {
@@ -425,6 +439,7 @@ async function runDataContracts() {
   const independent = readJson('../validation/external/independent-ledger.json');
   const boundaryRound = readJson('../validation/external/round-03-boundary-samples.json');
   const secondEngineRound = readJson('../validation/external/round-04-second-engine.json');
+  const validationManifest = Bazi.Validation.getValidationManifest();
   const schemaFiles = [
     ['../schemas/source-catalog.schema.json', sourceCatalog],
     ['../schemas/profile.schema.json', profileCatalog.profiles[0]],
@@ -434,7 +449,8 @@ async function runDataContracts() {
     ['../schemas/evidence-ledger.schema.json', evidenceLedger],
     ['../schemas/independent-validation.schema.json', independent],
     ['../schemas/independent-validation.schema.json', boundaryRound],
-    ['../schemas/independent-validation.schema.json', secondEngineRound]
+    ['../schemas/independent-validation.schema.json', secondEngineRound],
+    ['../schemas/validation-manifest.schema.json', validationManifest]
   ];
 
   for (const [file, sample] of schemaFiles) {
@@ -565,6 +581,8 @@ async function runDataContracts() {
   const secondEngineSourceIds = new Set(secondEngineRound.sources.map((source) => source.sourceId));
   assert(secondEngineRound.cases.length === 16, 'UT-SECOND-ENGINE-ROUND-SIZE', String(secondEngineRound.cases.length));
   assert(boundaryRound.cases.length + secondEngineRound.cases.length === 50, 'UT-EXTERNAL-TOTAL-50', `${boundaryRound.cases.length}+${secondEngineRound.cases.length}`);
+  const validationSummary = Bazi.Validation.summarizeValidationDatasets([boundaryRound, secondEngineRound]);
+  assert(validationSummary.totalCases === validationManifest.totals.cases && validationSummary.classifications.match === validationManifest.totals.classifications.match && validationSummary.classifications.difference === validationManifest.totals.classifications.difference && validationSummary.classifications.undetermined === validationManifest.totals.classifications.undetermined, 'UT-VALIDATION-MANIFEST-FIXTURES', JSON.stringify(validationSummary));
   assert(secondEngineRound.sources.every((source) => /^https:\/\//.test(source.url) && source.independence === 'external' && source.commit), 'UT-SECOND-ENGINE-SOURCE', JSON.stringify(secondEngineRound.sources));
   for (const sample of secondEngineRound.cases) {
     const result = Bazi.calculate(sample.input);

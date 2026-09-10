@@ -2034,6 +2034,11 @@ footer {
   box-shadow: none;
 }
 
+/* 以輸入卡片本身寬度作為 RWD 依據，避免嵌入式瀏覽器的 viewport 判定失準。 */
+.main-grid > aside.card {
+  container: bazi-input / inline-size;
+}
+
 .responsive-chart {
   border: 0;
   border-radius: 0;
@@ -2105,4 +2110,91 @@ body.theme-dark-preview .details-toggle {
 
 body.theme-dark-preview .details-toggle:hover {
   color: #ffffff;
+}
+
+/* 中小螢幕的輸入表單固定單欄，避免窄視窗仍套用桌面 12 欄配置。 */
+@media (max-width: 1100px) {
+  #bazi-form {
+    display: block;
+  }
+
+  #bazi-form > .form-group,
+  #bazi-form > #calc-btn,
+  #bazi-form > #storage-status {
+    grid-column: auto;
+  }
+}
+
+/* 手機窄版表單：讓時間模式按鈕可收縮，避免第三個選項被裁切。 */
+@media (max-width: 600px) {
+  #time-mode-control {
+    display: grid;
+    width: 100%;
+    gap: 6px;
+    border: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  #time-mode-control .segmented-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    white-space: nowrap;
+  }
+
+  #time-mode-control .segmented-btn:not(:last-child) {
+    border-right: 1px solid var(--border);
+  }
+
+  .checkbox-row {
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+
+  .checkbox-row input {
+    flex: 0 0 auto;
+    margin-top: 4px;
+  }
+}
+
+@container bazi-input (max-width: 700px) {
+  #bazi-form {
+    display: block;
+  }
+
+  #bazi-form > .form-group,
+  #bazi-form > #calc-btn,
+  #bazi-form > #storage-status {
+    grid-column: auto;
+  }
+
+  #time-mode-control {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 6px;
+    border: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  #time-mode-control .segmented-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    white-space: normal;
+    overflow: visible;
+    word-break: keep-all;
+  }
+
+  #time-mode-control .segmented-btn:not(:last-child) {
+    border-right: 1px solid var(--border);
+  }
 }

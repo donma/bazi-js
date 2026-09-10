@@ -5,9 +5,25 @@
   "type": "object",
   "required": ["meta", "input", "accuracy", "calendar", "pillars", "shenSha", "specialRules", "classicalSummary", "analysis", "rules"],
   "properties": {
-    "meta": {"type": "object", "required": ["engineVersion", "ruleSetVersion", "profileId", "resultSchemaVersion"]},
+    "meta": {
+      "type": "object",
+      "required": ["engineVersion", "ruleSetVersion", "profileId", "resultSchemaVersion"],
+      "properties": {
+        "apiVersion": {"type": "string"},
+        "governanceVersion": {"type": "string"},
+        "validationManifestVersion": {"type": "string"},
+        "profile": {"type": "object"}
+      }
+    },
     "input": {"type": "object"},
-    "accuracy": {"type": "object", "required": ["timeKnown", "hourPillarAvailable", "boundaryRules", "assumptions", "precision"]},
+    "accuracy": {
+      "type": "object",
+      "required": ["timeKnown", "hourPillarAvailable", "boundaryRules", "assumptions", "precision"],
+      "properties": {
+        "precision": {"type": "object"},
+        "limitations": {"type": "array"}
+      }
+    },
     "calendar": {"type": "object", "required": ["solar", "lunar", "solarTerms", "time"]},
     "pillars": {
       "type": "object",

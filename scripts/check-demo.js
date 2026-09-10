@@ -8,6 +8,7 @@ const checks = [
   ['demo index exists', html.length > 0],
   ['demo loads app module', /app\.js/.test(html)],
   ['demo has chart mount', /id=["']chart["']|id=["']chart-container["']/.test(html)],
+  ['demo has selectable year boundary', /id=["']yearBoundary["']/.test(html) && /lunar_new_year/.test(html + app) && /yearBoundary/.test(app)],
   ['demo has export actions', /下載\s*SVG|下載\s*PNG|複製\s*JSON|複製\s*AI Context/.test(html)],
   ['demo footer has repository link', /github\.com\/donma\/bazi-js/.test(html + app)],
   ['demo footer has lab link', /\/lab\/index\.html/.test(html + app)],
@@ -22,6 +23,7 @@ const checks = [
   ['demo uses compact evidence icon', /class="evidence-icon"/.test(app + styles)],
   ['demo avoids full-screen ShenSha dialog', !/shensha-info-panel|shensha-info-dialog/.test(app + styles)],
   ['demo styles include responsive media query', /@media/.test(styles)],
+  ['demo mobile form stacks without overflow', /@media \(max-width: 1100px\)[\s\S]*#bazi-form\s*\{[\s\S]*display:\s*block/.test(styles) && /@container bazi-input \(max-width: 700px\)[\s\S]*#time-mode-control\s*\{[\s\S]*display:\s*grid/.test(styles)],
   ['public demo does not expose internal sample filename', !/sample1/i.test(html + app + styles)]
 ];
 let failed = 0;

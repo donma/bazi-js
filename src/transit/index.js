@@ -77,7 +77,17 @@ export function calculateTransit(chartPillars, options = {}) {
   const monthBoundary = options.monthBoundary || 'jie';
   const dayBoundary = options.dayBoundary || '23:00';
   const needsLunarBoundary = yearBoundary === 'lunar_new_year' || monthBoundary === 'lunar_month';
-  const lunarInfo = needsLunarBoundary ? solarToLunar(y, m, d) : null;
+  // 大運逐年資料會固定取每年的年中時刻。呼叫端若已知該年必在
+  // 農曆正月初一之後，可傳入 lunarYear，避免為超出農曆資料範圍的
+  // 年份重新做 solarToLunar（例如 2101 年的年中流年）。
+  const lunarInfo = needsLunarBoundary
+    ? (Number.isInteger(options.lunarYear)
+      ? {
+          year: options.lunarYear,
+          month: Number.isInteger(options.lunarMonth) ? options.lunarMonth : null
+        }
+      : solarToLunar(y, m, d))
+    : null;
 
   // 以核心排盤計算目標時間點的四柱（即該時刻的流年、流月、流日、流時）
   const transitPillars = calculateFourPillars({

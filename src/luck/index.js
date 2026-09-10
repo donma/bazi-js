@@ -136,7 +136,10 @@ function buildAnnualDetails({ pillars, cycle, birthYear, startLocal, timezoneOff
       datetime: `${year}-06-01T12:00:00${formatTimezoneOffset(timezoneOffsetHours)}`,
       yearBoundary,
       monthBoundary,
-      dayBoundary
+      dayBoundary,
+      // 年中必已過正月初一；直接把該年度的農曆年傳給 Transit，
+      // 讓大運逐年展開不因 2100 年以後的農曆查表範圍而失敗。
+      lunarYear: year
     });
     const yearPillar = transit.year;
     const transitShenSha = includeAnnualShenSha

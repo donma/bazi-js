@@ -71,6 +71,7 @@ BaziJS 是一套給瀏覽器使用的 JavaScript 八字（四柱）排盤 SDK。
 | `birthHourBranch` | branch 必填 | 十二地支時辰 | `'申'` |
 | `gender` | 是 | 乾造或坤造 | `'male'` |
 | `timezone` | 否 | 出生地時區，預設 `+08:00` | `'+08:00'` |
+| `yearBoundary` | 否 | 年柱切年：`lichun` 立春、`lunar_new_year` 正月初一；SDK canonical 預設 `lichun` | `'lunar_new_year'` |
 | `location` | trueSolarTime 時建議填 | 出生地與經緯度 | `{ longitude: 121.5654 }` |
 | `trueSolarTime` | 否 | 是否使用真太陽時，預設 `false` | `true` |
 | `shenshaPreset` | 否 | 神煞資料量：`minimal`、`classical`、`full` | `'classical'` |
@@ -91,6 +92,8 @@ const result = Bazi.calculate(input);
 ```
 
 日期與時間使用字串，能讓不同瀏覽器與時區得到較一致的結果。
+
+Demo 的「年柱切年方式」預設選擇 `lunar_new_year`，但會把選項明確傳入 SDK；SDK 的 `canonical` 預設仍是 `lichun`。因此使用端若未指定 `yearBoundary`，不會受到 Demo 預設值影響。
 
 ### 三種出生時間模式
 
@@ -418,6 +421,20 @@ console.log(Bazi.Rules.RuleRegistry.getDiff('civil-midnight'));
 ```
 
 目前內建 `canonical`、`civil-midnight`、`lunar-calendar`、`true-solar`、`jieqi-whole-day`、`classical-sanming`、`research-tiaohou`、`research-tongguan`、`research-patterns`。`canonical` 是預設的官方正統（子平術規範）；其他是明確標示的比較或研究模型，不會假裝不同傳承沒有差異。每次讀取命盤時，請一起保存 `result.meta`、`result.rules.applied`、`result.accuracy`，之後才能重現同一份結果。
+
+SDK 也提供不增加主盤內容的驗證資料索引：
+
+```js
+const manifest = Bazi.Validation.getValidationManifest();
+console.log(manifest.totals); // 目前固定索引：50 組、2 個獨立來源
+
+const datasets = await Promise.all(
+  manifest.datasets.map((item) => fetch(`./${item.fixture}`).then((response) => response.json()))
+);
+console.log(Bazi.Validation.summarizeValidationDatasets(datasets));
+```
+
+`result.meta.profile` 是本次排盤採用的完整 Profile 快照；`result.accuracy.precision` 則說明節氣模型、固定 UTC offset、真太陽時模型與已知限制。這些欄位供 Lab、JSON 與 AI Context 使用，不需要全部顯示在命盤畫面。
 
 ### Profile 分析選擇
 

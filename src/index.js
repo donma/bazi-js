@@ -20,11 +20,14 @@ import * as Analysis from './analysis/index.js';
 import * as Luck from './luck/index.js';
 import * as Transit from './transit/index.js';
 import * as AI from './ai/index.js';
-import * as Validation from './core/utils/validation.js';
+import * as InputValidation from './core/utils/validation.js';
+import * as ValidationData from './validation/index.js';
 import * as Errors from './core/errors/index.js';
 import * as Constants from './core/constants/stems.js';
 import { Renderer } from './renderer/index.js';
 import { VERSIONS } from './rules/versions.js';
+
+const Validation = Object.freeze({ ...InputValidation, ...ValidationData });
 
 export {
   calculate,
@@ -51,6 +54,7 @@ export {
   AI,
   Renderer,
   Validation,
+  ValidationData,
   Errors,
   Constants,
   VERSIONS
@@ -93,6 +97,7 @@ const Bazi = {
   AI,
   Renderer,
   Validation,
+  ValidationData,
   Errors,
   Constants
 };
