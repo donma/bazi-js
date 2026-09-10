@@ -2,6 +2,7 @@
 
 import { calculate, calculateSafe, Chart } from './chart/index.js';
 import * as Calendar from './calendar/solar-terms.js';
+import * as TenGods from './tengods/index.js';
 import * as Solar from './calendar/solar.js';
 import * as Lunar from './calendar/lunar.js';
 import * as Constellation from './calendar/constellation.js';
@@ -30,6 +31,7 @@ export {
   calculateSafe,
   Chart,
   Calendar,
+  TenGods,
   Solar,
   Lunar,
   Constellation,
@@ -71,6 +73,7 @@ const Bazi = {
   calculateSafe,
   Chart,
   Calendar,
+  TenGods,
   Solar,
   Lunar,
   Constellation,

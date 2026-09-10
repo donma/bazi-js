@@ -520,6 +520,20 @@ input:focus, select:focus {
   font-weight: 700;
 }
 
+.responsive-pillar-field > .shensha-info {
+  color: var(--responsive-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.responsive-pillar-field li {
+  line-height: 1.65;
+}
+
+.responsive-pillar-field li small {
+  font-size: 11px;
+}
+
 .responsive-pillar-field > ul {
   min-height: 54px;
   margin-top: 3px;

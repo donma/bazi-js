@@ -375,15 +375,28 @@ function positionShenShaTooltip(wrapper) {
 
 function renderShenShaInfo(item, categoryClass) {
   const displayName = item.displayName || item.name || '神煞';
-  const escapedName = displayText(displayName);
-  const escapedId = displayText(item.id);
+  return renderInfoTooltip(displayName, item.interpretation || '此神煞的傳統象意摘要尚待整理。', `shensha:${item.id}`, categoryClass);
+}
+
+function renderInfoTooltip(title, description, infoId, categoryClass = '') {
+  const escapedName = displayText(title);
+  const escapedId = displayText(infoId || title);
   return `<span class="shensha-info">
-    <strong class="shensha-info-trigger ${categoryClass}" role="button" tabindex="0" data-shensha-info="${escapedId}" aria-expanded="false" aria-label="查看${escapedName}介紹">${escapedName}</strong>
+    <strong class="shensha-info-trigger ${categoryClass}" role="button" tabindex="0" data-shensha-info="${escapedId}" aria-expanded="false" aria-label="查看${escapedName}說明">${escapedName}</strong>
     <span class="shensha-info-tooltip" role="tooltip">
       <strong>${escapedName}</strong>
-      <span>${displayText(item.interpretation || '此神煞的傳統象意摘要尚待整理。')}</span>
+      <span>${displayText(description || '目前尚待整理說明。')}</span>
     </span>
   </span>`;
+}
+
+function renderHiddenStemInfo(item, branch, pillarKey) {
+  const stem = item.stem || '—';
+  const role = HIDDEN_ROLE_LABELS[item.role] || item.role || '藏氣';
+  const tenGod = item.tenGod && (item.tenGod.full || item.tenGod.short);
+  const stemDescription = `${branch || '地支'}中所藏的天干之一，並依藏氣層級與日主換算十神。`;
+  const roleDescription = item.roleInterpretation || '表示此藏幹在地支中的力量層級。';
+  return `<li>${renderInfoTooltip(stem, stemDescription, `hidden-stem:${pillarKey}:${stem}`)} <small>${tenGod ? `${renderInfoTooltip(tenGod, item.tenGod.interpretation, `ten-god:hidden:${pillarKey}:${item.tenGod.id}`)} · ` : ''}${renderInfoTooltip(role, roleDescription, `hidden-role:${item.role}`)} · ${displayText(item.days, '')}日/${Math.round((Number(item.weight) || 0) * 100)}%</small></li>`;
 }
 
 const PILLAR_LABELS = { year: '年柱', month: '月柱', day: '日柱', hour: '時柱' };
@@ -527,7 +540,7 @@ function renderResponsivePreview(result, options) {
   // 傳統命盤由左至右為時、日、月、年；核心結果仍維持 year/month/day/hour。
   const pillarCols = [
     { key: 'hour', title: '時柱', data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour, selfStage: result.twelveStages.selfSeated.hour },
-    { key: 'day', title: '日柱', data: p.day, tenGod: { full: '日主' }, hidden: result.tenGods.hidden.day, nayin: result.nayin.day, stage: result.twelveStages.byDayMaster.day, selfStage: result.twelveStages.selfSeated.day },
+    { key: 'day', title: '日柱', data: p.day, tenGod: result.tenGods.stems.day, hidden: result.tenGods.hidden.day, nayin: result.nayin.day, stage: result.twelveStages.byDayMaster.day, selfStage: result.twelveStages.selfSeated.day },
     { key: 'month', title: '月柱', data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month, selfStage: result.twelveStages.selfSeated.month },
     { key: 'year', title: '年柱', data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year, selfStage: result.twelveStages.selfSeated.year }
   ];
@@ -547,13 +560,14 @@ function renderResponsivePreview(result, options) {
   const pillars = pillarCols.map((col) => {
     const available = col.data && col.data.available !== false;
     const xunkong = available && Bazi.ShenSha.calculateXunKong(col.data.ganzhi).emptyBranches.join('') || '—';
-    const hidden = (col.hidden || []).map((item) => `<li><strong>${displayText(item.stem)}</strong> <small>${displayText(item.tenGod && item.tenGod.full, '')} · ${displayText(HIDDEN_ROLE_LABELS[item.role] || item.role, '')} · ${displayText(item.days, '')}日/${Math.round((Number(item.weight) || 0) * 100)}%</small></li>`).join('');
+    const hidden = (col.hidden || []).map((item) => renderHiddenStemInfo(item, col.data && col.data.branch, col.key)).join('');
+    const primaryTenGod = col.tenGod && (col.tenGod.full || col.tenGod.short);
     const shensha = shenShaByPillar[col.key] || [];
     return `<article class="responsive-pillar">
       <header>${displayText(col.title)}</header>
-      <div class="responsive-pillar-primary"><span>主星</span><strong>${displayText(col.tenGod && (col.tenGod.full || col.tenGod.short))}</strong></div>
+      <div class="responsive-pillar-primary"><span>主星</span><strong>${primaryTenGod ? renderInfoTooltip(primaryTenGod, col.tenGod.interpretation, `ten-god:primary:${col.key}:${col.tenGod.id}`) : '—'}</strong></div>
       <div class="responsive-pillar-characters"><div><span>天干</span><strong>${available ? displayText(col.data.stem) : '？'}</strong></div><div><span>地支</span><strong>${available ? displayText(col.data.branch) : '？'}</strong></div></div>
-      <div class="responsive-pillar-field"><span>藏幹</span><ul>${hidden || '<li>—</li>'}</ul></div>
+      <div class="responsive-pillar-field">${renderInfoTooltip('藏幹', '藏幹是地支內含的天干，會依本氣、中氣、餘氣標示層級，並可換算對應十神。', `hidden-label:${col.key}`)}<ul>${hidden || '<li>—</li>'}</ul></div>
       <div class="responsive-pillar-meta"><div><span>地勢</span>${displayText(col.stage && col.stage.name)}</div><div><span>自坐</span>${displayText(col.selfStage && col.selfStage.name)}</div><div><span>空亡</span>${displayText(xunkong)}</div><div><span>納音</span>${displayText(col.nayin)}</div></div>
       <div class="responsive-pillar-shensha"><h5>神煞（${shensha.length}）</h5>${renderPillarShenSha(shensha)}</div>
     </article>`;
@@ -612,7 +626,7 @@ function renderResponsivePreview(result, options) {
           <div><span>地勢</span><strong>${displayText(transitYear.stage && transitYear.stage.name)}</strong></div>
           <div><span>納音</span><strong>${displayText(transitYear.nayin)}</strong></div>
         </div>
-        <div class="responsive-transit-shensha"><strong>流年神煞（${transitShenSha.length}）</strong><p>${displayText(formatShenSha(transitShenSha, 20))}</p></div>
+        <div class="responsive-transit-shensha"><strong>流年神煞（${transitShenSha.length}）</strong><p>${renderShenShaInline(transitShenSha, 20)}</p></div>
       </section>`
     : '';
 
@@ -756,13 +770,13 @@ function renderResponsivePreview(result, options) {
       <h4>四柱主盤</h4>
       <div class="responsive-pillar-grid">${pillars}</div>
     </section>
+    ${shenSha}
     ${strength}
     ${useGod}
     ${classicalSummary}
     ${luckCycles}
     ${transitSection}
     ${interactions}
-    ${shenSha}
     <div class="responsive-watermark" aria-hidden="true">當麻實驗室 · github.com/donma/bazi-js</div>
     <footer><a href="https://github.com/donma/bazi-js" target="_blank" rel="noopener noreferrer">BaziJS 開源命理引擎</a> · Apache-2.0 授權</footer>
   </div>`;

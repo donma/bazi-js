@@ -846,6 +846,14 @@ function calculateFourPillars({
   };
 }
 
+// src/tengods/index.js
+var tengods_exports = {};
+__export(tengods_exports, {
+  HIDDEN_ROLE_INTERPRETATIONS: () => HIDDEN_ROLE_INTERPRETATIONS,
+  TEN_GOD_INTERPRETATIONS: () => TEN_GOD_INTERPRETATIONS,
+  calculateChartTenGods: () => calculateChartTenGods
+});
+
 // src/core/constants/elements.js
 var ELEMENTS = [
   { id: "wood", char: "\u6728", generates: "\u706B", restricts: "\u571F", generatedBy: "\u6C34", restrictedBy: "\u91D1", color: "#2d6a4f" },
@@ -950,14 +958,35 @@ function getHiddenStems(branchChar) {
   return HIDDEN_STEMS_DATA[branchChar] || [];
 }
 
+// src/tengods/interpretations.js
+var TEN_GOD_INTERPRETATIONS = Object.freeze({
+  day_master: "\u65E5\u4E3B\u4EE3\u8868\u547D\u76E4\u7684\u6838\u5FC3\u7ACB\u5834\u8207\u81EA\u8EAB\u4E94\u884C\uFF0C\u5176\u4ED6\u5929\u5E72\u8207\u85CF\u5E79\u7684\u5341\u795E\u90FD\u4EE5\u65E5\u4E3B\u70BA\u57FA\u6E96\u3002",
+  friend: "\u6BD4\u80A9\u4EE3\u8868\u540C\u6211\u3001\u540C\u4E94\u884C\u540C\u9670\u967D\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u81EA\u7ACB\u3001\u540C\u8F29\u8207\u4E26\u884C\u7AF6\u5408\u3002",
+  rob_wealth: "\u52AB\u8CA1\u4EE3\u8868\u540C\u6211\u3001\u540C\u4E94\u884C\u4F46\u9670\u967D\u4E0D\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u7AF6\u5408\u3001\u5206\u914D\u8207\u8CC7\u6E90\u6D41\u52D5\u3002",
+  eating_god: "\u98DF\u795E\u4EE3\u8868\u65E5\u4E3B\u6240\u751F\u3001\u9670\u967D\u76F8\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u8868\u9054\u3001\u5275\u4F5C\u3001\u4EAB\u53D7\u8207\u8F38\u51FA\u3002",
+  hurting_officer: "\u50B7\u5B98\u4EE3\u8868\u65E5\u4E3B\u6240\u751F\u3001\u9670\u967D\u4E0D\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u624D\u83EF\u8868\u9054\u3001\u8B8A\u901A\u8207\u5C0D\u898F\u7BC4\u7684\u6311\u6230\u3002",
+  indirect_wealth: "\u504F\u8CA1\u4EE3\u8868\u65E5\u4E3B\u6240\u524B\u3001\u9670\u967D\u76F8\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u6D41\u52D5\u8CC7\u6E90\u3001\u6A5F\u6703\u8207\u4EBA\u969B\u5F80\u4F86\u3002",
+  direct_wealth: "\u6B63\u8CA1\u4EE3\u8868\u65E5\u4E3B\u6240\u524B\u3001\u9670\u967D\u4E0D\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u7A69\u5B9A\u8CC7\u6E90\u3001\u8CAC\u4EFB\u8207\u5BE6\u969B\u7BA1\u7406\u3002",
+  seven_killings: "\u4E03\u6BBA\u4EE3\u8868\u524B\u5236\u65E5\u4E3B\u3001\u9670\u967D\u76F8\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u58D3\u529B\u3001\u6311\u6230\u3001\u7D00\u5F8B\u8207\u6B0A\u5A01\u3002",
+  direct_officer: "\u6B63\u5B98\u4EE3\u8868\u524B\u5236\u65E5\u4E3B\u3001\u9670\u967D\u4E0D\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u79E9\u5E8F\u3001\u898F\u7BC4\u3001\u8077\u5206\u8207\u8CAC\u4EFB\u3002",
+  indirect_resource: "\u504F\u5370\u4EE3\u8868\u751F\u52A9\u65E5\u4E3B\u3001\u9670\u967D\u76F8\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u76F4\u89BA\u3001\u504F\u9580\u77E5\u8B58\u8207\u975E\u5178\u578B\u652F\u6301\u3002",
+  direct_resource: "\u6B63\u5370\u4EE3\u8868\u751F\u52A9\u65E5\u4E3B\u3001\u9670\u967D\u4E0D\u540C\u7684\u529B\u91CF\uFF0C\u50B3\u7D71\u4E0A\u5E38\u7528\u4F86\u89C0\u5BDF\u5B78\u7FD2\u3001\u53D7\u52A9\u3001\u5E87\u852D\u8207\u6B63\u898F\u8CC7\u6E90\u3002"
+});
+var HIDDEN_ROLE_INTERPRETATIONS = Object.freeze({
+  primary: "\u672C\u6C23\u662F\u5730\u652F\u6240\u85CF\u7684\u4E3B\u8981\u5929\u5E72\uFF0C\u901A\u5E38\u8996\u70BA\u8A72\u5730\u652F\u6700\u6838\u5FC3\u7684\u85CF\u6C23\u3002",
+  secondary: "\u4E2D\u6C23\u662F\u5730\u652F\u6240\u85CF\u7684\u6B21\u8981\u5929\u5E72\uFF0C\u529B\u91CF\u901A\u5E38\u4F4E\u65BC\u672C\u6C23\u3002",
+  residual: "\u9918\u6C23\u662F\u5730\u652F\u6240\u85CF\u7684\u6B98\u9918\u5929\u5E72\uFF0C\u529B\u91CF\u901A\u5E38\u4F4E\u65BC\u672C\u6C23\u8207\u4E2D\u6C23\u3002"
+});
+
 // src/tengods/index.js
+var withTenGodInterpretation = (tenGod) => tenGod ? { ...tenGod, interpretation: tenGod.interpretation || TEN_GOD_INTERPRETATIONS[tenGod.id] || "" } : tenGod;
 function calculateChartTenGods(pillars) {
   const dayMaster = pillars.day.stem;
   const stems = {
-    year: getTenGod(dayMaster, pillars.year.stem),
-    month: getTenGod(dayMaster, pillars.month.stem),
-    day: { id: "day_master", short: "\u65E5\u4E3B", full: "\u65E5\u4E3B" },
-    hour: pillars.hour.available ? getTenGod(dayMaster, pillars.hour.stem) : null
+    year: withTenGodInterpretation(getTenGod(dayMaster, pillars.year.stem)),
+    month: withTenGodInterpretation(getTenGod(dayMaster, pillars.month.stem)),
+    day: withTenGodInterpretation({ id: "day_master", short: "\u65E5\u4E3B", full: "\u65E5\u4E3B" }),
+    hour: pillars.hour.available ? withTenGodInterpretation(getTenGod(dayMaster, pillars.hour.stem)) : null
   };
   const calculateBranchTenGods = (branchChar) => {
     if (!branchChar) return [];
@@ -968,7 +997,8 @@ function calculateChartTenGods(pillars) {
       // 'primary' | 'secondary' | 'residual'
       weight: h.weight,
       days: h.days,
-      tenGod: getTenGod(dayMaster, h.stem)
+      tenGod: withTenGodInterpretation(getTenGod(dayMaster, h.stem)),
+      roleInterpretation: HIDDEN_ROLE_INTERPRETATIONS[h.role] || ""
     }));
   };
   const hidden = {
@@ -7222,6 +7252,7 @@ var Bazi = {
   calculateSafe,
   Chart,
   Calendar: solar_terms_exports,
+  TenGods: tengods_exports,
   Solar: solar_exports,
   Lunar: lunar_exports,
   Constellation: constellation_exports,
@@ -7265,6 +7296,7 @@ export {
   special_rules_exports as SpecialRules,
   strength_exports as Strength,
   summary_exports as Summary,
+  tengods_exports as TenGods,
   transit_exports as Transit,
   true_solar_time_exports as TrueSolarTime,
   VERSIONS,

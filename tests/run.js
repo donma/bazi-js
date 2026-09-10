@@ -190,6 +190,8 @@ async function runUnit() {
   assert(Boolean(tianFu?.description) && tianFu.description.includes('正官'), 'UT-TIANFU-DESCRIPTION', tianFu?.description || '');
   assert(Boolean(tianFu?.interpretation) && tianFu.interpretation.includes('福氣'), 'UT-TIANFU-INTERPRETATION', tianFu?.interpretation || '');
   assert(Bazi.ShenSha.getShenShaCatalog().every((rule) => typeof rule.interpretation === 'string' && rule.interpretation.trim()), 'UT-SHENSHA-INTERPRETATIONS-COMPLETE', `${Bazi.ShenSha.getShenShaCatalog().length} rules checked`);
+  assert(Object.keys(Bazi.TenGods.TEN_GOD_INTERPRETATIONS).length === 11, 'UT-TENGOD-INTERPRETATIONS-COMPLETE', '十神與日主都必須有解釋');
+  assert(d1.tenGods.hidden.year.every((item) => item.roleInterpretation && item.tenGod?.interpretation), 'UT-HIDDEN-STEM-INTERPRETATIONS', JSON.stringify(d1.tenGods.hidden.year));
   assert(!SHENSHA_CATALOG.some((s) => ['kui_gang', 'shi_e_da_bai'].includes(s.id)), 'UT-SHENSHA-NO-SPECIAL-PILLARS', '固定日柱不可留在一般 ShenSha catalog');
 
   // SpecialPillar / SeasonalSpecial：固定柱位與季節條件獨立於 ShenSha。

@@ -3,16 +3,21 @@
 
 import { getTenGod } from '../core/constants/ten-gods-data.js';
 import { getHiddenStems } from '../core/constants/hidden-stems-data.js';
+import { TEN_GOD_INTERPRETATIONS, HIDDEN_ROLE_INTERPRETATIONS } from './interpretations.js';
+
+const withTenGodInterpretation = (tenGod) => tenGod
+  ? { ...tenGod, interpretation: tenGod.interpretation || TEN_GOD_INTERPRETATIONS[tenGod.id] || '' }
+  : tenGod;
 
 export function calculateChartTenGods(pillars) {
   const dayMaster = pillars.day.stem;
 
   // 四柱天干十神
   const stems = {
-    year: getTenGod(dayMaster, pillars.year.stem),
-    month: getTenGod(dayMaster, pillars.month.stem),
-    day: { id: 'day_master', short: '日主', full: '日主' },
-    hour: pillars.hour.available ? getTenGod(dayMaster, pillars.hour.stem) : null
+    year: withTenGodInterpretation(getTenGod(dayMaster, pillars.year.stem)),
+    month: withTenGodInterpretation(getTenGod(dayMaster, pillars.month.stem)),
+    day: withTenGodInterpretation({ id: 'day_master', short: '日主', full: '日主' }),
+    hour: pillars.hour.available ? withTenGodInterpretation(getTenGod(dayMaster, pillars.hour.stem)) : null
   };
 
   // 各地支藏干及其對應十神
@@ -24,7 +29,8 @@ export function calculateChartTenGods(pillars) {
       role: h.role, // 'primary' | 'secondary' | 'residual'
       weight: h.weight,
       days: h.days,
-      tenGod: getTenGod(dayMaster, h.stem)
+      tenGod: withTenGodInterpretation(getTenGod(dayMaster, h.stem)),
+      roleInterpretation: HIDDEN_ROLE_INTERPRETATIONS[h.role] || ''
     }));
   };
 
@@ -41,3 +47,5 @@ export function calculateChartTenGods(pillars) {
     hidden
   };
 }
+
+export { TEN_GOD_INTERPRETATIONS, HIDDEN_ROLE_INTERPRETATIONS } from './interpretations.js';
