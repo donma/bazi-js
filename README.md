@@ -12,8 +12,11 @@ BaziJS 是一套給瀏覽器使用的 JavaScript 八字（四柱）排盤 SDK。
 - 公曆、農曆、節氣與四柱干支
 - 十神、藏干、納音、十二長生與空亡
 - 五行分布、日主強弱與判定依據
+- 用神推導的用／喜／閒／仇／忌五分類（明確標示模型假設）
 - 天干地支合、沖、刑、害、破等互動
 - 大運、流年與流運神煞
+- 八宅輔助命卦與東四／西四命分類
+- 起運精確法與整日比較法的可追溯 variants
 - SVG、PNG 命盤輸出
 - 可交給 AI 使用的結構化 Context
 
@@ -172,6 +175,7 @@ if (response.success) {
 | `result.luckCycles` | 起運資料與大運；可選擇附加逐年資料 |
 | `result.transits` | 目前流年及流年與原局的互動 |
 | `result.auxiliary` | 胎元、胎息、命宮、身宮 |
+| `result.classicalSummary` | 可供畫面、JSON 與 AI Context 共用的 2／3／4 完整可追溯資料摘要 |
 | `result.rules` | 本次實際採用的規則 |
 | `result.accuracy` | 時區、邊界、真太陽時與計算假設 |
 
@@ -330,6 +334,67 @@ console.log(detailed.luckCycles.cycles[0].annuals[0]);
 
 逐年資料包含流年干支、十神、十二長生、納音、旬空、流年神煞，以及流年與原局的互動。
 
+### 用／喜／閒／仇／忌五分類
+
+這是依本次 `strength.favorableElements` 第一順位推導的分析結果，不會覆蓋不同流派的用神判法：
+
+```js
+console.log(result.strength.fiveCategory.groups);
+// { use: ['金'], joy: ['土'], idle: ['水'], adversary: ['木'], taboo: ['火'] }
+console.log(result.strength.fiveCategory.evidence);
+```
+
+請一起讀取 `modelId`、`references`、`variants` 與 `researchNotes`；它們說明這是可重現模型，不是跨流派唯一答案。
+
+### 2／3／4 的完整資料摘要
+
+若要製作密集但不干擾主盤的表格，讀取 `result.classicalSummary`：
+
+```js
+const summary = result.classicalSummary;
+
+// 2. 用／喜／閒／仇／忌：每列含五行、與用神關係、強弱分布與月令狀態
+console.log(summary.fiveCategory.rows);
+
+// 3. 人元用事、日空、年空：含節氣起點、分段、旬名、空亡地支與命中矩陣
+console.log(summary.monthCommand);
+console.log(summary.voids.rows);
+
+// 4. 胎元、胎息、命宮、身宮：matrix 可直接供表格或 SVG 使用
+console.log(summary.auxiliary.matrix);
+```
+
+`classicalSummary` 不會把這些資料改成固定斷語。`monthCommand` 的分日表、五分類的取用方式、命宮／身宮公式都保留 `variants` 與 `researchNotes`；旬空則保留日空與年空兩套索引及四柱命中矩陣。完整來源索引見 [`docs/references/special-systems.md`](/D:/AI_PROJECTS/BaZi/docs/references/special-systems.md) 與 [`sources/classical-texts.json`](/D:/AI_PROJECTS/BaZi/sources/classical-texts.json)。
+
+### 命卦與東四／西四
+
+命卦是獨立的八宅輔助欄位，不屬於子平神煞：
+
+```js
+const mingGua = result.auxiliary.mingGua;
+console.log(mingGua.trigram.name, mingGua.groupName);
+// 兌 西四命（範例輸入不同時會不同）
+```
+
+結果內會保留 `effectiveYear`、`yearBoundary`、`method` 與 evidence，方便檢查立春切年、性別及餘數 5 的處理方式。
+
+### 起運方法比較
+
+canonical 預設使用精確節氣差除三；同一結果也會附上整日取整的比較摘要：
+
+```js
+console.log(result.luckCycles.startAge.methodLabel);
+console.log(result.luckCycles.variants.map((item) => ({
+  method: item.method,
+  display: item.display,
+  startDate: item.startDate
+})));
+
+// 要把比較法當成實際 Profile 使用：
+const comparison = Bazi.calculate(input, { profile: 'jieqi-whole-day' });
+console.log(comparison.luckCycles.startAge);
+```
+
 ## 6. 可追溯資料、Profile 與 Schema
 
 這三層是給程式與維護者使用的資料，不會自動增加 Demo 畫面文字：
@@ -352,7 +417,22 @@ console.log(chart.rules.applied);               // 實際採用的規則
 console.log(Bazi.Rules.RuleRegistry.getDiff('civil-midnight'));
 ```
 
-目前內建 `canonical`、`civil-midnight`、`lunar-calendar`、`true-solar`。`canonical` 是預設的官方正統（子平術規範）；其他三個是明確標示的比較模型，不會假裝不同傳承沒有差異。每次讀取命盤時，請一起保存 `result.meta`、`result.rules.applied`、`result.accuracy`，之後才能重現同一份結果。
+目前內建 `canonical`、`civil-midnight`、`lunar-calendar`、`true-solar`、`jieqi-whole-day`、`classical-sanming`、`research-tiaohou`、`research-tongguan`、`research-patterns`。`canonical` 是預設的官方正統（子平術規範）；其他是明確標示的比較或研究模型，不會假裝不同傳承沒有差異。每次讀取命盤時，請一起保存 `result.meta`、`result.rules.applied`、`result.accuracy`，之後才能重現同一份結果。
+
+### Profile 分析選擇
+
+Profile 的 `rules.analysis` 會記錄六個分析維度：月令人元分日、命宮／身宮掌訣、用神模型、季節模型、通關模型與特殊格模型。這些選擇會進入 `result.analysis`：
+
+```js
+const research = Bazi.calculate(input, { profile: 'research-tiaohou' });
+console.log(research.analysis.selected.useGod.modelId); // tiaohou-research
+console.log(research.analysis.models.useGod.finalDecision); // false：研究中，不覆寫 canonical
+
+const classicalVariant = Bazi.calculate(input, { profile: 'classical-sanming' });
+console.log(classicalVariant.strength.monthCommander.modelId); // san-ming-volume-2
+```
+
+只有 `fuyi-canonical` 與既有 canonical 掌訣會產生目前已實作的決定；其餘研究模型會明確回傳 `research-only`、`finalDecision: false` 與證據，不會讓畫面出現未完成的斷語。
 
 需要在自己的工具查看證據索引時：
 
@@ -362,6 +442,10 @@ console.log(evidence.evidenceRecords);
 ```
 
 Schema 是資料格式契約；它不替古籍裁決流派。遇到異文，請讀 `variants` 與 `researchNotes`；`SpecialPatterns` 目前只在 `Bazi.Patterns` 登錄研究架構，不會混進一般 `result.shenSha`。
+
+`validation/external/round-01-samples.json` 保存曆法抽樣；`round-02-special-systems.json` 保存命卦、五分類與起運方法的網路抽樣，包含來源網址、擷取日期與衝突註記。驗證是把當時公開資料固定下來再重跑，避免網站改版、廣告或即時內容讓結果無法重現；它能保證「在指定 Profile、版本與證據範圍內可重現」，不能宣稱傳統命理存在跨流派的絕對唯一答案。
+
+`sources/evidence-ledger.json` 另保存古籍版本狀態、原文摘錄、定位 URL、頁碼（未知時為 `null`）、OCR／校勘註記。`validation/external/independent-ledger.json` 專門保存獨立引擎的觀察，並分成 `match`、`difference`、`undetermined`；沒有外部輸出的案例不會被 SDK 自己的結果填補。治理規則見 [`docs/governance/authority-model.md`](/D:/AI_PROJECTS/BaZi/docs/governance/authority-model.md) 與 [`docs/governance/rule-addition-protocol.md`](/D:/AI_PROJECTS/BaZi/docs/governance/rule-addition-protocol.md)。
 
 ## 7. SVG、PNG 與 AI Context
 
@@ -468,12 +552,29 @@ console.log(result.accuracy.trueSolarTimeUsed);
 
 ### 2026-09-09
 
-- 新增 `sources/classical-texts.json` 古籍證據索引：6 筆書目、12 組規則／研究 evidence，保留卷次、原始判定依據、版本差異與未實作狀態。
+- Demo 新增低資訊量的「古典資料摘要」收合卡：預設只顯示五分類、人元司令、日空／年空與輔助宮位數量；展開後才顯示 2／3／4 的精簡資料，完整 evidence 仍留在 JSON／AI Context。
+- 新增 `Bazi.Strength.calculateFiveElementCategories()` 與 `result.strength.fiveCategory`，將用／喜／閒／仇／忌作為明確標示模型的分析欄位，不混入 ShenSha。
+- 新增 `Bazi.Auxiliary.calculateMingGua()` 與 `result.auxiliary.mingGua`，獨立提供八宅命卦及東四／西四命，並保留跨世紀與餘數 5 的方法差異。
+- 新增 `jieqi-whole-day` 比較 Profile；`result.luckCycles.variants` 同時保存精確節氣差與整日取整的起運摘要，canonical 預設不變。
+- 新增 `validation/external/round-02-special-systems.json`，保存命卦、五分類與起運方法的公開網路抽樣，並將衝突來源保留在 `variants`／`researchNotes`。
+- 新增 `docs/references/special-systems.md`，記錄資料來源、適用範圍與「可重現不等於絕對真理」的驗收界線。
+- 新增 `result.classicalSummary` 與 `Bazi.Summary`：集中提供五分類、月令人元司令、日空／年空、胎元／胎息／命宮／身宮及可直接繪表的 `matrix`，每區保留 ruleId、版本、來源、variants 與 evidence。
+- 新增 `EV-FC-CLASSICAL-007`、`EV-MC-REN-YUAN-008`、`EV-KW-XUN-009`、`EV-AUX-PALACE-010`，並加入 `MC-2020-F`、`KW-2020-F`、`PALACE-2020-F` 可重跑抽樣驗證；修正胎元／命宮古籍參考卷次為《三命通會》卷二。
+- `schemas/chart-result.schema.json` 現在要求 `classicalSummary` 的四個 section 與 evidence；另提供 `schemas/classical-summary.schema.json` 讓使用端單獨驗證摘要；`Bazi.AI.toContext()` 同步保留完整摘要。
+- Demo 的起運走勢改為依目前年份自動展開大運逐年資料並粗框今年；尚未起運時顯示粗框的「起運前目前歲數」卡片，命盤預設流年也改用當下日期。
+- 新增 `sources/classical-texts.json` 古籍證據索引：5 筆書目、16 組規則／研究 evidence，保留卷次、原始判定依據、版本差異與未實作狀態。
 - 新增多流派 Profile 目錄與 SDK 內建 Profile：`canonical`、`civil-midnight`、`lunar-calendar`、`true-solar`；新增 `validation/profiles/differential-cases.json` 驗證切界差異會反映到實際四柱。
 - 新增 `schemas/` 正式 JSON Schema：古籍來源、Profile、規則 metadata、命盤結果、外部驗證資料集。
+- 新增 `schemas/analysis-result.schema.json`、`schemas/evidence-ledger.schema.json` 與 `schemas/independent-validation.schema.json`，讓 Profile 分析選擇、古籍 evidence ledger 與獨立驗證資料都可機器檢查。
+- 新增 `sources/evidence-ledger.json`：保存《三命通會》卷二／卷六可定位摘錄、數位版本狀態、頁碼未知註記、OCR／校勘註記與特殊格不冒充神煞的研究邊界。
+- 新增 `classical-sanming`、`research-tiaohou`、`research-tongguan`、`research-patterns` Profile；研究 Profile 只記錄可切換邊界，不覆寫 canonical 結論。
+- 新增 `validation/external/independent-ledger.json` 與獨立驗證分類：Day Pillar 案例有一致與約定差異，baziflow-core 本輪因沒有獨立執行輸出標示 `undetermined`。
+- 新增 `docs/governance/` 治理文件與 `.github/workflows/ci.yml`；CI 會執行測試、Schema／外部 ledger、bundle 與 Demo 靜態檢查，且不即時依賴第三方網站。
 - 新增 `validation/external/round-01-samples.json`，保存公開抽樣的日柱、農曆與節氣資料，並接入自動驗證。
 - `sources/`、`profiles/`、`schemas/` 已納入發布檔案清單，使用端可取得同一份證據與資料契約。
-- 驗證結果：`npm test` 通過 363/363；`npm run validate` 的 3 組日柱錨點與 2 組節氣精度檢查全部通過；瀏覽器 bundle 已重新編譯。
+- 公開 Demo 與 SVG 已移除內部比對檔名 `sample1`；該名稱只保留在內部 audit／測試追溯，並新增公開輸出防護測試。
+- 四柱主盤的視覺順序改為傳統由左至右「時柱、日柱、月柱、年柱」；SDK 結果欄位與 JSON／AI Context 仍維持 `year/month/day/hour`。
+- 驗證結果：`npm run ci` 全部通過；`npm test` 為 450/450，`npm run validate` 通過 3 組日柱、2 組節氣、8 組既有特殊系統與 4 組獨立 ledger，`npm run build` 產出三種瀏覽器 bundle，`npm run check:demo` 的 8 項靜態檢查全數通過。
 
 ## License
 

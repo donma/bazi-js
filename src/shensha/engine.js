@@ -55,6 +55,7 @@ function resultFor(rule, hits, evidence) {
     reference: references[0] ? references[0].title : undefined,
     references,
     description: rule.description || '',
+    ...(rule.interpretation ? { interpretation: rule.interpretation } : {}),
     ...(rule.variants ? { variants: rule.variants } : {}),
     ...(rule.researchNotes ? { researchNotes: rule.researchNotes } : {}),
     evidence: { details: evidence }

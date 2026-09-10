@@ -1,6 +1,6 @@
 # `ai-guide/sample1.html` 與 BaziJS SDK 差異 audit
 
-最後整理日期：2026-09-08
+最後整理日期：2026-09-09
 
 ## 結論
 
@@ -14,13 +14,15 @@
 | 星座 | `calendar.constellation` | 已補 | 只做公曆顯示輔助，不參與子平計算。 |
 | 節氣、季節 | `calendar.solarTerms`、`pillars.month.branch` | 已有/已補強顯示 | canonical 季節按節令月支；巳月是夏，不沿用 sample1 靜態的「立夏但季節春」。 |
 | 司令 | `strength.monthCommander` | 已補 | 以節後整日配人元司令分段，回傳分段、天數與演算法。不同傳本分日不同，不能視為唯一標準。 |
-| 命格、強弱、五行 | `strength`、`tenGods` | 已有/已補強顯示 | 目前輸出可重現的強弱模型與五行分布；不複製 sample1 的矛盾文案（同時寫身弱與偏旺）。 |
+| 命格、強弱、五行 | `strength`、`tenGods` | 已有/已補強顯示 | 目前輸出可重現的強弱模型與五行分布；不複製 sample1 的矛盾文案（同時寫身弱與偏旺）。另提供用／喜／閒／仇／忌模型摘要。 |
 | 四柱表格 | `pillars`、`tenGods`、`hiddenStems`、`twelveStages`、`kongWang`、`nayin` | 已有 | demo 以四張直式卡片呈現，神煞置於各柱下方並可展開 evidence。 |
 | 天干/地支留意 | `interactions.stems`、`interactions.branches` | 已有/已顯示 | 不把互動名稱改寫成未經規則定義的吉凶句。 |
 | 起運日期、起訖年份 | `luckCycles.startAge`、`cycles[].startDate/endDate` | 已補 | 大運年份改為與實際起運日期所在年份對齊；舊的 `fromAge/toAge` 保留，另提供 nominal age。 |
 | 大運神煞 | `cycles[].shenSha` | 已有 | 仍使用 ShenSha registry，不把大運格局混入神煞。 |
 | 每一步逐年流年 | `cycles[].annuals` | 已補（選配） | `includeLuckAnnualDetails: true` 時提供 10 年結構、流年神煞與原局互動；demo 預設開啟。 |
 | 五行旺衰卡片 | `strength.seasonalStates` | 已補 | 每個五行都有月令狀態與係數，demo 同時顯示比例和狀態。 |
+| 八宅命卦、東四西四 | `auxiliary.mingGua` | 已補（獨立輔助系統） | 採立春切年、年末兩位數與性別算法；保留跨世紀、餘 5 與來源衝突，不混入子平神煞。 |
+| 起運方法差異 | `luckCycles.variants` | 已補 | canonical 使用精確節氣差；另提供整日取整的 comparison Profile，兩者不互相覆蓋。 |
 | 流年運勢評分圖 | 無 | 未實作 | sample1 的小限/流年/實際分數沒有可核對的公開計分規格；SDK 不輸出假精確分數。 |
 
 ## 刻意不直接加入 SDK 的區塊
@@ -29,9 +31,9 @@
 
 這是以農曆年月日時套表的另一套民俗重量法，sample1 的「4兩8錢」與其批註不能從目前子平四柱規則推導。現階段沒有把它放入 `strength` 或 `luckCycles`，避免誤稱為子平結果。若日後要支援，應獨立成 `folk/weight`，為每一筆重量與批註提供版本、表格來源、異文與 opt-in profile。
 
-### 命卦風水與本命星宿
+### 本命星宿
 
-它們分別依賴八宅/九星與二十八宿等資料系統，不是四柱、十神或子平神煞的同一層。sample1 顯示的是固定解說文章，沒有可審核的完整演算法輸入與版本。未來應各自獨立為 `systems/ming-gua`、`systems/xing-xiu`，不可塞入 ShenSha Catalog。
+二十八宿依賴獨立天文資料系統，不是四柱、十神或子平神煞的同一層。sample1 顯示的是固定解說文章，沒有可審核的完整演算法輸入與版本，仍未納入 SDK。八宅命卦已移到 `src/auxiliary/ming-gua.js`，但明確標示為另一套輔助系統，不塞入 ShenSha Catalog。
 
 ### 命盤程式分析、流年分數、盲派串宮
 
@@ -61,7 +63,7 @@ canonical SDK 與 sample1 可一致重現的項目：
 - sample1 靜態資料把季節寫成「春」，但 canonical 依巳月判為「夏」。
 - sample1 的命宮/身宮是 `丙辰／甲寅`；BaziJS canonical 依現有輔助宮位公式輸出 `甲寅／甲子`。兩者是規則 profile 差異，不能在沒有來源確認時宣稱哪個唯一正確。
 - sample1 顯示起運時間 `1985-02-09 18:18:00`；BaziJS 依目前 `jieqi-diff-divide-3` 與天文節氣 JD 產生 `1985-02-09 23:57`。本次輸出精確時間與計算方法，讓差異可被測試，而不是刪掉時間欄位。
-- sample1 的「4兩8錢」、命卦、星宿、分數、盲派斷語未納入 canonical SDK。
+- sample1 的「4兩8錢」、星宿、流年分數、盲派斷語未納入 canonical SDK；命卦已以獨立八宅 Profile 加入，不冒充子平核心結果。
 
 ## 古典考據與分類邊界
 

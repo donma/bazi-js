@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/analysis-result.schema.json",
+  "title": "BaziJS Analysis Selection Result",
+  "type": "object",
+  "required": ["schemaVersion", "profileId", "selected", "models", "ruleId", "version", "evidence"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "profileId": {"type": "string"},
+    "profileName": {"type": "string"},
+    "selected": {"type": "object"},
+    "models": {"type": "object"},
+    "ruleId": {"type": "string"},
+    "version": {"type": "string"},
+    "description": {"type": "string"},
+    "evidence": {
+      "type": "object",
+      "required": ["matched", "profileId", "selectedModelIds", "nonCanonicalModels"],
+      "properties": {
+        "matched": {"type": "boolean"},
+        "profileId": {"type": "string"},
+        "selectedModelIds": {"type": "object"},
+        "nonCanonicalModels": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

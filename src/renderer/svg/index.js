@@ -130,11 +130,12 @@ function sectionFrame(width, height, title, innerNodes) {
 
 function getPillarColumns(result) {
   const p = result.pillars;
+  // 傳統命盤由左至右為時、日、月、年；核心結果仍維持 year/month/day/hour。
   return [
-    { key: 'year', title: '年柱', data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year, selfStage: result.twelveStages.selfSeated.year },
-    { key: 'month', title: '月柱', data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month, selfStage: result.twelveStages.selfSeated.month },
+    { key: 'hour', title: '時柱', data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour, selfStage: result.twelveStages.selfSeated.hour },
     { key: 'day', title: '日柱', data: p.day, tenGod: { full: '日主' }, hidden: result.tenGods.hidden.day, nayin: result.nayin.day, stage: result.twelveStages.byDayMaster.day, selfStage: result.twelveStages.selfSeated.day },
-    { key: 'hour', title: '時柱', data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour, selfStage: result.twelveStages.selfSeated.hour }
+    { key: 'month', title: '月柱', data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month, selfStage: result.twelveStages.selfSeated.month },
+    { key: 'year', title: '年柱', data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year, selfStage: result.twelveStages.selfSeated.year }
   ];
 }
 
@@ -246,6 +247,7 @@ function renderBasicInfo(result, width, theme) {
     ['強弱分數', `${result.strength.score} 分`],
     ['月令旺衰', result.strength.monthState ? result.strength.monthState.name : '—'],
     ['命宮／身宮', `${result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : '—'}／${result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : '—'}`],
+    ['命卦', result.auxiliary.mingGua ? `${result.auxiliary.mingGua.trigram.name}（${result.auxiliary.mingGua.groupName}）` : '—'],
     ['胎元／胎息', `${result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : '—'}／${result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : '—'}`],
     ['起運', result.luckCycles && result.luckCycles.startAge ? `${result.luckCycles.startAge.display}${result.luckCycles.startAge.startDateTime ? `（${result.luckCycles.startAge.startDateTime}）` : ''}` : '—'],
     ['規則版本', `神煞 ${result.meta.shenShaRuleVersion || '—'}`]
@@ -328,12 +330,16 @@ function renderStrength(result, width, theme) {
 function renderUseGod(result) {
   const nodes = [];
   let y = 0;
-  y = wrappedText(nodes, '以下為 BaziJS canonical 扶抑模型的可追溯摘要，不是固定斷語或醫療、財務建議。', { y, maxUnits: 52, lineHeight: 21, className: 'meta' });
+  y = wrappedText(nodes, '以下為 BaziJS 扶抑模型的可追溯摘要；此區僅呈現規則推導，不提供固定斷語或醫療、財務建議。', { y, maxUnits: 52, lineHeight: 21, className: 'meta' });
   y += 10;
   y = addLabelValue(nodes, '扶助方向', (result.strength.favorableElements || []).join('、') || '—', { y, maxUnits: 46 });
   y = addLabelValue(nodes, '忌仇方向', (result.strength.unfavorableElements || []).join('、') || '—', { y, maxUnits: 46 });
   y = addLabelValue(nodes, '得令／得地／得勢', [result.strength.deLing ? '得令' : '不得令', result.strength.deDi ? '得地' : '不得地', result.strength.deShi ? '得勢' : '不得勢'].join('、'), { y, maxUnits: 46 });
   y = addLabelValue(nodes, '月令司令', result.strength.monthCommander ? `${result.strength.monthCommander.stem}${result.strength.monthCommander.element}（第${result.strength.monthCommander.phase}段）` : '—', { y, maxUnits: 46 });
+  if (result.strength.fiveCategory) {
+    const groups = result.strength.fiveCategory.groups || {};
+    y = addLabelValue(nodes, '五分類', `用：${(groups.use || []).join('、')}；喜：${(groups.joy || []).join('、')}；閒：${(groups.idle || []).join('、')}；仇：${(groups.adversary || []).join('、')}；忌：${(groups.taboo || []).join('、')}`, { y, maxUnits: 46, lineHeight: 20 });
+  }
   return { height: y + 10, nodes };
 }
 
@@ -427,6 +433,7 @@ function renderShenShaSummary(result) {
   });
   const auxiliary = result.auxiliary || {};
   y = addLabelValue(nodes, '胎元命宮', `胎元：${auxiliary.taiYuan && auxiliary.taiYuan.ganzhi || '—'} ｜ 胎息：${auxiliary.taiXi && auxiliary.taiXi.ganzhi || '—'} ｜ 命宮：${auxiliary.mingGong && auxiliary.mingGong.ganzhi || '—'} ｜ 身宮：${auxiliary.shenGong && auxiliary.shenGong.ganzhi || '—'}`, { y, labelWidth: 92, maxUnits: 42, lineHeight: 21 });
+  y = addLabelValue(nodes, '命卦', auxiliary.mingGua ? `${auxiliary.mingGua.trigram.name}（${auxiliary.mingGua.groupName}）` : '—', { y, labelWidth: 92, maxUnits: 42, lineHeight: 21 });
   return { height: y + 10, nodes };
 }
 

@@ -10,14 +10,18 @@
     "build": "node scripts/build.js",
     "test": "node tests/run.js",
     "validate": "node scripts/validate-external.js",
-    "gen-golden": "node scripts/generate-golden.js"
+    "gen-golden": "node scripts/generate-golden.js",
+    "check:demo": "node scripts/check-demo.js",
+    "ci": "npm test && npm run validate && npm run build && npm run check:demo"
   },
   "files": [
     "dist",
     "src",
     "sources",
     "profiles",
-    "schemas"
+    "schemas",
+    "validation",
+    "docs"
   ],
   "keywords": [
     "bazi",

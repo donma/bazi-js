@@ -21,6 +21,89 @@ import { calculateTransit } from '../transit/index.js';
 import { calculateTransitShenSha } from '../shensha/engine.js';
 import { calculateXunKong } from '../shensha/utils/xunkong.js';
 
+export const LUCK_START_AGE_METHODS = Object.freeze({
+  'jieqi-diff-divide-3': Object.freeze({
+    label: '節氣差除三（精確日分）',
+    calculation: 'raw-difference',
+    ruleId: 'LUCK_START_DIFF_DIV_3',
+    references: ['https://zh.wikisource.org/zh-hant/三命通會_(四庫全書本)/卷02'],
+    caveat: '以出生時刻與前／後一個節的精確時差換算；不同家派仍可能取整或取氣。'
+  }),
+  'jieqi-whole-days-divide-3': Object.freeze({
+    label: '節氣差除三（整日比較）',
+    calculation: 'whole-days',
+    ruleId: 'LUCK_START_DIFF_WHOLE_DAY_DIV_3',
+    references: ['https://zh.wikisource.org/zh-hant/三命通會_(四庫全書本)/卷02'],
+    caveat: '先取相差整日再除三，只作流派／排盤網站差異比對，不是 canonical 預設。'
+  })
+});
+
+function roundDays(value) {
+  return Number(Number(value).toFixed(3));
+}
+
+function calculateStartAgeDetails({ method, rawDiffDays, currentJD, timezoneOffsetHours, targetJie, timingAssumption, timingDate, timingTime, bHour, bMinute }) {
+  const descriptor = LUCK_START_AGE_METHODS[method];
+  if (!descriptor) {
+    throw new Error(`不支援的起運歲數方法：${method}`);
+  }
+  const calculationDiffDays = descriptor.calculation === 'whole-days'
+    ? Math.floor(rawDiffDays)
+    : rawDiffDays;
+  const totalMonths = calculationDiffDays * 4;
+  const startYears = Math.floor(totalMonths / 12);
+  const remMonths = totalMonths - startYears * 12;
+  const startMonths = Math.floor(remMonths);
+  const remDays = (remMonths - startMonths) * 30;
+  const startDays = Math.round(remDays);
+
+  const startJdOffset = calculationDiffDays * (365.2422 / 3);
+  const startLocal = jdToLocalParts(currentJD + startJdOffset, timezoneOffsetHours);
+  const pad = n => String(n).padStart(2, '0');
+  const startDateStr = `${startLocal.year}-${pad(startLocal.month)}-${pad(startLocal.day)}`;
+  const startDateTimeStr = formatLocalDateTime(startLocal);
+
+  return {
+    years: startYears,
+    months: startMonths,
+    days: startDays,
+    display: `${startYears} 歲 ${startMonths} 個月 ${startDays} 天`,
+    startDate: startDateStr,
+    startDateTime: startDateTimeStr,
+    targetJie: targetJie.name,
+    method,
+    methodLabel: descriptor.label,
+    references: descriptor.references,
+    caveat: descriptor.caveat,
+    rawDiffDays: roundDays(rawDiffDays),
+    calculationDiffDays: roundDays(calculationDiffDays),
+    rounding: descriptor.calculation,
+    timingAssumption,
+    timingDate,
+    timingTime: `${String(bHour).padStart(2, '0')}:${String(bMinute).padStart(2, '0')}`
+  };
+}
+
+function summarizeStartAgeVariant({ method, rawDiffDays, currentJD, timezoneOffsetHours, targetJie, timingAssumption, timingDate, timingTime, bHour, bMinute }) {
+  const details = calculateStartAgeDetails({ method, rawDiffDays, currentJD, timezoneOffsetHours, targetJie, timingAssumption, timingDate, timingTime, bHour, bMinute });
+  return {
+    method: details.method,
+    methodLabel: details.methodLabel,
+    rawDiffDays: details.rawDiffDays,
+    calculationDiffDays: details.calculationDiffDays,
+    rounding: details.rounding,
+    years: details.years,
+    months: details.months,
+    days: details.days,
+    display: details.display,
+    startDate: details.startDate,
+    startDateTime: details.startDateTime,
+    targetJie: details.targetJie,
+    references: details.references,
+    caveat: details.caveat
+  };
+}
+
 function formatLocalDateTime(parts) {
   if (!parts) return null;
   const pad = (value) => String(value).padStart(2, '0');
@@ -140,26 +223,37 @@ export function calculateLuckCycles({
 
   let targetJie = forward ? nextJie : prevJie;
   // 差距天數
-  let diffDays = forward ? (nextJie.jdUT - currentJD) : (currentJD - prevJie.jdUT);
-  if (diffDays < 0) diffDays = 0;
+  const rawDiffDays = Math.max(0, forward ? (nextJie.jdUT - currentJD) : (currentJD - prevJie.jdUT));
 
-  // 3. 節氣差除以 3 法則換算歲、月、日
-  // 1 日 = 1/3 歲 = 4 個月 = 120 天
-  // 1 小時 (1/24 日) = 5 天
-  // 總月數 = diffDays * 4;
-  const totalMonths = diffDays * 4;
-  const startYears = Math.floor(totalMonths / 12);
-  const remMonths = totalMonths - startYears * 12;
-  const startMonths = Math.floor(remMonths);
-  const remDays = (remMonths - startMonths) * 30;
-  const startDays = Math.round(remDays);
+  // 3. 依指定 variant 將節氣差換算為歲、月、日。
+  // canonical 保留小數日；comparison variant 先取整日。兩者都不改變順逆與目標節。
+  const startAge = calculateStartAgeDetails({
+    method: startAgeMethod,
+    rawDiffDays,
+    currentJD,
+    timezoneOffsetHours,
+    targetJie,
+    timingAssumption,
+    timingDate,
+    timingTime,
+    bHour,
+    bMinute
+  });
+  const methodVariants = Object.keys(LUCK_START_AGE_METHODS).map((method) => summarizeStartAgeVariant({
+    method,
+    rawDiffDays,
+    currentJD,
+    timezoneOffsetHours,
+    targetJie,
+    timingAssumption,
+    timingDate,
+    timingTime,
+    bHour,
+    bMinute
+  }));
 
-  // 計算公曆起運日期（由出生日期推進 totalMonths 月，約合 diffDays * 121.75 天）
-  const startJdOffset = diffDays * (365.2422 / 3);
-  const startLocal = jdToLocalParts(currentJD + startJdOffset, timezoneOffsetHours);
+  const startLocal = jdToLocalParts(currentJD + (startAge.rounding === 'whole-days' ? Math.floor(rawDiffDays) : rawDiffDays) * (365.2422 / 3), timezoneOffsetHours);
   const pad = n => String(n).padStart(2, '0');
-  const startDateStr = `${startLocal.year}-${pad(startLocal.month)}-${pad(startLocal.day)}`;
-  const startDateTimeStr = formatLocalDateTime(startLocal);
 
   // 4. 由月柱向後或向前展開大運步數
   const monthStemIdx = stemIndex(pillars.month.stem);
@@ -178,7 +272,7 @@ export function calculateLuckCycles({
     const ganzhi = `${stemChar}${branchChar}`;
     const ganzhiIdx = sexagenaryIndex(sStemIdx, sBranchIdx);
 
-    const fromAge = startYears + (step - 1) * 10;
+    const fromAge = startAge.years + (step - 1) * 10;
     const toAge = fromAge + 9;
     const range = annualRange(startLocal, step);
     const fromYear = range.fromYear;
@@ -227,25 +321,14 @@ export function calculateLuckCycles({
     forward,
     directionRule,
     startAgeMethod,
-    diffDays: Number(diffDays.toFixed(3)),
+    diffDays: roundDays(rawDiffDays),
     targetJie: {
       name: targetJie.name,
       jdUT: targetJie.jdUT,
       local: targetJie.local
     },
-    startAge: {
-      years: startYears,
-      months: startMonths,
-      days: startDays,
-      display: `${startYears} 歲 ${startMonths} 個月 ${startDays} 天`,
-      startDate: startDateStr,
-      startDateTime: startDateTimeStr,
-      targetJie: targetJie.name,
-      method: startAgeMethod,
-      timingAssumption,
-      timingDate,
-      timingTime: `${String(bHour).padStart(2, '0')}:${String(bMinute).padStart(2, '0')}`
-    },
+    startAge,
+    variants: methodVariants,
     cycles
   };
 }

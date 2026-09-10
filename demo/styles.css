@@ -578,6 +578,85 @@ input:focus, select:focus {
   gap: 6px;
 }
 
+.responsive-shensha-title {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 4px;
+}
+
+.shensha-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.shensha-info-trigger {
+  display: inline;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shensha-info-trigger:hover,
+.shensha-info-trigger:focus-visible {
+  color: var(--responsive-accent);
+  outline: 2px solid color-mix(in srgb, var(--responsive-accent) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.shensha-info-tooltip {
+  position: fixed;
+  z-index: 12;
+  top: 0;
+  left: 0;
+  width: min(260px, calc(100vw - 32px));
+  display: grid;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid var(--responsive-border);
+  border-radius: 8px;
+  background: var(--responsive-card);
+  color: var(--responsive-text);
+  font-size: 12px;
+  box-shadow: 0 8px 20px rgba(20, 18, 15, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
+}
+
+.shensha-info:hover .shensha-info-tooltip,
+.shensha-info:focus-within .shensha-info-tooltip,
+.shensha-info.is-open .shensha-info-tooltip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.shensha-info-tooltip strong {
+  color: var(--responsive-accent);
+  font-size: 13px;
+}
+
+.shensha-info-tooltip span,
+.shensha-info-tooltip small {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.shensha-info-tooltip small {
+  color: var(--responsive-secondary);
+  font-size: 11px;
+}
+
 .responsive-shensha-name strong {
   color: var(--responsive-text);
   font-size: 14px;
@@ -598,9 +677,39 @@ input:focus, select:focus {
 }
 
 .responsive-pillar-shensha-item summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   cursor: pointer;
   color: var(--responsive-accent);
+  font-size: 11px;
   font-weight: 700;
+  line-height: 1;
+}
+
+.responsive-pillar-shensha-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.responsive-pillar-shensha-item summary::marker {
+  content: '';
+}
+
+.evidence-icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.25;
+}
+
+.evidence-count {
+  color: var(--responsive-shensha-inauspicious, #b33b32);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .responsive-pillar-shensha-item details ul {
@@ -709,6 +818,126 @@ input:focus, select:focus {
   font-size: 14px;
   font-weight: 700;
   overflow-wrap: anywhere;
+}
+
+.responsive-five-category-panel {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid var(--responsive-border);
+}
+
+.responsive-five-category-panel h5 {
+  margin: 0;
+  color: var(--responsive-accent);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.responsive-five-category-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.responsive-five-category-grid div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 9px;
+  border-radius: 5px;
+  background: var(--responsive-grid);
+}
+
+.responsive-five-category-grid strong {
+  color: var(--responsive-secondary);
+  font-size: 12px;
+}
+
+.responsive-five-category-grid span {
+  color: var(--responsive-text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.responsive-classical-summary-lead {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--responsive-grid) 72%, transparent);
+  color: var(--responsive-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.responsive-classical-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.responsive-classical-summary-grid article {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--responsive-grid) 72%, transparent);
+}
+
+.responsive-classical-summary-grid article > strong {
+  color: var(--responsive-secondary);
+  font-size: 13px;
+}
+
+.responsive-classical-summary-grid article p,
+.responsive-classical-summary-grid article small {
+  margin: 0;
+  color: var(--responsive-text);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.responsive-classical-summary-grid article small {
+  color: var(--responsive-secondary);
+  font-size: 11px;
+}
+
+.responsive-classical-category-list,
+.responsive-classical-palace-list {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+}
+
+.responsive-classical-category-list li,
+.responsive-classical-palace-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--responsive-secondary);
+  line-height: 1.5;
+}
+
+.responsive-classical-category-list b,
+.responsive-classical-palace-list b {
+  color: var(--responsive-text);
+  font-weight: 800;
+  text-align: right;
+}
+
+.responsive-classical-palace-list b {
+  display: grid;
+  gap: 1px;
+}
+
+.responsive-classical-palace-list b small {
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .responsive-evidence-details {
@@ -1029,6 +1258,22 @@ footer {
   padding-top: 20px;
 }
 
+.site-footer-meta {
+  margin: 0;
+}
+
+.site-footer-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 8px;
+}
+
+.site-footer-links a {
+  color: inherit;
+}
+
 /* ==================== RWD 響應式斷點 ==================== */
 
 /* 平板尺寸 (992px 以下) */
@@ -1090,9 +1335,16 @@ footer {
   .responsive-pillar-grid,
   .responsive-strength-summary,
   .responsive-use-god-grid,
+  .responsive-five-category-grid,
   .responsive-transit-grid,
   .responsive-luck-grid {
     grid-template-columns: 1fr;
+  }
+  .responsive-preluck-card {
+    grid-template-columns: 1fr;
+  }
+  .responsive-preluck-card p {
+    grid-column: auto;
   }
   .responsive-luck-grid article {
     grid-template-columns: 72px minmax(0, 1fr);
@@ -1452,17 +1704,20 @@ select {
 }
 
 .responsive-shensha-name strong.is-auspicious,
-.responsive-shensha-name span.is-auspicious {
+.responsive-shensha-name span.is-auspicious,
+.responsive-shensha-name .shensha-info-trigger.is-auspicious {
   color: var(--responsive-shensha-auspicious, #2f7d4a);
 }
 
 .responsive-shensha-name strong.is-inauspicious,
-.responsive-shensha-name span.is-inauspicious {
+.responsive-shensha-name span.is-inauspicious,
+.responsive-shensha-name .shensha-info-trigger.is-inauspicious {
   color: var(--responsive-shensha-inauspicious, #b33b32);
 }
 
 .responsive-shensha-name strong.is-neutral,
-.responsive-shensha-name span.is-neutral {
+.responsive-shensha-name span.is-neutral,
+.responsive-shensha-name .shensha-info-trigger.is-neutral {
   color: var(--responsive-shensha-neutral, var(--responsive-gold));
 }
 
@@ -1470,11 +1725,102 @@ select {
   line-height: 1.9;
 }
 
+.responsive-inline-special-rule {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  max-width: 100%;
+}
+
+.responsive-inline-special-rule > small {
+  font-size: 11px;
+}
+
+.responsive-inline-shensha {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  max-width: 100%;
+}
+
+.responsive-inline-shensha > small {
+  color: var(--responsive-secondary);
+  font-size: 11px;
+}
+
+.responsive-inline-special-rule .shensha-info-trigger.is-auspicious,
+.responsive-inline-special-rule > small.is-auspicious {
+  color: var(--responsive-shensha-auspicious, #2f7d4a);
+}
+
+.responsive-inline-special-rule .shensha-info-trigger.is-inauspicious,
+.responsive-inline-special-rule > small.is-inauspicious {
+  color: var(--responsive-shensha-inauspicious, #b33b32);
+}
+
+.responsive-inline-special-rule .shensha-info-trigger.is-neutral,
+.responsive-inline-special-rule > small.is-neutral {
+  color: var(--responsive-shensha-neutral, var(--responsive-gold));
+}
+
+.responsive-inline-shensha .shensha-info-trigger.is-auspicious {
+  color: var(--responsive-shensha-auspicious, #2f7d4a);
+}
+
+.responsive-inline-shensha .shensha-info-trigger.is-inauspicious {
+  color: var(--responsive-shensha-inauspicious, #b33b32);
+}
+
+.responsive-inline-shensha .shensha-info-trigger.is-neutral {
+  color: var(--responsive-shensha-neutral, var(--responsive-gold));
+}
+
 .responsive-luck-grid article {
   min-height: 72px;
   padding: 13px 15px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--responsive-grid) 82%, var(--responsive-card));
+}
+
+.responsive-preluck-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border: 2px solid var(--responsive-accent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--responsive-accent) 6%, var(--responsive-card));
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--responsive-accent) 14%, transparent);
+}
+
+.responsive-preluck-card > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.responsive-preluck-card span,
+.responsive-preluck-card em {
+  color: var(--responsive-secondary);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.responsive-preluck-card strong {
+  color: var(--responsive-accent);
+  font-size: 21px;
+}
+
+.responsive-preluck-card p {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  padding-top: 7px;
+  border-top: 1px solid var(--responsive-border);
+  color: var(--responsive-text);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 /* 以瀏覽器當下年份定位目前大運；今年流年用雙重邊框固定提示，避免只靠顏色辨識。 */
@@ -1562,6 +1908,10 @@ footer {
 
 @media (min-width: 601px) and (max-width: 760px) {
   /* 平板直向寬度較窄，仍維持四柱同列，但收斂卡片留白。 */
+  .responsive-classical-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .responsive-pillar-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 7px;
@@ -1646,6 +1996,10 @@ footer {
   .responsive-pillar + .responsive-pillar {
     border-top: 1px solid var(--responsive-border);
   }
+
+  .responsive-classical-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1712,6 +2066,15 @@ footer {
     border-right: 0;
     border-left: 0;
     box-shadow: none;
+  }
+
+  .responsive-classical-summary-lead {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  .responsive-classical-summary-grid {
+    gap: 7px;
   }
 }
 

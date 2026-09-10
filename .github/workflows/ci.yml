@@ -1,0 +1,30 @@
+name: BaziJS CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Unit and contract tests
+        run: npm test
+      - name: External validation ledger
+        run: npm run validate
+      - name: Browser bundle
+        run: npm run build
+      - name: Demo static checks
+        run: npm run check:demo

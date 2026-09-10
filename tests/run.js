@@ -30,6 +30,7 @@ async function runUnit() {
   assert(d2.pillars.day.ganzhi === '甲子', 'UT-DAY-2024', d2.pillars.day.ganzhi);
   const d3 = Bazi.calculate({ birthDate: '1900-01-01', birthTime: '12:00', gender: 'male' });
   assert(d3.pillars.day.ganzhi === '甲戌', 'UT-DAY-1900', d3.pillars.day.ganzhi);
+  assert(Number(d1.transits.targetDatetime.slice(0, 4)) === new Date().getFullYear(), 'UT-TRANSIT-DEFAULT-CURRENT-YEAR', d1.transits.targetDatetime);
 
   // 十神：甲日主見丙為食神、見庚為七殺、見壬為偏印、見戊為偏財、見甲為比肩
   const tg = Bazi.Constants;
@@ -42,6 +43,7 @@ async function runUnit() {
   // 空亡抽查：甲子旬（甲子日）空戌亥
   const kw = Bazi.calculate({ birthDate: '2024-01-01', birthTime: '12:00', gender: 'male' }).kongWang;
   assert(JSON.stringify(kw.byDay.branches) === JSON.stringify(['戌', '亥']), 'UT-KONGWANG-JIAZI', JSON.stringify(kw.byDay.branches));
+  assert(kw.byDay.xunName === '甲子旬' && kw.byDay.ruleId === 'AUX_KONGWANG_SIX_XUN_001' && kw.byDay.evidence.matched, 'UT-KONGWANG-PROVENANCE', JSON.stringify(kw.byDay));
 
   // 藏干抽查：子藏癸、午藏丁己
   const hs = Bazi.calculate({ birthDate: '2024-01-01', birthTime: '12:00', gender: 'male' }).hiddenStems;
@@ -75,10 +77,42 @@ async function runUnit() {
   // AI Context 結構
   const ctx = Bazi.AI.toContext(d1, { compact: false });
   assert(ctx.pillars && ctx.pillars.day.ganzhi === '戊午' && ctx.metadata.profileId === 'canonical', 'UT-AI-CONTEXT', '');
+  assert(ctx.dayMaster.fiveCategory && ctx.auxiliary.mingGua && ctx.luckCyclesSummary.variants.length === 2, 'UT-AI-NEW-SYSTEMS', 'AI Context 必須保留五分類、命卦與起運方法 variants');
+
+  // 新增的可選系統：五分類、八宅命卦、起運方法 variants。
+  const mingGua2020 = Bazi.Auxiliary.calculateMingGua({ effectiveYear: 2020, gender: 'female' });
+  assert(mingGua2020.trigram.name === '兌' && mingGua2020.groupName === '西四命', 'UT-MING-GUA-2020-F', JSON.stringify(mingGua2020));
+  const fiveCategory = Bazi.Strength.calculateFiveElementCategories({ useElement: '金', favorableElements: ['金', '水', '土'] });
+  assert(JSON.stringify(fiveCategory.groups) === JSON.stringify({ use: ['金'], joy: ['土'], idle: ['水'], adversary: ['木'], taboo: ['火'] }), 'UT-FIVE-CATEGORY-DETERMINISTIC', JSON.stringify(fiveCategory.groups));
+  assert(d1.strength.fiveCategory && d1.strength.fiveCategory.evidence.matched, 'UT-FIVE-CATEGORY-IN-RESULT', JSON.stringify(d1.strength.fiveCategory));
+  assert(d1.strength.monthCommander === null || (d1.strength.monthCommander.ruleId === 'STR_MONTH_COMMANDER_001' && d1.strength.monthCommander.evidence.matched), 'UT-MONTH-COMMANDER-PROVENANCE', JSON.stringify(d1.strength.monthCommander));
+  assert(d1.analysis && d1.analysis.selected.useGod.modelId === 'fuyi-canonical' && d1.analysis.models.useGod.finalDecision === true, 'UT-ANALYSIS-CANONICAL-SELECTION', JSON.stringify(d1.analysis));
+  const sanmingAnalysis = Bazi.calculate({ birthDate: '2020-08-31', birthTime: '20:06', gender: 'female' }, { profile: 'classical-sanming' });
+  assert(sanmingAnalysis.analysis.selected.monthCommander.modelId === 'san-ming-volume-2' && sanmingAnalysis.analysis.models.monthCommander.status === 'comparison' && sanmingAnalysis.strength.monthCommander.ruleId === 'STR_MONTH_COMMANDER_SANMING_002', 'UT-ANALYSIS-SANMING-PROFILE', JSON.stringify(sanmingAnalysis.analysis.selected.monthCommander));
+  assert(sanmingAnalysis.strength.monthCommander.researchNotes.conflict === true && sanmingAnalysis.strength.monthCommander.evidence.sourceTable === 'san-ming-tong-hui-volume-2', 'UT-ANALYSIS-SANMING-EVIDENCE', JSON.stringify(sanmingAnalysis.strength.monthCommander));
+  const researchAnalysis = Bazi.calculate({ birthDate: '2020-08-31', birthTime: '20:06', gender: 'female' }, { profile: 'research-tiaohou' });
+  assert(researchAnalysis.analysis.models.useGod.status === 'research-only' && researchAnalysis.analysis.models.useGod.finalDecision === false && researchAnalysis.strength.useGod.finalDecision === false, 'UT-ANALYSIS-RESEARCH-NO-OVERRIDE', JSON.stringify(researchAnalysis.analysis));
+  const customAnalysisProfile = Bazi.Rules.RuleRegistry.createProfile({ id: 'test-analysis-profile', base: 'canonical', overrides: { analysis: { monthCommander: 'san-ming-volume-2', patterns: 'patterns-research' } } });
+  assert(customAnalysisProfile.rules.analysis.monthCommander.value === 'san-ming-volume-2' && customAnalysisProfile.diff.analysis.patterns.to === 'patterns-research', 'UT-ANALYSIS-CUSTOM-PROFILE', JSON.stringify(customAnalysisProfile.diff));
+  assert(d1.classicalSummary && JSON.stringify(d1.classicalSummary.sections) === JSON.stringify(['fiveCategory', 'monthCommand', 'voids', 'auxiliary']), 'UT-CLASSICAL-SUMMARY-SECTIONS', JSON.stringify(d1.classicalSummary?.sections));
+  assert(d1.classicalSummary.fiveCategory.rows.length === 5 && d1.classicalSummary.fiveCategory.evidence.rows.length === 5, 'UT-CLASSICAL-SUMMARY-FIVE-ROWS', JSON.stringify(d1.classicalSummary.fiveCategory.rows));
+  assert(d1.classicalSummary.voids.rows.length === 2 && d1.classicalSummary.voids.byDay.xunName && d1.classicalSummary.voids.byYear.xunName, 'UT-CLASSICAL-SUMMARY-VOID-ROWS', JSON.stringify(d1.classicalSummary.voids));
+  assert(d1.classicalSummary.auxiliary.matrix.length === 4 && d1.classicalSummary.auxiliary.evidence.matched, 'UT-CLASSICAL-SUMMARY-AUX-MATRIX', JSON.stringify(d1.classicalSummary.auxiliary.matrix));
+  assert(d1.auxiliary.mingGua && d1.auxiliary.mingGua.ruleId === 'AUX_MING_GUA_LAST_TWO_DIGITS', 'UT-MING-GUA-IN-RESULT', JSON.stringify(d1.auxiliary.mingGua));
+  assert(d1.luckCycles.variants.length === 2 && d1.luckCycles.variants.some((variant) => variant.method === 'jieqi-whole-days-divide-3'), 'UT-LUCK-METHOD-VARIANTS', JSON.stringify(d1.luckCycles.variants));
+  const wholeDayProfile = Bazi.calculate({ birthDate: '1983-05-11', birthTime: '16:19', gender: 'male' }, { profile: 'jieqi-whole-day' });
+  assert(wholeDayProfile.luckCycles.startAge.method === 'jieqi-whole-days-divide-3' && wholeDayProfile.luckCycles.startAge.calculationDiffDays < wholeDayProfile.luckCycles.startAge.rawDiffDays, 'UT-LUCK-WHOLE-DAY-PROFILE', JSON.stringify(wholeDayProfile.luckCycles.startAge));
 
   // Renderer SVG 可產出
   const svg = Bazi.Renderer.render(d1, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
   assert(typeof svg === 'string' && svg.includes('<svg'), 'UT-RENDER-SVG', '');
+  const publicDemoSource = fs.readFileSync(new URL('../demo/app.js', import.meta.url), 'utf8');
+  assert(!/sample1/i.test(publicDemoSource) && !/sample1/i.test(svg), 'UT-PUBLIC-NO-INTERNAL-SAMPLE1', '公開畫面與 SVG 不應顯示內部比對檔名');
+  const demoPillarSource = publicDemoSource.slice(publicDemoSource.indexOf('const pillarCols = ['));
+  const expectedDisplayOrder = ['hour', 'day', 'month', 'year'];
+  const demoOrder = expectedDisplayOrder.map((key) => demoPillarSource.indexOf(`key: '${key}'`));
+  const svgOrder = expectedDisplayOrder.map((label) => svg.indexOf(`class="pillar-title" text-anchor="middle">${label === 'hour' ? '時柱' : label === 'day' ? '日柱' : label === 'month' ? '月柱' : '年柱'}</text>`));
+  assert(demoOrder.every((position, index) => position >= 0 && (index === 0 || position > demoOrder[index - 1])) && svgOrder.every((position, index) => position >= 0 && (index === 0 || position > svgOrder[index - 1])), 'UT-PILLAR-DISPLAY-TRADITIONAL-ORDER', '畫面與 SVG 應由左至右顯示時、日、月、年');
   for (const preset of ['full', 'mobile-share', 'a4', 'compact']) {
     const s = Bazi.Renderer.render(d1, { format: 'svg', preset, theme: 'dark' });
     assert(s.includes('<svg'), `UT-RENDER-PRESET-${preset}`, '');
@@ -134,6 +168,7 @@ async function runUnit() {
   assert(sample1Context.luckCyclesSummary.cycles.length === sample1.luckCycles.cycles.length && sample1Context.luckCyclesSummary.cycles.every((cycle) => Array.isArray(cycle.shenSha)), 'UT-SAMPLE1-AI-LUCK-COMPLETE', 'AI Context 不應只保留部分大運或省略大運神煞');
   assert(sample1Context.input.birthDate === sample1.input.birthDate && sample1Context.accuracy.boundaryRules && sample1Context.rules.applied, 'UT-SAMPLE1-AI-PROVENANCE', 'AI Context 必須保留重現排盤所需的輸入、精度與實際規則');
   assert(sample1Context.auxiliary.taiYuan.ganzhi === sample1.auxiliary.taiYuan.ganzhi && sample1Context.luckCyclesSummary.cycles[0].stage, 'UT-SAMPLE1-AI-FULL-AUXILIARY', 'AI Context 不應把輔宮或大運狀態壓成不可追溯摘要');
+  assert(sample1Context.classicalSummary?.auxiliary.matrix.length === 4 && sample1Context.metadata.classicalSummaryRuleVersion === '1.0.0', 'UT-AI-CLASSICAL-SUMMARY', 'AI Context 必須保留 2/3/4 完整資料層');
 
   // 新神煞（v1.0.1）：以 2024-01-01 甲子日（年支子）驗紅鸞在卯、天喜在酉
   const ss24 = Bazi.calculate({ birthDate: '2024-05-15', birthTime: '10:00', gender: 'male' });
@@ -151,6 +186,10 @@ async function runUnit() {
   assert(ty.match({ monthBranch: '巳', targetBranch: '辰' }) === true, 'UT-TIANYI-SICHEN', '');
   const hy = SHENSHA_CATALOG.find((s) => s.id === 'hong_yan');
   assert(hy.match({ baseStem: '己', targetBranch: '辰' }) === true, 'UT-HONGYAN-JICHEN', '');
+  const tianFu = Bazi.calculate({ birthDate: '2020-08-31', birthTime: '20:06', gender: 'female' }).shenSha.find((s) => s.id === 'tian_fu_gui_ren');
+  assert(Boolean(tianFu?.description) && tianFu.description.includes('正官'), 'UT-TIANFU-DESCRIPTION', tianFu?.description || '');
+  assert(Boolean(tianFu?.interpretation) && tianFu.interpretation.includes('福氣'), 'UT-TIANFU-INTERPRETATION', tianFu?.interpretation || '');
+  assert(Bazi.ShenSha.getShenShaCatalog().every((rule) => typeof rule.interpretation === 'string' && rule.interpretation.trim()), 'UT-SHENSHA-INTERPRETATIONS-COMPLETE', `${Bazi.ShenSha.getShenShaCatalog().length} rules checked`);
   assert(!SHENSHA_CATALOG.some((s) => ['kui_gang', 'shi_e_da_bai'].includes(s.id)), 'UT-SHENSHA-NO-SPECIAL-PILLARS', '固定日柱不可留在一般 ShenSha catalog');
 
   // SpecialPillar / SeasonalSpecial：固定柱位與季節條件獨立於 ShenSha。
@@ -158,9 +197,10 @@ async function runUnit() {
   const specialRegistry = specialRules.validateSpecialRuleRegistry();
   assert(specialRegistry.valid && specialRegistry.count === 11, 'UT-SPECIAL-REGISTRY-11', JSON.stringify(specialRegistry));
   for (const rule of specialRules.SPECIAL_RULE_REGISTRY) {
-    const required = ['id', 'name', 'aliases', 'tradition', 'conceptType', 'ruleFamily', 'baseOn', 'scope', 'category', 'confidence', 'ruleId', 'version', 'references', 'description', 'match', 'evidence'];
+    const required = ['id', 'name', 'aliases', 'tradition', 'conceptType', 'ruleFamily', 'baseOn', 'scope', 'category', 'confidence', 'ruleId', 'version', 'references', 'description', 'interpretation', 'match', 'evidence'];
     assert(required.every((field) => field in rule), `UT-SPECIAL-SCHEMA-${rule.id}`, '缺少規格欄位');
   }
+  assert(specialRules.SPECIAL_RULE_REGISTRY.every((rule) => typeof rule.interpretation === 'string' && rule.interpretation.trim()), 'UT-SPECIAL-INTERPRETATIONS-COMPLETE', '特殊柱位與季節條件都必須有面向使用者的解釋');
   const specialCase = (day, hour = '甲子', month = '甲寅') => ({
     year: { stem: '甲', branch: '子', ganzhi: '甲子' },
     month: { stem: month[0], branch: month[1], ganzhi: month },
@@ -378,11 +418,17 @@ async function runDataContracts() {
   const profileCatalog = readJson('../profiles/catalog.json');
   const differential = readJson('../validation/profiles/differential-cases.json');
   const external = readJson('../validation/external/round-01-samples.json');
+  const specialSystems = readJson('../validation/external/round-02-special-systems.json');
+  const evidenceLedger = readJson('../sources/evidence-ledger.json');
+  const independent = readJson('../validation/external/independent-ledger.json');
   const schemaFiles = [
     ['../schemas/source-catalog.schema.json', sourceCatalog],
     ['../schemas/profile.schema.json', profileCatalog.profiles[0]],
     ['../schemas/profile-differential.schema.json', differential],
-    ['../schemas/external-validation.schema.json', external]
+    ['../schemas/external-validation.schema.json', external],
+    ['../schemas/external-validation.schema.json', specialSystems],
+    ['../schemas/evidence-ledger.schema.json', evidenceLedger],
+    ['../schemas/independent-validation.schema.json', independent]
   ];
 
   for (const [file, sample] of schemaFiles) {
@@ -400,8 +446,12 @@ async function runDataContracts() {
   const chart = Bazi.calculate({ birthDate: '1983-05-11', birthTime: '16:19', gender: 'male' }, { includeLuckAnnualDetails: true });
   const chartSchema = readJson('../schemas/chart-result.schema.json');
   assert(schemaErrors(chart, chartSchema).length === 0, 'UT-CHART-RESULT-SCHEMA', schemaErrors(chart, chartSchema).join('; '));
+  const classicalSummarySchema = readJson('../schemas/classical-summary.schema.json');
+  assert(schemaErrors(chart.classicalSummary, classicalSummarySchema).length === 0, 'UT-CLASSICAL-SUMMARY-SCHEMA', schemaErrors(chart.classicalSummary, classicalSummarySchema).join('; '));
 
   assert(sourceCatalog.sources.length >= 5 && sourceCatalog.evidenceRecords.length >= 12, 'UT-SOURCES-CATALOG-COMPLETE', `${sourceCatalog.sources.length}/${sourceCatalog.evidenceRecords.length}`);
+  const evidenceSourceIds = new Set(evidenceLedger.editionRecords.map((edition) => edition.sourceId));
+  assert(evidenceLedger.citations.length >= 6 && evidenceLedger.citations.every((citation) => evidenceSourceIds.has(citation.sourceId) && citation.locator.url.startsWith('https://') && citation.originalExcerpt.length > 0), 'UT-EVIDENCE-LEDGER-LOCATABLE', JSON.stringify(evidenceLedger.citations.map((citation) => citation.evidenceId)));
   const sourceIds = new Set(sourceCatalog.sources.map((source) => source.sourceId));
   for (const record of sourceCatalog.evidenceRecords) {
     assert(record.sourceIds.every((id) => sourceIds.has(id)), `UT-SOURCE-REF-${record.evidenceId}`, JSON.stringify(record.sourceIds));
@@ -415,6 +465,7 @@ async function runDataContracts() {
     assert(Boolean(runtime), `UT-PROFILE-CATALOG-${profile.id}`, 'JSON catalog 與 SDK 內建 Profile 不同步');
     assert(runtime?.version === profile.version, `UT-PROFILE-VERSION-${profile.id}`, `${runtime?.version}/${profile.version}`);
     assert(Bazi.Rules.RuleRegistry.get(profile.id)?.rules?.dayBoundary?.value === profile.rules.dayBoundary.value, `UT-PROFILE-RULE-${profile.id}`, 'dayBoundary 不同步');
+    assert(Bazi.Rules.RuleRegistry.get(profile.id)?.rules?.analysis?.useGod?.value === profile.rules.analysis.useGod.value, `UT-PROFILE-ANALYSIS-${profile.id}`, 'analysis.useGod 不同步');
   }
 
   for (const fixture of differential.cases) {
@@ -445,6 +496,45 @@ async function runDataContracts() {
     const referenceJd = Bazi.Julian.gregorianToJulianDay(reference.getUTCFullYear(), reference.getUTCMonth() + 1, reference.getUTCDate() + (reference.getUTCHours() + reference.getUTCMinutes() / 60 + reference.getUTCSeconds() / 3600) / 24);
     const differenceMinutes = Math.abs(observedJd - referenceJd) * 1440;
     assert(differenceMinutes <= sample.maxDifferenceMinutes, `${sample.caseId}-SOLAR-TERM`, `${differenceMinutes.toFixed(1)} min`);
+  }
+
+  for (const source of specialSystems.sources) {
+    assert(/^https:\/\//.test(source.url), `UT-EXTERNAL-SOURCE-URL-${source.sourceId}`, source.url);
+  }
+  for (const sample of specialSystems.cases) {
+    const result = Bazi.calculate(sample.input);
+    if (sample.caseId.startsWith('MG-')) {
+      const mingGua = result.auxiliary.mingGua;
+      assert(mingGua.effectiveYear === sample.expected.effectiveYear && mingGua.guaNumber === sample.expected.guaNumber && mingGua.trigram.name === sample.expected.trigram && mingGua.groupName === sample.expected.groupName, `${sample.caseId}-MING-GUA`, JSON.stringify(mingGua));
+      if (sample.expected.conflict) assert(mingGua.researchNotes.conflict === true && mingGua.variants.length > 0, `${sample.caseId}-CONFLICT-PRESERVED`, JSON.stringify(mingGua.researchNotes));
+    } else if (sample.caseId.startsWith('FC-')) {
+      assert(result.strength.fiveCategory.modelId === sample.expected.modelId && result.strength.fiveCategory.useElement === sample.expected.useElement && JSON.stringify(result.strength.fiveCategory.groups) === JSON.stringify(sample.expected.groups), `${sample.caseId}-FIVE-CATEGORY`, JSON.stringify(result.strength.fiveCategory));
+    } else if (sample.caseId.startsWith('LUCK-')) {
+      const luck = result.luckCycles;
+      assert(luck.direction === sample.expected.direction && luck.startAgeMethod === sample.expected.startAgeMethod, `${sample.caseId}-METHOD`, JSON.stringify(luck));
+      assert(JSON.stringify(luck.variants.map((variant) => variant.method)) === JSON.stringify(sample.expected.variantMethods), `${sample.caseId}-VARIANT-LIST`, JSON.stringify(luck.variants));
+      assert(luck.variants[0].calculationDiffDays !== luck.variants[1].calculationDiffDays, `${sample.caseId}-VARIANT-DIFF`, JSON.stringify(luck.variants));
+    }
+  }
+
+  for (const source of independent.sources) {
+    assert(/^https:\/\//.test(source.url) && source.independence === 'external', `UT-INDEPENDENT-SOURCE-${source.sourceId}`, source.url);
+  }
+  for (const sample of independent.cases) {
+    const result = Bazi.calculate(sample.input);
+    const actual = pillarMap(result);
+    if (sample.adjudication.expectedPillars) {
+      assert(JSON.stringify(actual) === JSON.stringify(sample.adjudication.expectedPillars), `${sample.caseId}-ADJUDICATED`, JSON.stringify(actual));
+    }
+    for (const observation of sample.observations) {
+      if (observation.classification === 'match') {
+        assert(JSON.stringify(actual) === JSON.stringify(observation.observed.pillars), `${sample.caseId}-MATCH`, JSON.stringify(actual));
+      } else if (observation.classification === 'difference') {
+        assert(JSON.stringify(actual) !== JSON.stringify(observation.observed.pillars), `${sample.caseId}-DIFFERENCE`, JSON.stringify(actual));
+      } else {
+        assert(observation.observed === null && observation.notes.length > 0, `${sample.caseId}-UNDETERMINED`, JSON.stringify(observation));
+      }
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 import { CANONICAL_PROFILE } from './canonical.js';
+import { getAnalysisRuleId } from '../../analysis/index.js';
 
 // 這裡只登錄「可重現的規則配置差異」，不把不同傳承混成一個預設答案。
 // 根目錄 profiles/ 是可審核的 JSON 目錄；本檔則讓瀏覽器 SDK 可以直接取用同一組內建 Profile。
@@ -12,6 +13,15 @@ function rule(value, ruleId, overridden = false) {
   return { value, ruleId, version: '1.0.0', ...(overridden ? { overridden: true } : {}) };
 }
 
+function analysisRule(value, dimension) {
+  return {
+    value,
+    ruleId: getAnalysisRuleId(value, dimension),
+    version: value.endsWith('-research') || value === 'research-registry' ? '0.1.0' : '1.0.0',
+    overridden: true
+  };
+}
+
 function buildComparisonProfile({ id, name, description, overrides, differences, status = 'comparison' }) {
   const profile = clone(CANONICAL_PROFILE);
   profile.id = id;
@@ -21,7 +31,7 @@ function buildComparisonProfile({ id, name, description, overrides, differences,
   profile.profileType = 'comparison';
   profile.status = status;
   profile.baseId = 'canonical';
-  profile.version = '1.0.0';
+  profile.version = status === 'research-only' ? '0.1.0' : '1.0.0';
   profile.diff = differences;
 
   if (overrides.dayBoundary) {
@@ -37,12 +47,26 @@ function buildComparisonProfile({ id, name, description, overrides, differences,
   if (overrides.monthBoundary) {
     profile.rules.monthBoundary = rule(overrides.monthBoundary, `MONTH_BOUNDARY_${overrides.monthBoundary.toUpperCase()}`, true);
   }
+  if (overrides.startAgeMethod) {
+    profile.rules.luckCycle.startAgeMethod = rule(
+      overrides.startAgeMethod,
+      overrides.startAgeMethod === 'jieqi-whole-days-divide-3'
+        ? 'LUCK_START_DIFF_WHOLE_DAY_DIV_3'
+        : 'LUCK_START_DIFF_DIV_3',
+      true
+    );
+  }
   if (typeof overrides.trueSolarTime === 'boolean') {
     profile.rules.trueSolarTime = rule(
       overrides.trueSolarTime,
       overrides.trueSolarTime ? 'TRUE_SOLAR_TIME_ENABLED' : 'TRUE_SOLAR_TIME_DISABLED',
       true
     );
+  }
+  if (overrides.analysis) {
+    for (const [dimension, modelId] of Object.entries(overrides.analysis)) {
+      profile.rules.analysis[dimension] = analysisRule(modelId, dimension);
+    }
   }
   return profile;
 }
@@ -81,6 +105,54 @@ export const PROFILE_CATALOG = Object.freeze([
     description: '保留 canonical 的子平切界，改以出生地經度修正真太陽時；未提供地點時使用時區中央經線。',
     overrides: { trueSolarTime: true },
     differences: { trueSolarTime: { from: false, to: true } }
+  }),
+  buildComparisonProfile({
+    id: 'jieqi-whole-day',
+    name: '節氣差整日換算比較',
+    description: '保留 canonical 的節氣取節與順逆規則，但先取整日再以三日一歲換算；只作方法差異研究。',
+    overrides: { startAgeMethod: 'jieqi-whole-days-divide-3' },
+    differences: { startAgeMethod: { from: 'jieqi-diff-divide-3', to: 'jieqi-whole-days-divide-3' } }
+  }),
+  buildComparisonProfile({
+    id: 'classical-sanming',
+    name: '《三命通會》人元分日比較',
+    description: '只將月令人元司事分日切換為《三命通會》卷二表格，保留 canonical 其他計算，供逐案研究。',
+    overrides: { analysis: { monthCommander: 'san-ming-volume-2' } },
+    differences: { analysis: { monthCommander: { from: 'bazi-js-human-element', to: 'san-ming-volume-2' } } }
+  }),
+  buildComparisonProfile({
+    id: 'research-tiaohou',
+    name: '調候研究 Profile',
+    description: '標記調候與季節分析的研究邊界；未完成判定前不覆寫 canonical 扶抑結果。',
+    overrides: { analysis: { useGod: 'tiaohou-research', seasonal: 'tiaohou-research' } },
+    differences: {
+      analysis: {
+        useGod: { from: 'fuyi-canonical', to: 'tiaohou-research' },
+        seasonal: { from: 'none', to: 'tiaohou-research' }
+      }
+    },
+    status: 'research-only'
+  }),
+  buildComparisonProfile({
+    id: 'research-tongguan',
+    name: '通關研究 Profile',
+    description: '標記通關與介入五行的研究邊界；未完成全局判定前不覆寫 canonical 結果。',
+    overrides: { analysis: { useGod: 'tongguan-research', mediator: 'tongguan-research' } },
+    differences: {
+      analysis: {
+        useGod: { from: 'fuyi-canonical', to: 'tongguan-research' },
+        mediator: { from: 'none', to: 'tongguan-research' }
+      }
+    },
+    status: 'research-only'
+  }),
+  buildComparisonProfile({
+    id: 'research-patterns',
+    name: '古典特殊格研究 Profile',
+    description: '只選取 Pattern 研究登錄；沒有完整成格與破格 predicate 時不宣告命中。',
+    overrides: { analysis: { patterns: 'patterns-research' } },
+    differences: { analysis: { patterns: { from: 'research-registry', to: 'patterns-research' } } },
+    status: 'research-only'
   })
 ]);
 

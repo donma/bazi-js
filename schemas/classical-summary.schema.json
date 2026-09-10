@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/classical-summary.schema.json",
+  "title": "BaziJS Classical Summary",
+  "description": "五分類、月令人元司令、日空年空與輔助宮位的可追溯資料摘要。",
+  "type": "object",
+  "required": ["modelId", "version", "confidence", "tradition", "ruleId", "sections", "fiveCategory", "monthCommand", "voids", "auxiliary", "references", "variants", "researchNotes", "evidence"],
+  "properties": {
+    "modelId": {"type": "string"},
+    "version": {"type": "string"},
+    "confidence": {"type": "string"},
+    "tradition": {"type": "string"},
+    "conceptType": {"type": "string"},
+    "ruleFamily": {"type": "string"},
+    "baseOn": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "scope": {"type": "string"},
+    "category": {"type": "string"},
+    "ruleId": {"type": "string"},
+    "method": {"type": "string"},
+    "sections": {"type": "array", "minItems": 4, "items": {"enum": ["fiveCategory", "monthCommand", "voids", "auxiliary"]}},
+    "references": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/reference"}},
+    "variants": {"type": "array"},
+    "researchNotes": {"type": "object"},
+    "evidence": {"type": "object", "required": ["matched", "chartPillars", "sectionEvidence"]},
+    "fiveCategory": {"type": ["object", "null"]},
+    "monthCommand": {"type": "object", "required": ["hiddenStems", "monthPillar", "evidence"]},
+    "voids": {"type": "object", "required": ["byDay", "byYear", "rows", "evidence"]},
+    "auxiliary": {"type": "object", "required": ["palaceRows", "matrix", "elementDistribution", "seasonalStates", "evidence"]}
+  },
+  "$defs": {
+    "reference": {
+      "type": "object",
+      "required": ["sourceId", "title", "locator", "url"],
+      "properties": {
+        "sourceId": {"type": "string"},
+        "title": {"type": "string"},
+        "locator": {"type": "string"},
+        "url": {"type": "string", "pattern": "^https://"}
+      }
+    }
+  }
+}

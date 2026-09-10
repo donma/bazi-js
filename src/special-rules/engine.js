@@ -25,6 +25,7 @@ function resultFor(rule, context, evidence) {
     reference: rule.references[0] ? rule.references[0].title : undefined,
     references: rule.references,
     description: rule.description || '',
+    ...(rule.interpretation ? { interpretation: rule.interpretation } : {}),
     ...(rule.variants ? { variants: rule.variants } : {}),
     ...(rule.researchNotes ? { researchNotes: rule.researchNotes } : {}),
     evidence
@@ -66,7 +67,7 @@ export function validateSpecialRuleRegistry(registry = SPECIAL_RULE_REGISTRY) {
     ids.add(rule.id);
     if (!rule.ruleId || ruleIds.has(rule.ruleId)) errors.push(`duplicate ruleId: ${rule.ruleId || '(empty)'}`);
     ruleIds.add(rule.ruleId);
-    for (const field of ['name', 'tradition', 'conceptType', 'ruleFamily', 'scope', 'category', 'confidence', 'version', 'description']) {
+    for (const field of ['name', 'tradition', 'conceptType', 'ruleFamily', 'scope', 'category', 'confidence', 'version', 'description', 'interpretation']) {
       if (!rule[field]) errors.push(`${rule.id}: ${field} is required`);
     }
     if (!Array.isArray(rule.baseOn) || rule.baseOn.length === 0) errors.push(`${rule.id}: baseOn is required`);

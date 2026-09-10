@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/independent-validation.schema.json",
+  "title": "BaziJS Independent Validation Ledger",
+  "type": "object",
+  "required": ["schemaVersion", "datasetId", "capturedAt", "sources", "cases"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "datasetId": {"type": "string"},
+    "capturedAt": {"type": "string"},
+    "purpose": {"type": "string"},
+    "sources": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/source"}},
+    "cases": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/case"}}
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": ["sourceId", "name", "url", "sourceType", "scope", "independence"],
+      "properties": {
+        "sourceId": {"type": "string"},
+        "name": {"type": "string"},
+        "url": {"type": "string", "pattern": "^https://"},
+        "sourceType": {"type": "string"},
+        "scope": {"type": "array", "items": {"type": "string"}},
+        "independence": {"enum": ["external", "internal", "manual"]},
+        "notes": {"type": "string"}
+      }
+    },
+    "case": {
+      "type": "object",
+      "required": ["caseId", "input", "scope", "observations", "adjudication"],
+      "properties": {
+        "caseId": {"type": "string"},
+        "input": {"type": "object", "required": ["birthDate", "birthTime", "gender"]},
+        "scope": {"type": "string"},
+        "observations": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/observation"}},
+        "adjudication": {
+          "type": "object",
+          "required": ["classification", "reason"],
+          "properties": {
+            "classification": {"enum": ["match", "difference", "undetermined"]},
+            "expectedPillars": {"type": ["object", "null"]},
+            "reason": {"type": "string"}
+          }
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "required": ["sourceId", "classification", "observed", "notes"],
+      "properties": {
+        "sourceId": {"type": "string"},
+        "classification": {"enum": ["match", "difference", "undetermined"]},
+        "observed": {"type": ["object", "null"]},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

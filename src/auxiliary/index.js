@@ -30,6 +30,9 @@
 import { stemAt, stemIndex, sexagenaryIndex } from '../core/constants/stems.js';
 import { branchAt, branchIndex } from '../core/constants/branches.js';
 import { getNayin } from '../core/constants/nayin-data.js';
+import { calculateMingGua } from './ming-gua.js';
+
+export { calculateMingGua } from './ming-gua.js';
 
 // 天干五合對應
 const STEM_HE = {
@@ -55,7 +58,31 @@ const WU_HU_DUN = [2, 4, 6, 8, 0, 2, 4, 6, 8, 0];
 const YIN_BASED_BRANCH_ORDER = ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'];
 const YIN_ORDER_MAP = Object.fromEntries(YIN_BASED_BRANCH_ORDER.map((b, i) => [b, i]));
 
-export function calculateChartAuxiliary(pillars) {
+export function calculateChartAuxiliary(pillars, context = {}) {
+  const modelId = context.auxiliaryModel || 'canonical-palm';
+  const model = {
+    id: modelId,
+    status: modelId === 'canonical-palm' ? 'implemented' : 'research-only',
+    ruleId: modelId === 'canonical-palm' ? 'AUX_CANONICAL_PALM_001' : 'AUX_SANMING_PALM_RESEARCH_001',
+    version: modelId === 'canonical-palm' ? '1.0.0' : '0.1.0',
+    finalDecision: modelId === 'canonical-palm',
+    evidence: {
+      matched: modelId === 'canonical-palm',
+      status: modelId === 'canonical-palm' ? 'implemented' : 'research-only',
+      reason: modelId === 'canonical-palm'
+        ? '採 BaziJS canonical 掌訣公式。'
+        : '已保留研究 Profile 邊界；尚未以完整古籍變體取代 canonical 命宮／身宮結果。'
+    }
+  };
+  const mingGua = context.gender
+    ? calculateMingGua({
+      solarYear: context.solarYear,
+      effectiveYear: context.effectiveYear,
+      yearPillar: context.yearPillar || pillars.year,
+      gender: context.gender,
+      yearBoundary: context.yearBoundary || 'lichun'
+    })
+    : null;
   // 1. 胎元
   const mStemIdx = stemIndex(pillars.month.stem);
   const mBranchIdx = branchIndex(pillars.month.branch);
@@ -91,10 +118,12 @@ export function calculateChartAuxiliary(pillars) {
   // 3. 命宮與身宮（若時柱未知，則無法精確推算命宮身宮）
   if (!pillars.hour.available) {
     return {
+      model,
       taiYuan,
       taiXi,
       mingGong: null,
-      shenGong: null
+      shenGong: null,
+      mingGua
     };
   }
 
@@ -156,9 +185,11 @@ export function calculateChartAuxiliary(pillars) {
   };
 
   return {
+    model,
     taiYuan,
     taiXi,
     mingGong,
-    shenGong
+    shenGong,
+    mingGua
   };
 }

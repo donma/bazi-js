@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "bazi-js-external-round-02-special-systems",
+  "capturedAt": "2026-09-09",
+  "status": "comparative-reproducible",
+  "purpose": "命卦、五分類與起運方法的公開網路抽樣；保存矛盾資料，不宣稱傳統流派存在單一普遍答案。",
+  "sources": [
+    {
+      "sourceId": "sanming-volume-2",
+      "name": "《三命通會》卷二（論坐命官、論大運）",
+      "scope": "luck-start-age",
+      "kind": "primary-text",
+      "url": "https://zh.wikisource.org/zh-hant/三命通會_(四庫全書本)/卷02",
+      "note": "保存三日為年、順逆取節等古典判定依據。"
+    },
+    {
+      "sourceId": "sanming-volume-3",
+      "name": "《三命通會》卷三（論空亡）",
+      "scope": "xun-kong",
+      "kind": "primary-text",
+      "url": "https://zh.wikisource.org/zh-hant/三命通會/卷三",
+      "note": "保存甲旬盡處為空亡與六旬推算依據。"
+    },
+    {
+      "sourceId": "di-tian-sui-yuan-wei",
+      "name": "《滴天髓闡微》（任鐵樵注）",
+      "scope": "five-category-and-month-command",
+      "kind": "classical-commentary",
+      "url": "https://zh.wikisource.org/zh-hant/滴天髓闡微",
+      "note": "作為五分類術語、月令與人元理論的古典注家對讀；不宣稱提供唯一演算法。"
+    },
+    {
+      "sourceId": "minglitang-five-category",
+      "name": "命理堂：喜用神與忌神",
+      "scope": "five-category",
+      "kind": "secondary-methodology",
+      "url": "https://www.minglitang.com.au/learn/favourable-unfavourable",
+      "note": "作為五分類現代定義對照，非古籍唯一版本。"
+    },
+    {
+      "sourceId": "d02-bazhai",
+      "name": "八宅命卦工具說明",
+      "scope": "ming-gua",
+      "kind": "secondary-methodology",
+      "url": "https://www.d02.cn/tool/bazhai/",
+      "note": "保存年末兩位數、性別、東四西四的現代算法說明。"
+    },
+    {
+      "sourceId": "k366-minggua-1984",
+      "name": "K366 命卦 1984 案例",
+      "scope": "ming-gua",
+      "kind": "secondary-sample",
+      "url": "https://m.k366.com/minggua/1984.htm",
+      "note": "用於 1984 女性命卦艮的交叉抽樣。"
+    },
+    {
+      "sourceId": "guanyitang-kua-number",
+      "name": "觀音堂命卦計算說明",
+      "scope": "ming-gua",
+      "kind": "secondary-conflict",
+      "url": "https://guanyitang.com/tools/kua-number",
+      "note": "同頁公式、表格與其他來源在跨世紀／2020 案例有差異，故保留為衝突證據。"
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "MG-1984-F",
+      "input": {"birthDate": "1984-06-01", "birthTime": "12:00", "gender": "female"},
+      "external": {"sources": ["d02-bazhai", "k366-minggua-1984"], "classification": "formula-and-sample-match"},
+      "expected": {"effectiveYear": 1984, "guaNumber": 8, "trigram": "艮", "groupName": "西四命"}
+    },
+    {
+      "caseId": "MG-1990-F",
+      "input": {"birthDate": "1990-06-01", "birthTime": "12:00", "gender": "female"},
+      "external": {"sources": ["d02-bazhai"], "classification": "formula-match"},
+      "expected": {"effectiveYear": 1990, "guaNumber": 8, "trigram": "艮", "groupName": "西四命"}
+    },
+    {
+      "caseId": "MG-2020-F",
+      "input": {"birthDate": "2020-08-31", "birthTime": "20:06", "gender": "female"},
+      "external": {"sources": ["d02-bazhai", "guanyitang-kua-number"], "classification": "formula-match-conflict-preserved"},
+      "expected": {"effectiveYear": 2020, "guaNumber": 7, "trigram": "兌", "groupName": "西四命", "conflict": true}
+    },
+    {
+      "caseId": "FC-2020-F-CANONICAL",
+      "input": {"birthDate": "2020-08-31", "birthTime": "20:06", "gender": "female"},
+      "external": {"sources": ["minglitang-five-category"], "classification": "definition-match-derived-result"},
+      "expected": {
+        "modelId": "canonical-use-derived",
+        "useElement": "金",
+        "groups": {"use": ["金"], "joy": ["土"], "idle": ["水"], "adversary": ["木"], "taboo": ["火"]}
+      }
+    },
+    {
+      "caseId": "MC-2020-F",
+      "input": {"birthDate": "2020-08-31", "birthTime": "20:06", "gender": "female"},
+      "external": {"sources": ["sanming-volume-2", "di-tian-sui-yuan-wei"], "classification": "classical-scope-formula-match-with-variant"},
+      "expected": {
+        "monthBranch": "申",
+        "stem": "庚",
+        "element": "金",
+        "elapsedDays": 24,
+        "phase": 3,
+        "phases": [{"stem": "戊", "days": 7}, {"stem": "壬", "days": 7}, {"stem": "庚", "days": 16}]
+      }
+    },
+    {
+      "caseId": "KW-2020-F",
+      "input": {"birthDate": "2020-08-31", "birthTime": "20:06", "gender": "female"},
+      "external": {"sources": ["sanming-volume-3"], "classification": "classical-six-xun-formula-match"},
+      "expected": {
+        "day": {"xunName": "甲辰旬", "branches": ["寅", "卯"]},
+        "year": {"xunName": "甲午旬", "branches": ["辰", "巳"]}
+      }
+    },
+    {
+      "caseId": "PALACE-2020-F",
+      "input": {"birthDate": "2020-08-31", "birthTime": "20:06", "gender": "female"},
+      "external": {"sources": ["sanming-volume-2"], "classification": "classical-scope-formula-match-with-variant"},
+      "expected": {
+        "taiYuan": "乙亥",
+        "taiXi": "辛未",
+        "mingGong": "乙酉",
+        "shenGong": "辛巳"
+      }
+    },
+    {
+      "caseId": "LUCK-2020-F-VARIANTS",
+      "input": {"birthDate": "2020-08-31", "birthTime": "20:06", "gender": "female"},
+      "external": {"sources": ["sanming-volume-2"], "classification": "classical-method-match-with-comparison-variant"},
+      "expected": {
+        "direction": "backward",
+        "startAgeMethod": "jieqi-diff-divide-3",
+        "variantMethods": ["jieqi-diff-divide-3", "jieqi-whole-days-divide-3"],
+        "variantDiffers": true
+      }
+    }
+  ],
+  "solarTermCases": []
+}

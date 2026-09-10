@@ -7,9 +7,13 @@ export const SHENSHA_RULE_VERSION = '2.1.0';
 export const SPECIAL_RULE_VERSION = '1.0.0';
 export const PATTERN_RULE_VERSION = '0.1.0';
 export const STRENGTH_RULE_VERSION = '1.0.0';
+export const FIVE_CATEGORY_RULE_VERSION = '1.0.0';
+export const AUXILIARY_RULE_VERSION = '1.1.0';
+export const CLASSICAL_SUMMARY_RULE_VERSION = '1.0.0';
+export const ANALYSIS_RULE_VERSION = '1.0.0';
 export const INTERACTION_RULE_VERSION = '1.0.0';
-export const LUCK_RULE_VERSION = '1.0.0';
-export const RESULT_SCHEMA_VERSION = '2.0.0';
+export const LUCK_RULE_VERSION = '1.1.0';
+export const RESULT_SCHEMA_VERSION = '2.1.0';
 
 export const VERSIONS = {
   engineVersion: ENGINE_VERSION,
@@ -19,6 +23,10 @@ export const VERSIONS = {
   specialRuleVersion: SPECIAL_RULE_VERSION,
   patternRuleVersion: PATTERN_RULE_VERSION,
   strengthRuleVersion: STRENGTH_RULE_VERSION,
+  fiveCategoryRuleVersion: FIVE_CATEGORY_RULE_VERSION,
+  auxiliaryRuleVersion: AUXILIARY_RULE_VERSION,
+  classicalSummaryRuleVersion: CLASSICAL_SUMMARY_RULE_VERSION,
+  analysisRuleVersion: ANALYSIS_RULE_VERSION,
   interactionRuleVersion: INTERACTION_RULE_VERSION,
   luckRuleVersion: LUCK_RULE_VERSION,
   resultSchemaVersion: RESULT_SCHEMA_VERSION

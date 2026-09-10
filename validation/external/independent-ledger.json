@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "bazi-js-independent-validation-2026-09",
+  "capturedAt": "2026-09-09",
+  "purpose": "以獨立公開排盤引擎與人工記錄區分一致、約定差異與無法判定；不把 repo 自存 expected 冒充外部驗證。",
+  "sources": [
+    {
+      "sourceId": "daypillar",
+      "name": "Day Pillar public calculator",
+      "url": "https://daypillar.com/bazi-calculator",
+      "sourceType": "independent-engine",
+      "scope": ["pillars", "true-solar-time"],
+      "independence": "external",
+      "notes": "公開頁面提供 Singapore 1985-10-08 15:20 的真太陽時 worked example。"
+    },
+    {
+      "sourceId": "baziflow-core",
+      "name": "baziflow-core",
+      "url": "https://github.com/Eastern-Sunrise/bazi-core",
+      "sourceType": "independent-open-source-engine",
+      "scope": ["pillars", "true-solar-time"],
+      "independence": "external",
+      "notes": "公開 repository 說明排盤與真太陽時功能；本輪沒有把未捕獲的執行輸出寫成 expected。"
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "IV-DAYPILLAR-1985-TRUE-SOLAR-MATCH",
+      "input": {
+        "birthDate": "1985-10-08",
+        "birthTime": "15:20",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "location": {"longitude": 103.82}
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "daypillar",
+          "classification": "match",
+          "observed": {
+            "pillars": {"year": "乙丑", "month": "乙酉", "day": "庚辰", "hour": "癸未"},
+            "effectiveTime": "14:28"
+          },
+          "notes": "來源 worked example 以 Singapore 經度 103.82 修正 15:20 民用時間。"
+        }
+      ],
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {"year": "乙丑", "month": "乙酉", "day": "庚辰", "hour": "癸未"},
+        "reason": "相同輸入約定與來源案例的四柱一致。"
+      }
+    },
+    {
+      "caseId": "IV-DAYPILLAR-1985-CLOCK-CONVENTION-MATCH",
+      "input": {
+        "birthDate": "1985-10-08",
+        "birthTime": "15:20",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "location": {"longitude": 103.82}
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "daypillar",
+          "classification": "match",
+          "observed": {
+            "pillars": {"year": "乙丑", "month": "乙酉", "day": "庚辰", "hour": "甲申"},
+            "effectiveTime": "15:20"
+          },
+          "notes": "來源同時列出 clock-time 版本；本案明確關閉真太陽時。"
+        }
+      ],
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {"year": "乙丑", "month": "乙酉", "day": "庚辰", "hour": "甲申"},
+        "reason": "同一出生資料在 clock-time 約定下與來源列出的甲申時一致。"
+      }
+    },
+    {
+      "caseId": "IV-DAYPILLAR-1985-CONVENTION-DIFFERENCE",
+      "input": {
+        "birthDate": "1985-10-08",
+        "birthTime": "15:20",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "location": {"longitude": 103.82}
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "daypillar",
+          "classification": "difference",
+          "observed": {"pillars": {"year": "乙丑", "month": "乙酉", "day": "庚辰", "hour": "癸未"}},
+          "notes": "此觀察刻意以來源真太陽時結果對照 SDK 的 clock-time 輸入；差異是時間約定，不是未標記的引擎錯誤。"
+        }
+      ],
+      "adjudication": {
+        "classification": "difference",
+        "expectedPillars": {"year": "乙丑", "month": "乙酉", "day": "庚辰", "hour": "甲申"},
+        "reason": "輸入約定不同：來源觀察採真太陽時，SDK 本案明確採民用 clock-time。"
+      }
+    },
+    {
+      "caseId": "IV-BAZIFLOW-UNDETERMINED-001",
+      "input": {
+        "birthDate": "1985-10-08",
+        "birthTime": "15:20",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "location": {"longitude": 103.82}
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "undetermined",
+          "observed": null,
+          "notes": "本輪只確認公開 repository 的功能範圍，沒有可引用的獨立執行輸出，因此不判定一致或差異。"
+        }
+      ],
+      "adjudication": {
+        "classification": "undetermined",
+        "expectedPillars": null,
+        "reason": "沒有捕獲可重現的外部輸出；禁止以 SDK 自身結果填補。"
+      }
+    }
+  ]
+}

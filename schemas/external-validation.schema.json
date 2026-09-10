@@ -23,6 +23,20 @@
         }
       }
     },
-    "solarTermCases": {"type": "array", "items": {"type": "object", "required": ["caseId", "year", "term", "referenceUtc", "maxDifferenceMinutes"]}}
+    "solarTermCases": {"type": "array", "items": {"type": "object", "required": ["caseId", "year", "term", "referenceUtc", "maxDifferenceMinutes"]}},
+    "systemCases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["caseId", "system", "input", "external", "expected"],
+        "properties": {
+          "caseId": {"type": "string"},
+          "system": {"enum": ["ming-gua", "five-category", "luck-start-age"]},
+          "input": {"type": "object"},
+          "external": {"type": "object", "required": ["sources", "classification"]},
+          "expected": {"type": "object"}
+        }
+      }
+    }
   }
 }

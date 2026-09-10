@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "1.0.0",
+  "catalogId": "bazi-js-classical-evidence-ledger",
+  "catalogVersion": "2026.09",
+  "purpose": "可定位的古籍摘錄、版本與校勘狀態；不把未核實的頁碼或傳本差異寫成確定事實。",
+  "editionRecords": [
+    {
+      "editionId": "wikisource-san-ming-tong-hui",
+      "sourceId": "san-ming-tong-hui",
+      "title": "《三命通會》維基文庫數位轉錄本",
+      "provider": "Wikisource",
+      "editionStatus": "digital-transcription",
+      "publicationYear": null,
+      "notes": "此為可公開定位的數位轉錄；不是影像版，頁碼不強行推定。"
+    },
+    {
+      "editionId": "wikisource-di-tian-sui-yan-wei",
+      "sourceId": "di-tian-sui-yan-wei",
+      "title": "《滴天髓闡微》維基文庫數位轉錄本",
+      "provider": "Wikisource",
+      "editionStatus": "digital-transcription",
+      "publicationYear": null,
+      "notes": "作為理論背景索引；實際規則仍需逐條保存原文與變體。"
+    }
+  ],
+  "citations": [
+    {
+      "evidenceId": "EV-MC-SANMING-001",
+      "sourceId": "san-ming-tong-hui",
+      "ruleIds": ["STR_MONTH_COMMANDER_SANMING_002"],
+      "edition": "wikisource-san-ming-tong-hui",
+      "locator": {
+        "type": "section",
+        "section": "卷二〈論人元司事〉",
+        "page": null,
+        "url": "https://zh.wikisource.org/zh-hant/三命通會/卷二",
+        "accessedAt": "2026-09-09"
+      },
+      "originalExcerpt": "寅中有艮土用事五日，丙火長生五日，甲木二十日",
+      "transcription": "寅：戊五日、丙五日、甲二十日；其餘月依原條文表列。",
+      "ocrNotes": "此為數位轉錄，無 OCR 影像層。",
+      "collationNotes": "目前只採可定位條文；完整分日表與其他傳本的差異保留在 SAN_MING_MONTH_COMMAND_PHASES 與 variants。",
+      "verificationStatus": "source-located",
+      "variants": [{"id": "bazi-js-human-element", "note": "BaziJS canonical 採另一套可重現分段表。"}],
+      "researchNotes": "古籍分日與後世人元司令表不可直接視為同一規則。"
+    },
+    {
+      "evidenceId": "EV-SP-RILU-002",
+      "sourceId": "san-ming-tong-hui",
+      "ruleIds": ["PATTERN_RILU_GUI_SHI_RESEARCH_001"],
+      "edition": "wikisource-san-ming-tong-hui",
+      "locator": {
+        "type": "section",
+        "section": "卷六〈日祿歸時〉",
+        "page": null,
+        "url": "https://zh.wikisource.org/zh-hant/三命通會/卷六",
+        "accessedAt": "2026-09-09"
+      },
+      "originalExcerpt": "日祿歸時沒官星，號青雲得路。",
+      "transcription": "時柱與日祿歸時相關，仍須配合全局成格條件。",
+      "ocrNotes": "此為數位轉錄，無 OCR 影像層。",
+      "collationNotes": "短摘錄只證明古籍條名與概念，不足以推出完整成格算法。",
+      "verificationStatus": "source-located",
+      "variants": [],
+      "researchNotes": "列入 Patterns 研究，不列入一般神煞。"
+    },
+    {
+      "evidenceId": "EV-SP-GONGLU-003",
+      "sourceId": "san-ming-tong-hui",
+      "ruleIds": ["PATTERN_GONGLU_RESEARCH_001"],
+      "edition": "wikisource-san-ming-tong-hui",
+      "locator": {
+        "type": "section",
+        "section": "卷六〈拱祿拱貴〉",
+        "page": null,
+        "url": "https://zh.wikisource.org/zh-hant/三命通會/卷六",
+        "accessedAt": "2026-09-09"
+      },
+      "originalExcerpt": "拱祿拱貴，填實則凶。",
+      "transcription": "拱祿、拱貴以兩柱夾拱條件研究，不能只用單柱命中。",
+      "ocrNotes": "此為數位轉錄，無 OCR 影像層。",
+      "collationNotes": "尚未將所有填實、沖破與月令條件整理成 canonical predicate。",
+      "verificationStatus": "source-located",
+      "variants": [],
+      "researchNotes": "列入 Patterns 研究，不列入一般神煞。"
+    },
+    {
+      "evidenceId": "EV-SP-LIUYI-004",
+      "sourceId": "san-ming-tong-hui",
+      "ruleIds": ["PATTERN_LIUYI_SHUGUI_RESEARCH_001"],
+      "edition": "wikisource-san-ming-tong-hui",
+      "locator": {
+        "type": "section",
+        "section": "卷六〈六乙鼠貴〉",
+        "page": null,
+        "url": "https://zh.wikisource.org/zh-hant/三命通會/卷六",
+        "accessedAt": "2026-09-09"
+      },
+      "originalExcerpt": "陰木獨遇子時，為六乙鼠貴之地。",
+      "transcription": "六乙鼠貴至少涉及乙日與子時，完整成格條件待研究。",
+      "ocrNotes": "此為數位轉錄，無 OCR 影像層。",
+      "collationNotes": "不把條名或單一日時條件直接轉成神煞命中。",
+      "verificationStatus": "source-located",
+      "variants": [],
+      "researchNotes": "列入 Patterns 研究，不列入一般神煞。"
+    },
+    {
+      "evidenceId": "EV-AUX-MINGGONG-005",
+      "sourceId": "san-ming-tong-hui",
+      "ruleIds": ["AUX_CANONICAL_PALM_001"],
+      "edition": "wikisource-san-ming-tong-hui",
+      "locator": {
+        "type": "section",
+        "section": "卷二〈論坐命官〉",
+        "page": null,
+        "url": "https://zh.wikisource.org/zh-hant/三命通會/卷二",
+        "accessedAt": "2026-09-09"
+      },
+      "originalExcerpt": "此法看是何月生人坐於何時，然後方定命坐何宮。",
+      "transcription": "命宮算法以出生月支與時支為基礎，再依五虎遁取命宮天干。",
+      "ocrNotes": "此為數位轉錄，無 OCR 影像層。",
+      "collationNotes": "完整掌訣、起法與不同術派算法尚未全部對讀；canonical 公式與研究 Profile 分離。",
+      "verificationStatus": "source-located",
+      "variants": [{"id": "san-ming-palm-research", "note": "預留完整變體研究，不覆蓋 canonical。"}],
+      "researchNotes": "此證據只支援月時取命宮的來源方向，不宣稱目前公式是唯一傳承。"
+    },
+    {
+      "evidenceId": "EV-LUCK-006",
+      "sourceId": "san-ming-tong-hui",
+      "ruleIds": ["LUCK_START_DIFF_DIV_3"],
+      "edition": "wikisource-san-ming-tong-hui",
+      "locator": {
+        "type": "section",
+        "section": "卷二〈論大運〉",
+        "page": null,
+        "url": "https://zh.wikisource.org/zh-hant/三命通會/卷二",
+        "accessedAt": "2026-09-09"
+      },
+      "originalExcerpt": "古人以大運則一辰十歲，折除以三日為年者何？",
+      "transcription": "大運起運的節氣距離與三日一歲換算，保留為可追溯方法。",
+      "ocrNotes": "此為數位轉錄，無 OCR 影像層。",
+      "collationNotes": "不同起運折算法另以 luckCycles.variants 保存，不在此條文下假定唯一。",
+      "verificationStatus": "source-located",
+      "variants": [{"id": "jieqi-whole-days-divide-3", "note": "節氣差先取整日再除三的比較方法。"}],
+      "researchNotes": "古籍引文與本 SDK 實作方法需保持可區分。"
+    }
+  ]
+}

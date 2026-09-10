@@ -17,7 +17,22 @@ export const XUN_KONGWANG = [
 ];
 
 export function getKongWang(sexagenaryIdx) {
+  return getKongWangInfo(sexagenaryIdx).branches;
+}
+
+// 回傳可追溯的旬空紀錄；getKongWang 仍保留原本只回傳地支陣列的相容 API。
+export function getKongWangInfo(sexagenaryIdx) {
   const i = ((sexagenaryIdx % 60) + 60) % 60;
   const xun = XUN_KONGWANG.find(x => i >= x.start && i <= x.end);
-  return xun ? xun.kong : [];
+  return xun ? {
+    xunName: xun.name,
+    xunStart: xun.start,
+    xunEnd: xun.end,
+    branches: [...xun.kong]
+  } : {
+    xunName: null,
+    xunStart: null,
+    xunEnd: null,
+    branches: []
+  };
 }

@@ -15,7 +15,7 @@
     "version": {"type": "string"},
     "rules": {
       "type": "object",
-      "required": ["yearBoundary", "monthBoundary", "dayBoundary", "trueSolarTime", "luckCycle", "strength"],
+      "required": ["yearBoundary", "monthBoundary", "dayBoundary", "trueSolarTime", "luckCycle", "strength", "analysis"],
       "properties": {
         "yearBoundary": {"$ref": "#/$defs/valueRule"},
         "monthBoundary": {"$ref": "#/$defs/valueRule"},
@@ -26,7 +26,30 @@
           "required": ["directionRule", "startAgeMethod"],
           "properties": {"directionRule": {"$ref": "#/$defs/valueRule"}, "startAgeMethod": {"$ref": "#/$defs/valueRule"}}
         },
-        "strength": {"type": "object", "required": ["ruleId", "version"]}
+        "strength": {
+          "type": "object",
+          "required": ["ruleId", "version"],
+          "properties": {
+            "deLingWeight": {"type": "number"},
+            "deDiWeight": {"type": "number"},
+            "deShiWeight": {"type": "number"},
+            "categoryMethod": {"type": "string"},
+            "ruleId": {"type": "string"},
+            "version": {"type": "string"}
+          }
+        },
+        "analysis": {
+          "type": "object",
+          "required": ["monthCommander", "auxiliary", "useGod", "seasonal", "mediator", "patterns"],
+          "properties": {
+            "monthCommander": {"$ref": "#/$defs/valueRule"},
+            "auxiliary": {"$ref": "#/$defs/valueRule"},
+            "useGod": {"$ref": "#/$defs/valueRule"},
+            "seasonal": {"$ref": "#/$defs/valueRule"},
+            "mediator": {"$ref": "#/$defs/valueRule"},
+            "patterns": {"$ref": "#/$defs/valueRule"}
+          }
+        }
       }
     },
     "diff": {"type": "object"},

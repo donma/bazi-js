@@ -161,6 +161,62 @@ function init() {
   document.getElementById('copy-json-btn').addEventListener('click', copyJson);
   document.getElementById('copy-ai-btn').addEventListener('click', copyAiContext);
 
+  // 神煞介紹：所有已註冊神煞都使用文字 tooltip，避免額外增加畫面雜訊。
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-shensha-info]');
+    if (button) {
+      event.preventDefault();
+      const wrapper = button.closest('.shensha-info');
+      document.querySelectorAll('.shensha-info.is-open').forEach((item) => {
+        if (item !== wrapper) {
+          item.classList.remove('is-open');
+          item.querySelector('[data-shensha-info]')?.setAttribute('aria-expanded', 'false');
+        }
+      });
+      const isOpen = wrapper?.classList.toggle('is-open') || false;
+      button.setAttribute('aria-expanded', String(isOpen));
+      if (isOpen) positionShenShaTooltip(wrapper);
+      return;
+    }
+    if (!event.target.closest('.shensha-info')) {
+      document.querySelectorAll('.shensha-info.is-open').forEach((item) => {
+        item.classList.remove('is-open');
+        item.querySelector('[data-shensha-info]')?.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    const trigger = event.target.closest?.('[data-shensha-info]');
+    if (trigger && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      trigger.click();
+      return;
+    }
+    if (event.key === 'Escape') {
+      document.querySelectorAll('.shensha-info.is-open').forEach((item) => {
+        item.classList.remove('is-open');
+        item.querySelector('[data-shensha-info]')?.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  document.addEventListener('pointerover', (event) => {
+    const wrapper = event.target.closest?.('.shensha-info');
+    if (wrapper) positionShenShaTooltip(wrapper);
+  });
+
+  document.addEventListener('focusin', (event) => {
+    const wrapper = event.target.closest?.('.shensha-info');
+    if (wrapper) positionShenShaTooltip(wrapper);
+  });
+
+  const repositionOpenTooltips = () => {
+    document.querySelectorAll('.shensha-info.is-open').forEach(positionShenShaTooltip);
+  };
+  window.addEventListener('resize', repositionOpenTooltips);
+  window.addEventListener('scroll', repositionOpenTooltips, true);
+
   // 初始執行一次
   runCalculation();
 }
@@ -212,13 +268,11 @@ function updateRender() {
   const preset = document.getElementById('preset-select').value;
 
   const chartContainer = document.getElementById('chart-container');
-  const chartHint = document.querySelector('.chart-hint');
   chartContainer.classList.toggle('is-responsive-preview', responsivePreview);
   document.body.classList.toggle('theme-dark-preview', theme === 'dark');
 
   if (responsivePreview) {
     chartContainer.innerHTML = renderResponsivePreview(currentResult, { theme, preset });
-    chartHint.textContent = '直式閱讀版：文字不縮放、無需水平捲軸；SVG／PNG 下載會保留同一份完整資料。';
   } else {
     const svgStr = Bazi.Renderer.render(currentResult, {
       format: 'svg',
@@ -226,7 +280,6 @@ function updateRender() {
       preset
     });
     chartContainer.innerHTML = svgStr;
-    chartHint.textContent = '窄螢幕會自動換行，文字保持清楚，不需要水平捲軸。';
   }
   document.getElementById('json-output').textContent = JSON.stringify(getExportResult(), null, 2);
 }
@@ -295,6 +348,44 @@ function displayText(value, fallback = '—') {
   return escapeHtml(value === undefined || value === null || value === '' ? fallback : value);
 }
 
+function positionShenShaTooltip(wrapper) {
+  const trigger = wrapper?.querySelector('[data-shensha-info]');
+  const tooltip = wrapper?.querySelector('.shensha-info-tooltip');
+  if (!trigger || !tooltip) return;
+
+  const margin = 16;
+  const width = Math.min(260, Math.max(0, window.innerWidth - (margin * 2)));
+  const triggerRect = trigger.getBoundingClientRect();
+  const height = tooltip.offsetHeight;
+  let left = triggerRect.left + (triggerRect.width / 2) - (width / 2);
+  let top = triggerRect.bottom + 8;
+  let isAbove = false;
+
+  left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+  if (height && top + height > window.innerHeight - margin && triggerRect.top - height - 8 >= margin) {
+    top = triggerRect.top - height - 8;
+    isAbove = true;
+  }
+
+  tooltip.style.width = `${width}px`;
+  tooltip.style.left = `${Math.round(left)}px`;
+  tooltip.style.top = `${Math.round(top)}px`;
+  tooltip.classList.toggle('is-above', isAbove);
+}
+
+function renderShenShaInfo(item, categoryClass) {
+  const displayName = item.displayName || item.name || '神煞';
+  const escapedName = displayText(displayName);
+  const escapedId = displayText(item.id);
+  return `<span class="shensha-info">
+    <strong class="shensha-info-trigger ${categoryClass}" role="button" tabindex="0" data-shensha-info="${escapedId}" aria-expanded="false" aria-label="查看${escapedName}介紹">${escapedName}</strong>
+    <span class="shensha-info-tooltip" role="tooltip">
+      <strong>${escapedName}</strong>
+      <span>${displayText(item.interpretation || '此神煞的傳統象意摘要尚待整理。')}</span>
+    </span>
+  </span>`;
+}
+
 const PILLAR_LABELS = { year: '年柱', month: '月柱', day: '日柱', hour: '時柱' };
 const BASE_LABELS = {
   yearStem: '年干',
@@ -326,9 +417,10 @@ function formatBasedOn(basedOn) {
   return (basedOn || []).map((value) => BASE_LABELS[value] || value).join('、');
 }
 
-function formatShenSha(list, limit = 14) {
+function formatShenSha(list, limit = 14, options = {}) {
+  const showHitOn = options.showHitOn !== false;
   const names = (list || []).slice(0, limit).map((item) => {
-    const hitOn = Array.isArray(item.hitOn) && item.hitOn.length ? `（${formatHitOn(item.hitOn)}）` : '';
+    const hitOn = showHitOn && Array.isArray(item.hitOn) && item.hitOn.length ? `（${formatHitOn(item.hitOn)}）` : '';
     return `${item.displayName || item.name || ''}${hitOn}`;
   });
   if (!names.length) return '—';
@@ -336,14 +428,38 @@ function formatShenSha(list, limit = 14) {
   return `${names.join('、 ')}${suffix}`;
 }
 
-function formatSpecialRules(list) {
-  if (!list || !list.length) return '— 本命盤沒有命中特殊柱位或季節條件';
-  return list.map((item) => {
-    const evidence = item.evidence || {};
-    const basis = formatBasedOn(item.baseOn || item.basedOn);
-    const season = evidence.season ? `季節：${evidence.season === 'spring' ? '春' : evidence.season === 'summer' ? '夏' : evidence.season === 'autumn' ? '秋' : '冬'}（月令${evidence.monthBranch || '—'}）` : '';
-    const target = evidence.targetValue ? `命中：${evidence.targetValue}` : '';
-    return `${item.name || item.displayName || ''}（${basis}）${[target, season].filter(Boolean).join('，')}`;
+function renderShenShaInline(list, limit = 14, options = {}) {
+  const showHitOn = options.showHitOn !== false;
+  const items = (list || []).slice(0, limit);
+  if (!items.length) return '—';
+  const rendered = items.map((item) => {
+    const categoryClass = item.category === 'auspicious'
+      ? 'is-auspicious'
+      : item.category === 'inauspicious'
+        ? 'is-inauspicious'
+        : item.category === 'neutral'
+          ? 'is-neutral'
+          : '';
+    const hitOn = showHitOn && Array.isArray(item.hitOn) && item.hitOn.length
+      ? `（${formatHitOn(item.hitOn)}）`
+      : '';
+    return `<span class="responsive-inline-shensha ${categoryClass}">${renderShenShaInfo(item, categoryClass)}${hitOn ? `<small>${displayText(hitOn)}</small>` : ''}</span>`;
+  });
+  const suffix = (list || []).length > limit ? `……（共${list.length}顆）` : '';
+  return `${rendered.join('、 ')}${displayText(suffix, '')}`;
+}
+
+function formatSpecialRulesInline(list) {
+  return (list || []).map((item) => {
+    const category = SHENSHA_CATEGORY_LABELS[item.category] || item.category || '—';
+    const categoryClass = item.category === 'auspicious'
+      ? 'is-auspicious'
+      : item.category === 'inauspicious'
+        ? 'is-inauspicious'
+        : item.category === 'neutral'
+          ? 'is-neutral'
+          : '';
+    return `<span class="responsive-inline-special-rule ${categoryClass}">${renderShenShaInfo(item, categoryClass)}<small class="${categoryClass}">（${displayText(category)}）</small></span>`;
   }).join('、 ');
 }
 
@@ -370,16 +486,20 @@ function renderPillarShenSha(items) {
           ? 'is-neutral'
           : '';
     const confidence = SHENSHA_CONFIDENCE_LABELS[item.confidence] || item.confidence || '—';
-    const evidence = (item.evidence && item.evidence.details || []).map((detail) => {
+    const evidenceDetails = [
+      item.basedOn?.length ? `基準：${formatBasedOn(item.basedOn)}` : '',
+      item.reference ? `依據：${item.reference}` : '',
+      ...(item.evidence && item.evidence.details || []).map((detail) => {
       const base = detail.baseValue ? `基準 ${detail.baseValue}` : '';
       const target = detail.targetValue ? `命中 ${detail.targetValue}` : '';
-      return `<li>${displayText([base, target, detail.reason].filter(Boolean).join(' · '), '符合規則')}</li>`;
-    }).join('');
+        return [base, target, detail.reason].filter(Boolean).join(' · ');
+      })
+    ].filter(Boolean);
+    const evidence = evidenceDetails.map((detail) => `<li>${displayText(detail, '符合規則')}</li>`).join('');
+    const evidenceLabel = `判定證據（${evidenceDetails.length} 筆）`;
     return `<li class="responsive-pillar-shensha-item ${categoryClass}">
-      <div class="responsive-shensha-name"><strong class="${categoryClass}">${displayText(item.displayName || item.name)}</strong><span class="${categoryClass}">${displayText(category)} · ${displayText(confidence)}</span></div>
-      <div class="responsive-shensha-meta">基準：${displayText(formatBasedOn(item.basedOn))}</div>
-      <div class="responsive-shensha-reference">依據：${displayText(item.reference, '未提供')}</div>
-      ${evidence ? `<details><summary>判定證據（${(item.evidence.details || []).length} 筆）</summary><ul>${evidence}</ul></details>` : ''}
+      <div class="responsive-shensha-name"><span class="responsive-shensha-title">${renderShenShaInfo(item, categoryClass)}</span><span class="${categoryClass}">${displayText(category)} · ${displayText(confidence)}</span></div>
+      ${evidence ? `<details><summary title="${displayText(evidenceLabel)}" aria-label="${displayText(evidenceLabel)}"><svg class="evidence-icon" aria-hidden="true" viewBox="0 0 16 16" focusable="false"><circle cx="6.5" cy="6.5" r="4"></circle><path d="m9.5 9.5 3.25 3.25"></path></svg><span class="evidence-count" aria-hidden="true">(${evidenceDetails.length})</span></summary><ul>${evidence}</ul></details>` : ''}
     </li>`;
   }).join('')}</ul>`;
 }
@@ -404,11 +524,12 @@ function renderResponsivePreview(result, options) {
 
   const p = result.pillars;
   const shenShaByPillar = Bazi.ShenSha.groupShenShaByPillar(result.shenSha || []);
+  // 傳統命盤由左至右為時、日、月、年；核心結果仍維持 year/month/day/hour。
   const pillarCols = [
-    { key: 'year', title: '年柱', data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year, selfStage: result.twelveStages.selfSeated.year },
-    { key: 'month', title: '月柱', data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month, selfStage: result.twelveStages.selfSeated.month },
+    { key: 'hour', title: '時柱', data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour, selfStage: result.twelveStages.selfSeated.hour },
     { key: 'day', title: '日柱', data: p.day, tenGod: { full: '日主' }, hidden: result.tenGods.hidden.day, nayin: result.nayin.day, stage: result.twelveStages.byDayMaster.day, selfStage: result.twelveStages.selfSeated.day },
-    { key: 'hour', title: '時柱', data: p.hour, tenGod: result.tenGods.stems.hour, hidden: result.tenGods.hidden.hour, nayin: result.nayin.hour, stage: result.twelveStages.byDayMaster.hour, selfStage: result.twelveStages.selfSeated.hour }
+    { key: 'month', title: '月柱', data: p.month, tenGod: result.tenGods.stems.month, hidden: result.tenGods.hidden.month, nayin: result.nayin.month, stage: result.twelveStages.byDayMaster.month, selfStage: result.twelveStages.selfSeated.month },
+    { key: 'year', title: '年柱', data: p.year, tenGod: result.tenGods.stems.year, hidden: result.tenGods.hidden.year, nayin: result.nayin.year, stage: result.twelveStages.byDayMaster.year, selfStage: result.twelveStages.selfSeated.year }
   ];
 
   const elementColors = theme.elementColors || {};
@@ -439,11 +560,25 @@ function renderResponsivePreview(result, options) {
   }).join('');
 
   const currentYear = new Date().getFullYear();
-  const visibleLuckCycles = result.luckCycles ? result.luckCycles.cycles.slice(0, 8) : [];
-  const currentLuckCycle = visibleLuckCycles.find((cycle) => currentYear >= Number(cycle.fromYear) && currentYear <= Number(cycle.toYear));
+  const birthYear = Number(String(result.input.birthDate || '').slice(0, 4));
+  const currentAge = Number.isInteger(birthYear) ? currentYear - birthYear + 1 : null;
+  const allLuckCycles = result.luckCycles ? result.luckCycles.cycles : [];
+  const currentLuckCycle = allLuckCycles.find((cycle) => currentYear >= Number(cycle.fromYear) && currentYear <= Number(cycle.toYear));
+  const visibleLuckCycles = currentLuckCycle && !allLuckCycles.slice(0, 8).includes(currentLuckCycle)
+    ? [...allLuckCycles.slice(0, 7), currentLuckCycle]
+    : allLuckCycles.slice(0, 8);
+  const beforeFirstLuckCycle = Boolean(allLuckCycles[0] && currentYear < Number(allLuckCycles[0].fromYear));
+  const currentTransitYear = result.transits && result.transits.year;
+  const currentTransitShenSha = result.transits && (result.transits.shenShaYear || (currentTransitYear && currentTransitYear.shenSha)) || [];
+  const currentTransitInteractions = result.transits && (result.transits.interactions || []).map((item) => item.description || item.name).filter(Boolean) || [];
+  const beforeLuckDetails = [
+    currentTransitInteractions.length ? `互動：${displayText(currentTransitInteractions.join('、'))}` : '',
+    currentTransitShenSha.length ? `神煞：${displayText(formatShenSha(currentTransitShenSha, 8))}` : ''
+  ].filter(Boolean).join('<br>');
   const luckCycles = preset.includeLuckCycles && result.luckCycles
     ? `<section class="responsive-section">
-        <h4>起運走勢 <span>（${displayText(result.luckCycles.directionText)} · ${displayText(result.luckCycles.startAge.display)}起運${currentLuckCycle ? ` · ${currentYear}年已自動展開` : ''}）</span></h4>
+        <h4>起運走勢 <span>（${displayText(result.luckCycles.directionText)} · ${displayText(result.luckCycles.startAge.display)}起運${currentLuckCycle ? ` · ${currentYear}年已自動展開` : beforeFirstLuckCycle ? ` · ${currentYear}年${currentAge}歲，尚未起運` : ''}）</span></h4>
+        ${beforeFirstLuckCycle ? `<article class="responsive-preluck-card is-current-year" aria-label="${currentYear}年目前${currentAge}歲，尚未起運"><div><span>目前歲數</span><strong>${displayText(currentAge)}歲</strong><em>${currentYear}年 · 尚未起運</em></div><div><span>目前流年</span><strong>${displayText(currentTransitYear && currentTransitYear.ganzhi)}</strong><em>${displayText(currentTransitYear && currentTransitYear.tenGod && (currentTransitYear.tenGod.full || currentTransitYear.tenGod.short))} · ${displayText(currentTransitYear && currentTransitYear.stage && currentTransitYear.stage.name)} · ${displayText(currentTransitYear && currentTransitYear.nayin)}</em></div>${beforeLuckDetails ? `<p>${beforeLuckDetails}</p>` : ''}</article>` : ''}
         <div class="responsive-luck-grid">${visibleLuckCycles.map((cycle) => {
           const isCurrentCycle = currentLuckCycle === cycle;
           return `<article class="${isCurrentCycle ? 'is-current-cycle' : ''}"${isCurrentCycle ? ` aria-label="${currentYear}年所在大運，已自動展開"` : ''}>
@@ -451,7 +586,7 @@ function renderResponsivePreview(result, options) {
           <strong>${displayText(cycle.ganzhi)}</strong>
           <small>${displayText(cycle.tenGodStem && cycle.tenGodStem.short)}</small>
           <em>${displayText(cycle.fromYear)}-${displayText(cycle.toYear)}</em>
-          <small class="responsive-luck-shensha">神煞：${displayText(formatShenSha(cycle.shenSha, 5))}</small>
+          <small class="responsive-luck-shensha">神煞：${displayText(formatShenSha(cycle.shenSha, 5, { showHitOn: false }))}</small>
           ${Array.isArray(cycle.annuals) ? `<details class="responsive-luck-annuals"${isCurrentCycle ? ' open' : ''}><summary>${isCurrentCycle ? `${currentYear}年所在大運 · ` : ''}展開逐年資料（${cycle.annuals.length} 年）</summary><div class="responsive-annual-list">${cycle.annuals.map((annual) => {
             const isCurrentYear = Number(annual.year) === currentYear;
             const interactionText = (annual.interactions || []).map((item) => item.description || item.name).filter(Boolean).join('、');
@@ -500,29 +635,11 @@ function renderResponsivePreview(result, options) {
     ? `<section class="responsive-section responsive-shensha">
         <h4>神煞吉凶與命宮身宮</h4>
         <div class="responsive-detail-list">
-          <div><strong>原局神煞</strong><p>${escapeHtml(formatShenSha(result.shenSha, 14))}</p></div>
-          <div><strong>流年神煞</strong><p>${escapeHtml(formatShenSha(result.transits && result.transits.shenShaYear, 10))}</p></div>
-          <div><strong>初運神煞</strong><p>${escapeHtml(formatShenSha(result.luckCycles && result.luckCycles.cycles[0] && result.luckCycles.cycles[0].shenSha, 10))}</p></div>
+          <div><strong>原局神煞</strong><p>${renderShenShaInline(result.shenSha, 14)}</p></div>
+          <div><strong>流年神煞</strong><p>${renderShenShaInline(result.transits && result.transits.shenShaYear, 10)}</p></div>
+          <div><strong>初運神煞</strong><p>${renderShenShaInline(result.luckCycles && result.luckCycles.cycles[0] && result.luckCycles.cycles[0].shenSha, 10, { showHitOn: false })}</p></div>
+          ${(result.specialRules || []).length ? `<div><strong>特殊條件</strong><p>${formatSpecialRulesInline(result.specialRules)}</p></div>` : ''}
           <div><strong>胎元命宮</strong><p>胎元：${displayText(result.auxiliary.taiYuan && result.auxiliary.taiYuan.ganzhi)} ｜ 胎息：${displayText(result.auxiliary.taiXi && result.auxiliary.taiXi.ganzhi)} ｜ 命宮：${displayText(result.auxiliary.mingGong && result.auxiliary.mingGong.ganzhi)} ｜ 身宮：${displayText(result.auxiliary.shenGong && result.auxiliary.shenGong.ganzhi)}</p></div>
-        </div>
-      </section>`
-    : '';
-
-  const specialRules = preset.includeShenSha
-    ? `<section class="responsive-section responsive-special-rules">
-        <h4>特殊柱位與季節條件</h4>
-        <div class="responsive-detail-list">
-          <div><strong>命中結果</strong><p>${escapeHtml(formatSpecialRules(result.specialRules))}</p></div>
-          ${(result.specialRules || []).map((item) => {
-            const evidence = item.evidence || {};
-            const season = evidence.season ? `季節：${evidence.season === 'spring' ? '春' : evidence.season === 'summer' ? '夏' : evidence.season === 'autumn' ? '秋' : '冬'}（月令${evidence.monthBranch || '—'}）` : '';
-            const evidenceText = [
-              `基準：${formatBasedOn(item.baseOn)}`,
-              evidence.targetValue ? `命中：${evidence.targetValue}` : '',
-              season,
-            ].filter(Boolean).join(' · ');
-            return `<div><strong>${displayText(item.name || item.displayName)}</strong><p>${displayText(evidenceText)}<br><small>${displayText(item.description, '—')}</small></p></div>`;
-          }).join('')}
         </div>
       </section>`
     : '';
@@ -544,12 +661,56 @@ function renderResponsivePreview(result, options) {
   const useGod = preset.includeStrength
     ? `<section class="responsive-section responsive-use-god">
         <h4>用神模型</h4>
-        <p class="responsive-model-note">以下為 BaziJS canonical 扶抑模型的可追溯摘要，不是 sample1 的固定斷語或醫療、財務建議。</p>
+        <p class="responsive-model-note">以下為 BaziJS 扶抑模型的可追溯摘要；此區僅呈現規則推導，不提供固定斷語或醫療、財務建議。</p>
         <div class="responsive-use-god-grid">
           <div><strong>扶助方向</strong><span>${displayText((result.strength.favorableElements || []).join('、'))}</span></div>
           <div><strong>忌仇方向</strong><span>${displayText((result.strength.unfavorableElements || []).join('、'))}</span></div>
           <div><strong>得令／得地／得勢</strong><span>${displayText([result.strength.deLing ? '得令' : '不得令', result.strength.deDi ? '得地' : '不得地', result.strength.deShi ? '得勢' : '不得勢'].join('、'))}</span></div>
           <div><strong>月令司令</strong><span>${displayText(result.strength.monthCommander ? `${result.strength.monthCommander.stem}${result.strength.monthCommander.element}（第${result.strength.monthCommander.phase}段）` : '—')}</span></div>
+        </div>
+        ${result.strength.fiveCategory ? `<div class="responsive-five-category-panel"><h5>用／喜／閒／仇／忌五分類</h5><div class="responsive-five-category-grid">${[
+          ['use', '用神'], ['joy', '喜神'], ['idle', '閒神'], ['adversary', '仇神'], ['taboo', '忌神']
+        ].map(([key, label]) => `<div><strong>${label}</strong><span>${displayText((result.strength.fiveCategory.groups[key] || []).join('、'))}</span></div>`).join('')}</div><p class="responsive-model-note">五分類依本次扶抑模型推導。</p></div>` : ''}
+      </section>`
+    : '';
+
+  const classicalData = result.classicalSummary;
+  const classicalFiveRows = classicalData?.fiveCategory?.rows || [];
+  const classicalMonth = classicalData?.monthCommand;
+  const classicalVoids = classicalData?.voids;
+  const classicalMatrix = classicalData?.auxiliary?.matrix || [];
+  const classicalSummary = preset.includeStrength && classicalData
+    ? `<section class="responsive-section responsive-classical-summary">
+        <h4>古典資料摘要</h4>
+        <p class="responsive-classical-summary-lead">${displayText([
+          classicalFiveRows.length ? `五分類 ${classicalFiveRows.length} 項` : '',
+          classicalMonth?.stem ? `人元司令 ${classicalMonth.stem}${classicalMonth.element || ''}` : '',
+          classicalVoids?.byDay ? `日空 ${classicalVoids.byDay.branches.join('、')}` : '',
+          classicalVoids?.byYear ? `年空 ${classicalVoids.byYear.branches.join('、')}` : '',
+          classicalMatrix.length ? `輔助宮位 ${classicalMatrix.length} 項` : ''
+        ].filter(Boolean).join(' · '))}</p>
+        <div class="responsive-classical-summary-grid">
+            <article>
+              <strong>用／喜／閒／仇／忌</strong>
+              <ul class="responsive-classical-category-list">${classicalFiveRows.map((item) => `<li><span>${displayText(item.label)}</span><b>${displayText(item.element)}</b></li>`).join('')}</ul>
+              <small>本次命盤的模型結果。</small>
+            </article>
+            <article>
+              <strong>人元用事</strong>
+              <p>${displayText(classicalMonth?.stem ? `${classicalMonth.stem}${classicalMonth.element || ''} · 第${classicalMonth.phase}段 · 節後${classicalMonth.elapsedDays}日` : '')}</p>
+              <small>藏干：${displayText((classicalMonth?.hiddenStems || []).map((item) => `${item.stem}${HIDDEN_ROLE_LABELS[item.role] || ''}${item.tenGod?.full ? `（${item.tenGod.full}）` : ''}`).join('、'))}</small>
+            </article>
+            <article>
+              <strong>日空／年空</strong>
+              <p>日空：${displayText(classicalVoids?.byDay?.xunName)} · ${displayText(classicalVoids?.byDay?.branches?.join('、'))}</p>
+              <p>年空：${displayText(classicalVoids?.byYear?.xunName)} · ${displayText(classicalVoids?.byYear?.branches?.join('、'))}</p>
+              <small>只呈現旬空與命中資料，不直接下吉凶斷語。</small>
+            </article>
+            <article>
+              <strong>輔助宮位矩陣</strong>
+              <ul class="responsive-classical-palace-list">${classicalMatrix.map((item) => `<li><span>${displayText(item.label)}</span><b>${displayText(item.ganzhi)}<small>${displayText(item.nayin)}</small></b></li>`).join('')}</ul>
+              <small>詳細資料已保留在匯出內容中。</small>
+            </article>
         </div>
       </section>`
     : '';
@@ -577,6 +738,7 @@ function renderResponsivePreview(result, options) {
     ['五行月令', result.strength.monthState ? result.strength.monthState.name : '—'],
     ['命宮', result.auxiliary.mingGong ? result.auxiliary.mingGong.ganzhi : '—'],
     ['身宮', result.auxiliary.shenGong ? result.auxiliary.shenGong.ganzhi : '—'],
+    ['命卦', result.auxiliary.mingGua ? `${result.auxiliary.mingGua.trigram.name}（${result.auxiliary.mingGua.groupName}）` : '—'],
     ['胎元', result.auxiliary.taiYuan ? result.auxiliary.taiYuan.ganzhi : '—'],
     ['胎息', result.auxiliary.taiXi ? result.auxiliary.taiXi.ganzhi : '—'],
     ['起運', result.luckCycles && result.luckCycles.startAge ? `${result.luckCycles.startAge.display}${result.luckCycles.startAge.startDateTime ? `（${result.luckCycles.startAge.startDateTime}）` : ''}` : '—'],
@@ -594,15 +756,15 @@ function renderResponsivePreview(result, options) {
       <h4>四柱主盤</h4>
       <div class="responsive-pillar-grid">${pillars}</div>
     </section>
-    ${specialRules}
     ${strength}
     ${useGod}
+    ${classicalSummary}
     ${luckCycles}
     ${transitSection}
     ${interactions}
     ${shenSha}
     <div class="responsive-watermark" aria-hidden="true">當麻實驗室 · github.com/donma/bazi-js</div>
-    <footer>BaziJS 開源命理引擎 · Apache-2.0 授權</footer>
+    <footer><a href="https://github.com/donma/bazi-js" target="_blank" rel="noopener noreferrer">BaziJS 開源命理引擎</a> · Apache-2.0 授權</footer>
   </div>`;
 }
 

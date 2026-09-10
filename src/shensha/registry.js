@@ -4,6 +4,7 @@
 import { SHENSHA_CATALOG } from './catalog.js';
 import { EXTENDED_SHENSHA } from './catalogs/extended/vnext.js';
 import { SHENSHA_CATEGORIES, SHENSHA_CONFIDENCES, SHENSHA_TIERS } from './constants.js';
+import { SHENSHA_INTERPRETATIONS } from './interpretations.js';
 
 const LEGACY_DISPLAY = {
   tao_hua: { displayName: '桃花（咸池）', aliases: ['咸池'] },
@@ -47,9 +48,16 @@ function normalizeLegacyRule(rule) {
   };
 }
 
+function withInterpretation(rule) {
+  return {
+    ...rule,
+    interpretation: rule.interpretation || SHENSHA_INTERPRETATIONS[rule.id] || ''
+  };
+}
+
 export const SHENSHA_REGISTRY = Object.freeze([
-  ...SHENSHA_CATALOG.map(normalizeLegacyRule),
-  ...EXTENDED_SHENSHA
+  ...SHENSHA_CATALOG.map(normalizeLegacyRule).map(withInterpretation),
+  ...EXTENDED_SHENSHA.map(withInterpretation)
 ]);
 
 export function validateShenShaRegistry(registry = SHENSHA_REGISTRY) {
@@ -69,6 +77,7 @@ export function validateShenShaRegistry(registry = SHENSHA_REGISTRY) {
     if (!SHENSHA_TIERS.includes(rule.tier)) errors.push(`${rule.id}: invalid tier`);
     if (!SHENSHA_CONFIDENCES.includes(rule.confidence)) errors.push(`${rule.id}: invalid confidence`);
     if (!Array.isArray(rule.baseOn) || rule.baseOn.length === 0) errors.push(`${rule.id}: baseOn is required`);
+    if (typeof rule.interpretation !== 'string' || !rule.interpretation.trim()) errors.push(`${rule.id}: interpretation is required`);
     if (typeof rule.match !== 'function') errors.push(`${rule.id}: match must be a function`);
     if (!rule.version) errors.push(`${rule.id}: version is required`);
     if (!Array.isArray(rule.references) || rule.references.length === 0) errors.push(`${rule.id}: references is required`);

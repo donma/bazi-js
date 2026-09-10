@@ -32,6 +32,7 @@ function buildShenShaItem(item, options = {}) {
     reference: item.reference,
     ...(Array.isArray(item.references) ? { references: item.references } : {}),
     ...(item.description ? { description: item.description } : {}),
+    ...(item.interpretation ? { interpretation: item.interpretation } : {}),
     ...(item.variants ? { variants: item.variants } : {}),
     ...(item.researchNotes ? { researchNotes: item.researchNotes } : {}),
     ...(includeEvidence ? { evidence: item.evidence } : {})
@@ -58,6 +59,7 @@ function buildSpecialRuleItem(item, options = {}) {
     reference: item.reference,
     ...(Array.isArray(item.references) ? { references: item.references } : {}),
     ...(item.description ? { description: item.description } : {}),
+    ...(item.interpretation ? { interpretation: item.interpretation } : {}),
     ...(item.variants ? { variants: item.variants } : {}),
     ...(item.researchNotes ? { researchNotes: item.researchNotes } : {}),
     ...(includeEvidence ? { evidence: item.evidence } : {})
@@ -146,12 +148,17 @@ export function toContext(result, options = {}) {
     metadata: {
       engine: 'BaziJS',
       engineVersion: result.meta.engineVersion,
-      resultSchemaVersion: result.meta.resultSchemaVersion || '2.0.0',
+      resultSchemaVersion: result.meta.resultSchemaVersion || '2.1.0',
       ruleSetVersion: result.meta.ruleSetVersion,
       profileId: result.meta.profileId,
       shenshaPreset: result.meta.shenshaPreset || 'classical',
       shenShaRuleVersion: result.meta.shenShaRuleVersion || '2.1.0',
-      specialRuleVersion: result.meta.specialRuleVersion || '1.0.0'
+      specialRuleVersion: result.meta.specialRuleVersion || '1.0.0',
+      fiveCategoryRuleVersion: result.meta.fiveCategoryRuleVersion || '1.0.0',
+      auxiliaryRuleVersion: result.meta.auxiliaryRuleVersion || '1.0.0',
+      classicalSummaryRuleVersion: result.meta.classicalSummaryRuleVersion || '1.0.0',
+      analysisRuleVersion: result.meta.analysisRuleVersion || '1.0.0',
+      luckRuleVersion: result.meta.luckRuleVersion || '1.0.0'
     },
 
     inputSummary: {
@@ -196,6 +203,7 @@ export function toContext(result, options = {}) {
       seasonalStates: result.strength.seasonalStates || {},
       favorableElements: result.strength.favorableElements,
       unfavorableElements: result.strength.unfavorableElements,
+      fiveCategory: result.strength.fiveCategory || null,
       ...(includeStrengthEvidence ? { strengthEvidence: result.strength.evidence } : {})
     },
 
@@ -210,8 +218,13 @@ export function toContext(result, options = {}) {
       taiYuan: result.auxiliary.taiYuan || null,
       taiXi: result.auxiliary.taiXi || null,
       mingGong: result.auxiliary.mingGong || null,
-      shenGong: result.auxiliary.shenGong || null
+      shenGong: result.auxiliary.shenGong || null,
+      mingGua: result.auxiliary.mingGua || null
     },
+
+    classicalSummary: result.classicalSummary || null,
+
+    analysis: result.analysis || null,
 
     rules: result.rules,
 
@@ -263,6 +276,9 @@ export function toContext(result, options = {}) {
       direction: result.luckCycles.directionText,
       startAge: result.luckCycles.startAge.display,
       startDate: result.luckCycles.startAge.startDate,
+      startAgeMethod: result.luckCycles.startAgeMethod,
+      startAgeDetails: result.luckCycles.startAge,
+      variants: result.luckCycles.variants || [],
       cycles: result.luckCycles.cycles.slice(0, maxLuckCycles).map(c => ({
         step: c.step,
         ganzhi: c.ganzhi,

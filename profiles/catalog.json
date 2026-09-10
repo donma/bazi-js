@@ -18,7 +18,8 @@
         "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"},
         "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"},
         "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
-        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "fuyi-canonical", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
       },
       "references": ["docs/references/rule-differences.md", "docs/architecture/quality-gates.md"]
     },
@@ -37,7 +38,8 @@
         "dayBoundary": {"value": "00:00", "ruleId": "DAY_BOUNDARY_MIDNIGHT_0000", "version": "1.0.0", "overridden": true},
         "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"},
         "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
-        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "fuyi-canonical", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
       },
       "diff": {"dayBoundary": {"from": "23:00", "to": "00:00"}},
       "references": ["docs/references/day-boundary.md", "docs/references/rule-differences.md"]
@@ -57,7 +59,8 @@
         "dayBoundary": {"value": "00:00", "ruleId": "DAY_BOUNDARY_MIDNIGHT_0000", "version": "1.0.0", "overridden": true},
         "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"},
         "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
-        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "fuyi-canonical", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
       },
       "diff": {"yearBoundary": {"from": "lichun", "to": "lunar_new_year"}, "monthBoundary": {"from": "jie", "to": "lunar_month"}, "dayBoundary": {"from": "23:00", "to": "00:00"}},
       "references": ["docs/references/rule-differences.md", "docs/references/four-pillars.md"]
@@ -77,10 +80,96 @@
         "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"},
         "trueSolarTime": {"value": true, "ruleId": "TRUE_SOLAR_TIME_ENABLED", "version": "1.0.0", "overridden": true},
         "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}},
-        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "fuyi-canonical", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
       },
       "diff": {"trueSolarTime": {"from": false, "to": true}},
       "references": ["docs/references/rule-differences.md", "docs/references/calendar.md"]
+    },
+    {
+      "id": "jieqi-whole-day",
+      "name": "節氣差整日換算比較",
+      "description": "保留 canonical 的節氣取節與順逆規則，但先取整日再以三日一歲換算；只作方法差異研究。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "comparison",
+      "baseId": "canonical",
+      "version": "1.0.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"},
+        "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"},
+        "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"},
+        "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"},
+        "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-whole-days-divide-3", "ruleId": "LUCK_START_DIFF_WHOLE_DAY_DIV_3", "version": "1.0.0", "overridden": true}},
+        "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "fuyi-canonical", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
+      },
+      "diff": {"startAgeMethod": {"from": "jieqi-diff-divide-3", "to": "jieqi-whole-days-divide-3"}},
+      "references": ["docs/references/special-systems.md", "docs/references/luck-cycle.md"]
+    },
+    {
+      "id": "classical-sanming",
+      "name": "《三命通會》人元分日比較",
+      "description": "只切換《三命通會》卷二人元司事分日表，其他規則仍承接 canonical。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "comparison",
+      "baseId": "canonical",
+      "version": "1.0.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"}, "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"}, "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"}, "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"}, "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}}, "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "san-ming-volume-2", "ruleId": "STR_MONTH_COMMANDER_SANMING_002", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "fuyi-canonical", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
+      },
+      "diff": {"analysis": {"monthCommander": {"from": "bazi-js-human-element", "to": "san-ming-volume-2"}}},
+      "references": ["sources/evidence-ledger.json", "docs/references/classical-special-rules.md"]
+    },
+    {
+      "id": "research-tiaohou",
+      "name": "調候研究 Profile",
+      "description": "標記調候與季節分析研究邊界，未完成前不覆寫 canonical 扶抑結果。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "research-only",
+      "baseId": "canonical",
+      "version": "0.1.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"}, "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"}, "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"}, "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"}, "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}}, "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "tiaohou-research", "ruleId": "ANALYSIS_TIAOHOU_RESEARCH_001", "version": "0.1.0"}, "seasonal": {"value": "tiaohou-research", "ruleId": "ANALYSIS_TIAOHOU_RESEARCH_001", "version": "0.1.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
+      },
+      "diff": {"analysis": {"useGod": {"from": "fuyi-canonical", "to": "tiaohou-research"}, "seasonal": {"from": "none", "to": "tiaohou-research"}}},
+      "references": ["docs/governance/authority-model.md", "sources/evidence-ledger.json"]
+    },
+    {
+      "id": "research-tongguan",
+      "name": "通關研究 Profile",
+      "description": "標記通關與介入五行研究邊界，未完成前不覆寫 canonical 結果。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "research-only",
+      "baseId": "canonical",
+      "version": "0.1.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"}, "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"}, "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"}, "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"}, "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}}, "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "tongguan-research", "ruleId": "ANALYSIS_TONGGUAN_RESEARCH_001", "version": "0.1.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "tongguan-research", "ruleId": "ANALYSIS_TONGGUAN_RESEARCH_001", "version": "0.1.0"}, "patterns": {"value": "research-registry", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
+      },
+      "diff": {"analysis": {"useGod": {"from": "fuyi-canonical", "to": "tongguan-research"}, "mediator": {"from": "none", "to": "tongguan-research"}}},
+      "references": ["docs/governance/authority-model.md", "sources/evidence-ledger.json"]
+    },
+    {
+      "id": "research-patterns",
+      "name": "古典特殊格研究 Profile",
+      "description": "只選取 Pattern 研究登錄，沒有完整成格與破格 predicate 時不宣告命中。",
+      "tradition": "classical-ziping",
+      "profileType": "comparison",
+      "status": "research-only",
+      "baseId": "canonical",
+      "version": "0.1.0",
+      "rules": {
+        "yearBoundary": {"value": "lichun", "ruleId": "YEAR_BOUNDARY_LICHUN", "version": "1.0.0"}, "monthBoundary": {"value": "jie", "ruleId": "MONTH_BOUNDARY_JIE", "version": "1.0.0"}, "dayBoundary": {"value": "23:00", "ruleId": "DAY_BOUNDARY_ZISHI_2300", "version": "1.0.0"}, "trueSolarTime": {"value": false, "ruleId": "TRUE_SOLAR_TIME_DISABLED", "version": "1.0.0"}, "luckCycle": {"directionRule": {"value": "gender-year-yinyang", "ruleId": "LUCK_DIR_GENDER_YINYANG", "version": "1.0.0"}, "startAgeMethod": {"value": "jieqi-diff-divide-3", "ruleId": "LUCK_START_DIFF_DIV_3", "version": "1.0.0"}}, "strength": {"deLingWeight": 40, "deDiWeight": 30, "deShiWeight": 30, "categoryMethod": "canonical-use-derived", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"},
+        "analysis": {"monthCommander": {"value": "bazi-js-human-element", "ruleId": "STR_MONTH_COMMANDER_001", "version": "1.0.0"}, "auxiliary": {"value": "canonical-palm", "ruleId": "AUX_CANONICAL_PALM_001", "version": "1.0.0"}, "useGod": {"value": "fuyi-canonical", "ruleId": "STR_CANONICAL_DEFAULT", "version": "1.0.0"}, "seasonal": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "mediator": {"value": "none", "ruleId": "ANALYSIS_NONE_001", "version": "1.0.0"}, "patterns": {"value": "patterns-research", "ruleId": "PATTERN_RESEARCH_ONLY_001", "version": "0.1.0"}}
+      },
+      "diff": {"analysis": {"patterns": {"from": "research-registry", "to": "patterns-research"}}},
+      "references": ["docs/governance/authority-model.md", "sources/evidence-ledger.json"]
     }
   ]
 }

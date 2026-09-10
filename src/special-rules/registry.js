@@ -1,5 +1,6 @@
 import { SPECIAL_RULE_VERSION } from '../rules/versions.js';
 import { SEASON_BRANCHES } from './context.js';
+import { SPECIAL_RULE_INTERPRETATIONS } from './interpretations.js';
 
 const CLASSICAL_ZIPING = 'classical-ziping';
 const DAY_PILLAR = 'day-pillar-special';
@@ -51,6 +52,11 @@ const JIU_CHOU = Object.freeze(['戊子', '戊午', '己卯', '己酉', '辛卯'
 const GU_LUAN = Object.freeze(['乙巳', '丁巳', '辛亥', '戊申', '甲寅', '丙午', '戊午', '壬子']);
 const YIN_YANG_CHA_CUO = Object.freeze(['丙子', '丁丑', '戊寅', '辛卯', '壬辰', '癸巳', '丙午', '丁未', '戊申', '辛酉', '壬戌', '癸亥']);
 const JIN_SHEN = Object.freeze(['癸酉', '己巳', '乙丑']);
+
+const withInterpretation = (rule) => ({
+  ...rule,
+  interpretation: rule.interpretation || SPECIAL_RULE_INTERPRETATIONS[rule.id] || ''
+});
 
 const PILLAR_RULES = [
   {
@@ -251,8 +257,8 @@ const SEASONAL_RULES = [
   }
 ];
 
-export const SPECIAL_PILLAR_RULES = Object.freeze(PILLAR_RULES);
-export const SEASONAL_SPECIAL_RULES = Object.freeze(SEASONAL_RULES);
-export const SPECIAL_RULE_REGISTRY = Object.freeze([...PILLAR_RULES, ...SEASONAL_RULES]);
+export const SPECIAL_PILLAR_RULES = Object.freeze(PILLAR_RULES.map(withInterpretation));
+export const SEASONAL_SPECIAL_RULES = Object.freeze(SEASONAL_RULES.map(withInterpretation));
+export const SPECIAL_RULE_REGISTRY = Object.freeze([...SPECIAL_PILLAR_RULES, ...SEASONAL_SPECIAL_RULES]);
 
 export { KUI_GANG, SHI_E_DA_BAI, RI_GUI, RI_DE, BA_ZHUAN, JIU_CHOU, GU_LUAN, YIN_YANG_CHA_CUO, JIN_SHEN };

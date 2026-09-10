@@ -29,6 +29,8 @@ import { RuleRegistry } from '../rules/rule-registry.js';
 import { toContext } from '../ai/index.js';
 import { VERSIONS } from '../rules/versions.js';
 import { BaziRuleError } from '../core/errors/index.js';
+import { buildClassicalSummary } from '../summary/index.js';
+import { buildAnalysisResult } from '../analysis/index.js';
 
 function formatTimezoneOffset(offsetHours) {
   const sign = offsetHours < 0 ? '-' : '+';
@@ -46,6 +48,7 @@ export function calculate(input, options = {}) {
   // 2. 解析 Rule Profile
   const profileId = input.profile || options.profile || 'canonical';
   const profile = RuleRegistry.require(profileId);
+  const analysisRules = profile.rules.analysis || {};
 
   // 3. 提取規則參數
   const yearBoundary = input.yearBoundary || profile.rules.yearBoundary.value;
@@ -129,11 +132,20 @@ export function calculate(input, options = {}) {
   const nayin = calculateChartNayin(pillars);
   const twelveStages = calculateChartTwelveStages(pillars);
   const kongWang = calculateChartKongWang(pillars);
-  const auxiliary = calculateChartAuxiliary(pillars);
+  const auxiliary = calculateChartAuxiliary(pillars, {
+    solarYear: calcYear,
+    yearPillar: pillars.year,
+    gender: input.gender,
+    yearBoundary,
+    auxiliaryModel: analysisRules.auxiliary?.value
+  });
   const interactions = calculateInteractions(pillars);
   const strength = calculateStrength(pillars, interactions, {
     currentJD,
-    prevJie: surroundingJieInfo.prevJie
+    prevJie: surroundingJieInfo.prevJie,
+    fiveCategoryMethod: profile.rules.strength.categoryMethod,
+    monthCommanderModel: analysisRules.monthCommander?.value,
+    useGodModel: analysisRules.useGod?.value
   });
   const shenshaPreset = input.shenshaPreset || input.shenShaPreset || options.shenshaPreset || options.shenShaPreset || 'classical';
   if (!['minimal', 'classical', 'full'].includes(shenshaPreset)) {
@@ -173,7 +185,9 @@ export function calculate(input, options = {}) {
   });
 
   // 10. 當期流年/流月運勢計算（以當前或指定時刻）
-  const transitDate = options.transitDatetime || `${inYear}-06-01T12:00:00${formatTimezoneOffset(timezoneOffsetHours)}`;
+  const now = new Date();
+  const currentTransitDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T12:00:00${formatTimezoneOffset(timezoneOffsetHours)}`;
+  const transitDate = options.transitDatetime || currentTransitDate;
   const transits = calculateTransit(pillars, {
     datetime: transitDate,
     yearBoundary,
@@ -201,6 +215,8 @@ export function calculate(input, options = {}) {
       ...VERSIONS,
       profileId: profile.id,
       profileName: profile.name,
+      profileStatus: profile.status || (profile.id === 'canonical' ? 'default' : 'custom'),
+      profileVersion: profile.version,
       shenshaPreset
     },
 
@@ -310,6 +326,7 @@ export function calculate(input, options = {}) {
     auxiliary,
     interactions,
     strength,
+    analysis: buildAnalysisResult({ profile, strength, auxiliary }),
     shenSha,
     specialRules,
     luckCycles,
@@ -321,12 +338,26 @@ export function calculate(input, options = {}) {
         appliedRule(profile.rules.monthBoundary, monthBoundary, input.monthBoundary !== undefined, `MONTH_BOUNDARY_${monthBoundary.toUpperCase()}`),
         appliedRule(profile.rules.dayBoundary, dayBoundary, input.dayBoundary !== undefined, dayBoundary === '00:00' ? 'DAY_BOUNDARY_MIDNIGHT_0000' : 'DAY_BOUNDARY_ZISHI_2300'),
         profile.rules.luckCycle.directionRule,
-        profile.rules.luckCycle.startAgeMethod
+        profile.rules.luckCycle.startAgeMethod,
+        {
+          ruleId: profile.rules.strength.ruleId,
+          version: profile.rules.strength.version,
+          categoryMethod: profile.rules.strength.categoryMethod
+        },
+        ...Object.entries(profile.rules.analysis || {}).map(([dimension, profileRule]) => ({
+          ...profileRule,
+          domain: 'analysis',
+          dimension,
+          value: profileRule.value
+        }))
       ]
     },
 
     debug: options.debug ? pillars.debug : undefined
   };
+
+  // 2/3/4 共用的完整資料摘要：在 result 建立後組裝，確保摘要與畫面及匯出使用同一份結果。
+  result.classicalSummary = buildClassicalSummary(result);
 
   return result;
 }

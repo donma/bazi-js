@@ -55,8 +55,19 @@ export const CANONICAL_PROFILE = {
       deLingWeight: 40,
       deDiWeight: 30,
       deShiWeight: 30,
+      categoryMethod: 'canonical-use-derived',
       ruleId: 'STR_CANONICAL_DEFAULT',
       version: '1.0.0'
+    },
+
+    // 分析模型選擇：研究模型可以被 Profile 指定，但未完成時不覆寫 canonical 結果。
+    analysis: {
+      monthCommander: { value: 'bazi-js-human-element', ruleId: 'STR_MONTH_COMMANDER_001', version: '1.0.0' },
+      auxiliary: { value: 'canonical-palm', ruleId: 'AUX_CANONICAL_PALM_001', version: '1.0.0' },
+      useGod: { value: 'fuyi-canonical', ruleId: 'STR_CANONICAL_DEFAULT', version: '1.0.0' },
+      seasonal: { value: 'none', ruleId: 'ANALYSIS_SEASONAL_NONE_001', version: '1.0.0' },
+      mediator: { value: 'none', ruleId: 'ANALYSIS_MEDIATOR_NONE_001', version: '1.0.0' },
+      patterns: { value: 'research-registry', ruleId: 'PATTERN_RESEARCH_ONLY_001', version: '0.1.0' }
     }
   }
 };

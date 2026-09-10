@@ -5,10 +5,12 @@
 import { CANONICAL_PROFILE } from './profiles/canonical.js';
 import { BUILTIN_PROFILES, PROFILE_CATALOG } from './profiles/catalog.js';
 import { BaziRuleError } from '../core/errors/index.js';
+import { ANALYSIS_DIMENSIONS, ANALYSIS_MODEL_IDS, getAnalysisRuleId, validateAnalysisProfileRules } from '../analysis/index.js';
 
 const VALID_YEAR_BOUNDARIES = new Set(['lichun', 'lunar_new_year']);
 const VALID_MONTH_BOUNDARIES = new Set(['jie', 'lunar_month']);
 const VALID_DAY_BOUNDARIES = new Set(['23:00', '00:00']);
+const VALID_START_AGE_METHODS = new Set(['jieqi-diff-divide-3', 'jieqi-whole-days-divide-3']);
 
 function validateProfile(profile) {
   const errors = [];
@@ -27,6 +29,10 @@ function validateProfile(profile) {
   if (profile?.rules?.trueSolarTime && typeof profile.rules.trueSolarTime.value !== 'boolean') {
     errors.push('rules.trueSolarTime.value must be boolean');
   }
+  if (profile?.rules?.luckCycle?.startAgeMethod && !VALID_START_AGE_METHODS.has(profile.rules.luckCycle.startAgeMethod.value)) {
+    errors.push('rules.luckCycle.startAgeMethod.value is invalid');
+  }
+  errors.push(...validateAnalysisProfileRules(profile));
   return errors;
 }
 
@@ -118,6 +124,36 @@ class ProfileRegistry {
           overridden: true
         };
         newProfile.diff[key] = { from: baseProfile.rules.monthBoundary.value, to: val };
+      } else if (key === 'startAgeMethod') {
+        if (!VALID_START_AGE_METHODS.has(val)) throw new BaziRuleError(`無效 startAgeMethod：${val}`, 'PROFILE_OVERRIDE_INVALID', { key, value: val });
+        newProfile.rules.luckCycle.startAgeMethod = {
+          value: val,
+          ruleId: val === 'jieqi-whole-days-divide-3' ? 'LUCK_START_DIFF_WHOLE_DAY_DIV_3' : 'LUCK_START_DIFF_DIV_3',
+          version: '1.0.0',
+          overridden: true
+        };
+        newProfile.diff[key] = { from: baseProfile.rules.luckCycle.startAgeMethod.value, to: val };
+      } else if (key === 'analysis') {
+        if (!val || typeof val !== 'object' || Array.isArray(val)) {
+          throw new BaziRuleError('analysis 覆寫必須是 dimension → modelId 物件', 'PROFILE_OVERRIDE_INVALID', { key, value: val });
+        }
+        for (const [dimension, modelId] of Object.entries(val)) {
+          if (!ANALYSIS_DIMENSIONS.includes(dimension)) {
+            throw new BaziRuleError(`不支援的 analysis 維度：${dimension}`, 'PROFILE_OVERRIDE_INVALID', { key, dimension });
+          }
+          if (!ANALYSIS_MODEL_IDS[dimension].includes(modelId)) {
+            throw new BaziRuleError(`無效 analysis model：${dimension}=${modelId}`, 'PROFILE_OVERRIDE_INVALID', { key, dimension, value: modelId });
+          }
+          const baseRule = newProfile.rules.analysis[dimension];
+          newProfile.rules.analysis[dimension] = {
+            value: modelId,
+            ruleId: getAnalysisRuleId(modelId, dimension),
+            version: modelId.endsWith('-research') || modelId === 'research-registry' ? '0.1.0' : '1.0.0',
+            overridden: true
+          };
+          newProfile.diff.analysis ||= {};
+          newProfile.diff.analysis[dimension] = { from: baseRule.value, to: modelId };
+        }
       } else {
         throw new BaziRuleError(`不支援的 Profile 覆寫欄位：${key}`, 'PROFILE_OVERRIDE_UNSUPPORTED', { key });
       }

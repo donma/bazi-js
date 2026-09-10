@@ -13,6 +13,9 @@ import * as ShenSha from './shensha/index.js';
 import * as SpecialRules from './special-rules/index.js';
 import * as Patterns from './patterns/index.js';
 import * as Strength from './strength/index.js';
+import * as Auxiliary from './auxiliary/index.js';
+import * as Summary from './summary/index.js';
+import * as Analysis from './analysis/index.js';
 import * as Luck from './luck/index.js';
 import * as Transit from './transit/index.js';
 import * as AI from './ai/index.js';
@@ -38,6 +41,9 @@ export {
   SpecialRules,
   Patterns,
   Strength,
+  Auxiliary,
+  Summary,
+  Analysis,
   Luck,
   Transit,
   AI,
@@ -55,7 +61,11 @@ const Bazi = {
     shenSha: { version: VERSIONS.shenShaRuleVersion },
     specialRules: { version: VERSIONS.specialRuleVersion },
     patterns: { version: VERSIONS.patternRuleVersion },
-    strength: { version: VERSIONS.strengthRuleVersion }
+    strength: { version: VERSIONS.strengthRuleVersion, fiveCategoryVersion: VERSIONS.fiveCategoryRuleVersion },
+    auxiliary: { version: VERSIONS.auxiliaryRuleVersion },
+    classicalSummary: { version: VERSIONS.classicalSummaryRuleVersion },
+    analysis: { version: VERSIONS.analysisRuleVersion },
+    luck: { version: VERSIONS.luckRuleVersion }
   },
   calculate,
   calculateSafe,
@@ -72,6 +82,9 @@ const Bazi = {
   SpecialRules,
   Patterns,
   Strength,
+  Auxiliary,
+  Summary,
+  Analysis,
   Luck,
   Transit,
   AI,

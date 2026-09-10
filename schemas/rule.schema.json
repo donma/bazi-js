@@ -19,6 +19,7 @@
     "version": {"type": "string"},
     "references": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["title", "locator"]}},
     "description": {"type": "string"},
+    "interpretation": {"type": "string"},
     "match": {"type": "object", "required": ["kind"], "properties": {"kind": {"type": "string"}, "expression": {"type": "string"}}},
     "evidence": {"type": "object", "required": ["kind"], "properties": {"kind": {"type": "string"}, "fields": {"type": "array"}}},
     "variants": {"type": "array"},

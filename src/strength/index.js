@@ -17,6 +17,9 @@ import { STEMS, STEM_INDEX } from '../core/constants/stems.js';
 import { BRANCHES, BRANCH_INDEX } from '../core/constants/branches.js';
 import { getHiddenStems } from '../core/constants/hidden-stems-data.js';
 import { elementRelation, ELEMENTS } from '../core/constants/elements.js';
+import { calculateFiveElementCategories, FIVE_CATEGORY_METHOD } from './five-category.js';
+
+export { calculateFiveElementCategories, FIVE_CATEGORY_METHOD } from './five-category.js';
 
 // 月令五行旺衰係數（旺=1.0, 相=0.8, 休=0.4, 囚=0.2, 死=0.1）
 // 寅卯月：木旺、火相、水休、金囚、土死
@@ -65,8 +68,28 @@ export const MONTH_COMMAND_PHASES = Object.freeze({
   '丑': [{ stem: '癸', days: 9 }, { stem: '辛', days: 3 }, { stem: '己', days: 18 }]
 });
 
-export function calculateMonthCommander(monthBranch, elapsedDays) {
-  const phases = MONTH_COMMAND_PHASES[monthBranch];
+// 《三命通會》卷二〈論人元司事〉的另一套分日表。
+// 它與 BaziJS 既有的「月令人元」細分不同，故保留為可切換的 comparison model，
+// 不覆蓋 canonical，也不宣稱傳本之間沒有差異。
+export const SAN_MING_MONTH_COMMAND_PHASES = Object.freeze({
+  '寅': [{ stem: '戊', days: 5 }, { stem: '丙', days: 5 }, { stem: '甲', days: 20 }],
+  '卯': [{ stem: '甲', days: 7 }, { stem: '乙', days: 23 }],
+  '辰': [{ stem: '乙', days: 7 }, { stem: '癸', days: 5 }, { stem: '戊', days: 18 }],
+  '巳': [{ stem: '戊', days: 7 }, { stem: '庚', days: 5 }, { stem: '丙', days: 18 }],
+  '午': [{ stem: '丙', days: 7 }, { stem: '丁', days: 23 }],
+  '未': [{ stem: '丁', days: 7 }, { stem: '甲', days: 5 }, { stem: '己', days: 18 }],
+  '申': [{ stem: '戊', days: 5 }, { stem: '壬', days: 5 }, { stem: '庚', days: 20 }],
+  '酉': [{ stem: '庚', days: 7 }, { stem: '辛', days: 23 }],
+  '戌': [{ stem: '辛', days: 7 }, { stem: '丁', days: 5 }, { stem: '戊', days: 18 }],
+  '亥': [{ stem: '戊', days: 5 }, { stem: '甲', days: 5 }, { stem: '壬', days: 20 }],
+  '子': [{ stem: '壬', days: 7 }, { stem: '癸', days: 23 }],
+  '丑': [{ stem: '癸', days: 7 }, { stem: '庚', days: 5 }, { stem: '己', days: 18 }]
+});
+
+export function calculateMonthCommander(monthBranch, elapsedDays, options = {}) {
+  const modelId = options.model || 'bazi-js-human-element';
+  const isSanMing = modelId === 'san-ming-volume-2';
+  const phases = (isSanMing ? SAN_MING_MONTH_COMMAND_PHASES : MONTH_COMMAND_PHASES)[monthBranch];
   if (!phases || !Number.isFinite(elapsedDays)) return null;
 
   const wholeDays = Math.max(0, Math.floor(elapsedDays));
@@ -83,6 +106,17 @@ export function calculateMonthCommander(monthBranch, elapsedDays) {
   const phase = phases[phaseIndex];
   const stem = STEMS[STEM_INDEX[phase.stem]];
   return {
+    method: isSanMing ? 'san-ming-tong-hui-volume-2' : 'human-element-month-commander',
+    modelId,
+    ruleId: isSanMing ? 'STR_MONTH_COMMANDER_SANMING_002' : 'STR_MONTH_COMMANDER_001',
+    version: '1.0.0',
+    tradition: 'classical-ziping',
+    conceptType: 'seasonal-derived',
+    ruleFamily: 'month-commander',
+    baseOn: ['monthPillar.branch', 'solarTerms.prevJie', 'hiddenStems.month'],
+    scope: 'seasonal-month',
+    category: 'month-command',
+    confidence: isSanMing ? 'classical-variant' : 'school-specific',
     stem: phase.stem,
     element: stem ? stem.element : null,
     monthBranch,
@@ -91,7 +125,43 @@ export function calculateMonthCommander(monthBranch, elapsedDays) {
     phaseCount: phases.length,
     phaseDays: phase.days,
     phases: phases.map((item) => ({ ...item })),
-    algorithm: 'jie-after-whole-days'
+    algorithm: 'jie-after-whole-days',
+    references: [
+      {
+        sourceId: 'san-ming-tong-hui',
+        title: '《三命通會》',
+        locator: '卷二〈論人元司事〉、〈論四時節氣〉',
+        url: 'https://zh.wikisource.org/zh-hant/三命通會/卷二'
+      },
+      {
+        sourceId: 'di-tian-sui-yan-wei',
+        title: '《滴天髓闡微》',
+        locator: '月令／人元司令相關注解',
+        url: 'https://zh.wikisource.org/zh-hant/滴天髓闡微'
+      }
+    ],
+    variants: [
+      { id: 'phase-table', description: '人元司令分日表在不同傳本、註家間可能不同。' },
+      { id: 'jie-day-rounding', description: '節後經過日數可採整日、含起日或精確時刻，會影響分段邊界。' },
+      ...(isSanMing ? [{ id: 'bazi-js-human-element', description: 'BaziJS canonical 仍採既有 MONTH_COMMAND_PHASES，供逐案比較。' }] : [{ id: 'san-ming-volume-2', description: '《三命通會》卷二人元司事表，作為文獻比較變體。' }])
+    ],
+    researchNotes: {
+      conflict: isSanMing,
+      note: isSanMing
+        ? '此 Profile 改用《三命通會》卷二所列分日表；與 BaziJS canonical 的分段不同，僅供差異研究。'
+        : '本版本固定採節後經過整日與 MONTH_COMMAND_PHASES；這是可重現的 profile 規則，不宣稱跨流派唯一。'
+    },
+    evidence: {
+      matched: true,
+      monthBranch,
+      elapsedDays: wholeDays,
+      phase: phaseIndex + 1,
+      selectedStem: phase.stem,
+      selectionRule: '累加本月分段日數，取 elapsedDays 所在段',
+      phaseTable: phases.map((item) => ({ ...item })),
+      modelId,
+      sourceTable: isSanMing ? 'san-ming-tong-hui-volume-2' : 'bazi-js-canonical'
+    }
   };
 }
 
@@ -174,7 +244,9 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
   const elapsedDays = Number.isFinite(calendarContext.currentJD) && calendarContext.prevJie && Number.isFinite(calendarContext.prevJie.jdUT)
     ? Math.max(0, calendarContext.currentJD - calendarContext.prevJie.jdUT)
     : null;
-  const monthCommander = calculateMonthCommander(monthBranch, elapsedDays);
+  const monthCommander = calculateMonthCommander(monthBranch, elapsedDays, {
+    model: calendarContext.monthCommanderModel
+  });
 
   evidence.push({
     ruleId: 'STR_DE_LING',
@@ -312,6 +384,25 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
     };
   }
 
+  const fiveCategoryMethod = calendarContext.fiveCategoryMethod || FIVE_CATEGORY_METHOD;
+  const fiveCategory = calculateFiveElementCategories({
+    favorableElements,
+    method: fiveCategoryMethod
+  });
+
+  const useGodModel = calendarContext.useGodModel || 'fuyi-canonical';
+  const useGod = {
+    modelId: useGodModel,
+    ruleId: useGodModel === 'fuyi-canonical' ? 'STR_CANONICAL_DEFAULT' : `ANALYSIS_${useGodModel.toUpperCase().replaceAll('-', '_')}`,
+    status: useGodModel === 'fuyi-canonical' ? 'implemented' : 'research-only',
+    finalDecision: useGodModel === 'fuyi-canonical',
+    evidence: {
+      matched: useGodModel === 'fuyi-canonical',
+      status: useGodModel === 'fuyi-canonical' ? 'implemented' : 'research-only',
+      reason: useGodModel === 'fuyi-canonical' ? '由 canonical 扶抑模型產出。' : '研究 Profile 目前不覆寫 canonical 扶抑結果。'
+    }
+  };
+
   return {
     dayMaster: dmElement,
     score: finalScore,
@@ -330,6 +421,7 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
       deLing
     },
     monthCommander,
+    useGod,
     seasonalStates: Object.fromEntries(Object.entries(SEASON_STATES[monthBranch] || {}).map(([element, name]) => [element, {
       name,
       factor: STATE_FACTOR[name] || null
@@ -337,6 +429,7 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
     distribution: fiveElementsDistribution,
     favorableElements: [...new Set(favorableElements)],
     unfavorableElements: [...new Set(unfavorableElements)],
+    fiveCategory,
     evidence
   };
 }

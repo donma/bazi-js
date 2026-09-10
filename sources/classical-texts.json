@@ -4,6 +4,7 @@
   "catalogVersion": "2026.09",
   "textStatus": "bibliographic-and-rule-evidence-index",
   "disclaimer": "本目錄提供卷次與判定依據索引，不宣稱已完成所有傳本的校勘或全文數位化。",
+  "evidenceLedger": "sources/evidence-ledger.json",
   "sources": [
     {
       "sourceId": "san-ming-tong-hui",
@@ -12,8 +13,9 @@
       "period": "明",
       "sourceStatus": "primary",
       "editionNote": "以可核對的卷次與篇名作為索引；版本、標點與列數差異另記於 evidenceRecords。",
-      "locators": ["卷三：神煞與日例", "卷五：十惡大敗日", "卷六：特殊格與特殊日柱"],
+      "locators": ["卷二：人元司事、胎元、坐命官", "卷三：神煞與日例、論空亡", "卷五：十惡大敗日", "卷六：特殊格與特殊日柱"],
       "references": [
+        "https://zh.wikisource.org/zh-hant/三命通會/卷二",
         "https://zh.wikisource.org/zh-hant/三命通會/卷六",
         "https://zh.wikisource.org/zh-hant/三命通會_(四庫全書本)/卷03"
       ]
@@ -46,7 +48,7 @@
       "sourceStatus": "commentary",
       "editionNote": "作為人元司令、月令與全局取用的理論參考，不用來替代固定日柱原始條文。",
       "locators": ["人元司令", "月令與全局取用"],
-      "references": ["docs/references/sample1-audit.md"]
+      "references": ["https://zh.wikisource.org/zh-hant/滴天髓闡微", "docs/references/sample1-audit.md"]
     },
     {
       "sourceId": "zi-ping-zhen-quan",
@@ -191,6 +193,50 @@
       "evidenceStatus": "research-only",
       "variants": [{"id": "textual-and-school-variants", "note": "各格的核心日干、時柱、虛神與破格條件需逐條校勘。"}],
       "researchNotes": "這些是 SpecialPatterns，不得放入 ShenSha Catalog；目前只登錄架構。"
+    },
+    {
+      "evidenceId": "EV-FC-CLASSICAL-007",
+      "sourceIds": ["di-tian-sui-yan-wei"],
+      "ruleIds": ["STR_FIVE_CATEGORY_CANONICAL_DERIVED"],
+      "citation": "《滴天髓闡微》喜神、忌神、仇神、閒神相關注解；現代術語定義作為對照。",
+      "originalBasis": "先由本次扶抑 Profile 選出用神，再依五行生剋關係展開喜、閒、仇、忌；這是 SDK 的可重現推導，不是古籍固定排序。",
+      "scope": "wholeChart",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "profile-selected-use", "note": "調候、格局、通關或透干取用會使五分類改變。"}],
+      "researchNotes": "古籍提供術語與取用思路，未提供可跨流派直接套用的單一五分類演算法。"
+    },
+    {
+      "evidenceId": "EV-MC-REN-YUAN-008",
+      "sourceIds": ["san-ming-tong-hui", "di-tian-sui-yan-wei"],
+      "ruleIds": ["STR_MONTH_COMMANDER_001"],
+      "citation": "《三命通會》卷二〈論人元司事〉、〈論四時節氣〉；《滴天髓闡微》月令與人元注解。",
+      "originalBasis": "以月支為提綱，按節後經過日數落入本專案的分段表，選出當月值令藏干；日數取法與分段表另有傳本差異。",
+      "scope": "seasonalMonth",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "phase-table", "note": "各家人元司令分日比例不同。"}, {"id": "day-rounding", "note": "節後整日與精確時刻取法不同。"}],
+      "researchNotes": "保存本版本演算法與差異，不把分日表宣稱為唯一古法。"
+    },
+    {
+      "evidenceId": "EV-KW-XUN-009",
+      "sourceIds": ["san-ming-tong-hui"],
+      "ruleIds": ["AUX_KONGWANG_SIX_XUN_001"],
+      "citation": "《三命通會》卷三〈論空亡〉。",
+      "originalBasis": "甲旬盡處為空亡；六十甲子分六旬，每旬十支，餘下兩支為旬空。",
+      "scope": "dayPillarAndYearPillar",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "day-xun", "note": "日空與年空應分欄保存。"}],
+      "researchNotes": "只核算旬空地支與命盤命中矩陣，不由此欄直接判吉凶。"
+    },
+    {
+      "evidenceId": "EV-AUX-PALACE-010",
+      "sourceIds": ["san-ming-tong-hui"],
+      "ruleIds": ["AUX_TAIYUAN_001", "AUX_TAIXI_002", "AUX_MINGGONG_003", "AUX_SHENGONG_004", "AUX_CLASSICAL_AUXILIARY_001"],
+      "citation": "《三命通會》卷二〈論胎元〉、〈論坐命官〉及相關胎息、命宮、身宮資料。",
+      "originalBasis": "胎元、胎息、命宮、身宮依目前 canonical 公式集中輸出；命宮身宮另有中氣過宮、月建與子時分界差異。",
+      "scope": "wholeChartAuxiliary",
+      "evidenceStatus": "implemented",
+      "variants": [{"id": "solar-term-over-month", "note": "中氣過宮可能改變命宮身宮。"}, {"id": "zi-hour-boundary", "note": "子時換日可能改變結果。"}],
+      "researchNotes": "資料集中呈現可驗證的計算結果，不把輔助宮位當成子平格局或神煞。"
     }
   ]
 }

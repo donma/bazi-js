@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/evidence-ledger.schema.json",
+  "title": "BaziJS Classical Evidence Ledger",
+  "type": "object",
+  "required": ["schemaVersion", "catalogId", "editionRecords", "citations"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "catalogId": {"type": "string"},
+    "editionRecords": {"type": "array", "items": {"$ref": "#/$defs/edition"}},
+    "citations": {"type": "array", "items": {"$ref": "#/$defs/citation"}}
+  },
+  "$defs": {
+    "edition": {
+      "type": "object",
+      "required": ["editionId", "sourceId", "title", "provider", "editionStatus"],
+      "properties": {
+        "editionId": {"type": "string"},
+        "sourceId": {"type": "string"},
+        "title": {"type": "string"},
+        "provider": {"type": "string"},
+        "editionStatus": {"type": "string"},
+        "publicationYear": {"type": ["integer", "null"]},
+        "notes": {"type": "string"}
+      }
+    },
+    "citation": {
+      "type": "object",
+      "required": ["evidenceId", "sourceId", "ruleIds", "edition", "locator", "originalExcerpt", "ocrNotes", "collationNotes", "verificationStatus"],
+      "properties": {
+        "evidenceId": {"type": "string"},
+        "sourceId": {"type": "string"},
+        "ruleIds": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "edition": {"type": "string"},
+        "locator": {
+          "type": "object",
+          "required": ["type", "section", "page", "url", "accessedAt"],
+          "properties": {
+            "type": {"type": "string"},
+            "section": {"type": "string"},
+            "page": {"type": ["integer", "null"]},
+            "url": {"type": "string", "pattern": "^https://"},
+            "accessedAt": {"type": "string"}
+          }
+        },
+        "originalExcerpt": {"type": "string", "minLength": 1},
+        "transcription": {"type": "string"},
+        "ocrNotes": {"type": "string"},
+        "collationNotes": {"type": "string"},
+        "verificationStatus": {"type": "string"},
+        "variants": {"type": "array"},
+        "researchNotes": {"type": "string"}
+      }
+    }
+  }
+}

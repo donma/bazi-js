@@ -12,6 +12,7 @@ export {
   YIN_YANG_CHA_CUO,
   JIN_SHEN
 } from './registry.js';
+export { SPECIAL_RULE_INTERPRETATIONS } from './interpretations.js';
 export {
   calculateSpecialRules,
   calculateSpecialPillarRules,

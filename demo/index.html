@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BaziJS · 純前端八字排盤 SDK 正式展示</title>
-  <link rel="stylesheet" href="./styles.css?v=2.1.0">
+  <link rel="stylesheet" href="./styles.css?v=2.1.2">
 </head>
 <body>
   <div class="container">
@@ -14,10 +14,6 @@
       <p class="hero-subtitle">
         可驗證、可追溯、零後端依賴的純前端八字計算與視覺化開源 SDK。
       </p>
-      <div class="header-links">
-        <a href="../lab/index.html">Geek Lab 實驗室 →</a>
-        <a href="https://github.com/donma/bazi-js" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
-      </div>
     </header>
 
     <div class="main-grid">
@@ -132,8 +128,6 @@
           <div class="chart-viewer" id="chart-container" role="region" aria-label="八字命盤圖表" tabindex="0">
             <!-- 動態插入 SVG -->
           </div>
-          <p class="chart-hint">直式閱讀版：文字不縮放、無需水平捲軸；SVG／PNG 下載會保留同一份完整資料。</p>
-
           <!-- 展開檢視結構化 JSON 資料 -->
           <details style="margin-top: 16px;">
             <summary class="details-toggle">檢視結構化 JSON 輸出 (Structured SDK Result)</summary>
@@ -143,15 +137,19 @@
       </main>
     </div>
 
-    <footer>
-      <p>
-        BaziJS 核心 SDK 完全在瀏覽器端運算 · Apache-2.0 開源授權 ·
+    <footer class="site-footer">
+      <p class="site-footer-meta">BaziJS 核心 SDK · 完全在瀏覽器端運算 · Apache-2.0 開源授權</p>
+      <nav class="site-footer-links" aria-label="相關連結">
+        <a href="../lab/index.html">驗證小工具</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://github.com/donma/bazi-js" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+        <span aria-hidden="true">·</span>
         <a href="https://donmalab.com" target="_blank" rel="noopener noreferrer">當麻實驗室</a>
-      </p>
+      </nav>
     </footer>
   </div>
 
-  <script src="../dist/bazi-sdk.js?v=2.4.2"></script>
-  <script src="./app.js?v=2.2.2"></script>
+  <script src="../dist/bazi-sdk.js?v=2.4.6"></script>
+  <script src="./app.js?v=2.2.6"></script>
 </body>
 </html>
