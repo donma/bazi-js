@@ -1,0 +1,2871 @@
+{
+  "coverageVersion": "0.1.0",
+  "taxonomyVersion": "0.1.0",
+  "catalogVersion": "2026.09",
+  "scopes": [
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "all",
+      "totals": {
+        "concepts": 68,
+        "rules": 68
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 68,
+          "total": 68,
+          "percent": 100
+        },
+        "locatorBacked": {
+          "covered": 68,
+          "total": 68,
+          "percent": 100
+        },
+        "variantsDocumented": {
+          "covered": 22,
+          "total": 68,
+          "percent": 32.4
+        },
+        "machineReadable": {
+          "covered": 68,
+          "total": 68,
+          "percent": 100
+        },
+        "implemented": {
+          "covered": 61,
+          "total": 68,
+          "percent": 89.7
+        },
+        "tests": {
+          "covered": 0,
+          "total": 68,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 68,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 68,
+          "total": 68,
+          "percent": 100
+        }
+      },
+      "entries": [
+        {
+          "conceptId": "shensha.tian-yi-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tai-ji-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-de-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yue-de-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.wen-chang-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.lu-shen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yang-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yi-ma",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tao-hua",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.hua-gai",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jiang-xing",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jie-sha",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.wang-shen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.gu-chen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.gua-su",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jin-yu",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.hong-luan",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-xi",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-yi-star",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.hong-yan",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.fei-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.liu-jia-kong-wang",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.ci-guan",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.guo-yin-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.xue-tang",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.pi-ma",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.xue-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.fu-xing-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-chu-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-guan-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-fu-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.zai-sha",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yuan-chen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.gou-shen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jiao-sha",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.sang-men",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.diao-ke",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.bai-hu",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-luo",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.di-wang",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.kui-gang",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.shi-e-da-bai",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.ri-gui",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.ri-de",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.ba-zhuan",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.jiu-chou",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.gu-luan",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.yin-yang-cha-cuo",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.jin-shen",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.tian-she",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.si-fei",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.zheng-guan",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.qi-sha",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.zheng-cai",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.pian-cai",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.zheng-yin",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.pian-yin",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.shi-shen",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.shang-guan",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.jian-lu",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.yang-ren",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.ren-qi-long-bei",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.liu-yin-chao-yang",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.liu-yi-shu-gui",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.ri-lu-gui-shi",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.gong-lu",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.gong-gui",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.fu-de-xiu-qi",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "calendar",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "pillar",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "stem-branch",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "five-element",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "ten-god",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "hidden-stem",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "nayin",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "twelve-stage",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "kongwang",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "interaction",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "strength",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "month-commander",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "pattern",
+      "totals": {
+        "concepts": 17,
+        "rules": 17
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 17,
+          "total": 17,
+          "percent": 100
+        },
+        "locatorBacked": {
+          "covered": 17,
+          "total": 17,
+          "percent": 100
+        },
+        "variantsDocumented": {
+          "covered": 9,
+          "total": 17,
+          "percent": 52.9
+        },
+        "machineReadable": {
+          "covered": 17,
+          "total": 17,
+          "percent": 100
+        },
+        "implemented": {
+          "covered": 10,
+          "total": 17,
+          "percent": 58.8
+        },
+        "tests": {
+          "covered": 0,
+          "total": 17,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 17,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 17,
+          "total": 17,
+          "percent": 100
+        }
+      },
+      "entries": [
+        {
+          "conceptId": "pattern.zheng-guan",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.qi-sha",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.zheng-cai",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.pian-cai",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.zheng-yin",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.pian-yin",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.shi-shen",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.shang-guan",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.jian-lu",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.yang-ren",
+          "conceptType": "pattern",
+          "status": "candidate-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.ren-qi-long-bei",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.liu-yin-chao-yang",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.liu-yi-shu-gui",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.ri-lu-gui-shi",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.gong-lu",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.gong-gui",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "pattern.fu-de-xiu-qi",
+          "conceptType": "pattern",
+          "status": "research-only",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": false,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "use-god",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "shensha",
+      "totals": {
+        "concepts": 40,
+        "rules": 40
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 40,
+          "total": 40,
+          "percent": 100
+        },
+        "locatorBacked": {
+          "covered": 40,
+          "total": 40,
+          "percent": 100
+        },
+        "variantsDocumented": {
+          "covered": 2,
+          "total": 40,
+          "percent": 5
+        },
+        "machineReadable": {
+          "covered": 40,
+          "total": 40,
+          "percent": 100
+        },
+        "implemented": {
+          "covered": 40,
+          "total": 40,
+          "percent": 100
+        },
+        "tests": {
+          "covered": 0,
+          "total": 40,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 40,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 40,
+          "total": 40,
+          "percent": 100
+        }
+      },
+      "entries": [
+        {
+          "conceptId": "shensha.tian-yi-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tai-ji-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-de-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yue-de-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.wen-chang-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.lu-shen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yang-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yi-ma",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tao-hua",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.hua-gai",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jiang-xing",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jie-sha",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.wang-shen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.gu-chen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.gua-su",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jin-yu",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.hong-luan",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-xi",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-yi-star",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.hong-yan",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.fei-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.liu-jia-kong-wang",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.ci-guan",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.guo-yin-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.xue-tang",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.pi-ma",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.xue-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.fu-xing-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-chu-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-guan-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-fu-gui-ren",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.zai-sha",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.yuan-chen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.gou-shen",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.jiao-sha",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.sang-men",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.diao-ke",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.bai-hu",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.tian-luo",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "shensha.di-wang",
+          "conceptType": "shensha",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "special-rule",
+      "totals": {
+        "concepts": 11,
+        "rules": 11
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 11,
+          "total": 11,
+          "percent": 100
+        },
+        "locatorBacked": {
+          "covered": 11,
+          "total": 11,
+          "percent": 100
+        },
+        "variantsDocumented": {
+          "covered": 11,
+          "total": 11,
+          "percent": 100
+        },
+        "machineReadable": {
+          "covered": 11,
+          "total": 11,
+          "percent": 100
+        },
+        "implemented": {
+          "covered": 11,
+          "total": 11,
+          "percent": 100
+        },
+        "tests": {
+          "covered": 0,
+          "total": 11,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 11,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 11,
+          "total": 11,
+          "percent": 100
+        }
+      },
+      "entries": [
+        {
+          "conceptId": "special-rule.kui-gang",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.shi-e-da-bai",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.ri-gui",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.ri-de",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.ba-zhuan",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.jiu-chou",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.gu-luan",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.yin-yang-cha-cuo",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.jin-shen",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.tian-she",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "special-rule.si-fei",
+          "conceptType": "special-rule",
+          "status": "canonical",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": true,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "auxiliary",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "luck",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "transit",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    },
+    {
+      "coverageVersion": "0.1.0",
+      "catalogVersion": "2026.09",
+      "scope": "profile",
+      "totals": {
+        "concepts": 0,
+        "rules": 0
+      },
+      "dimensions": {
+        "sourceLinked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "locatorBacked": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "variantsDocumented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "machineReadable": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "implemented": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        },
+        "tests": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "external": {
+          "covered": 0,
+          "total": 0,
+          "status": "not-collected"
+        },
+        "documentation": {
+          "covered": 0,
+          "total": 0,
+          "percent": 0
+        }
+      },
+      "entries": []
+    }
+  ]
+}

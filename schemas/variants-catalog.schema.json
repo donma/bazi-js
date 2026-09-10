@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/variants-catalog.schema.json",
+  "title": "BaziJS Variants Catalog",
+  "type": "object",
+  "required": ["schemaVersion", "catalogId", "catalogVersion", "variants"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "catalogId": {"type": "string"},
+    "catalogVersion": {"type": "string"},
+    "purpose": {"type": "string"},
+    "variants": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["variantId", "conceptId", "tradition", "sourceIds", "status", "condition", "algorithm"], "properties": {"variantId": {"type": "string"}, "conceptId": {"type": "string"}, "tradition": {"type": "string"}, "sourceIds": {"type": "array", "items": {"type": "string"}}, "status": {"type": "string"}, "condition": {"type": "string"}, "algorithm": {"type": "string"}, "profileIds": {"type": "array", "items": {"type": "string"}}, "differencesFromCanonical": {"type": "string"}, "evidence": {"type": "string"}}}}
+  }
+}

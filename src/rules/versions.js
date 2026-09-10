@@ -21,6 +21,9 @@ export const TRANSIT_GRAPH_VERSION = '0.1.0';
 export const INTERACTION_RULE_VERSION = '1.0.0';
 export const LUCK_RULE_VERSION = '1.1.0';
 export const RESULT_SCHEMA_VERSION = '2.1.0';
+export const REFERENCE_TAXONOMY_VERSION = '0.1.0';
+export const REFERENCE_INDEX_VERSION = '0.1.0';
+export const REFERENCE_COVERAGE_VERSION = '0.1.0';
 
 export const VERSIONS = {
   engineVersion: ENGINE_VERSION,
@@ -43,5 +46,8 @@ export const VERSIONS = {
   transitGraphVersion: TRANSIT_GRAPH_VERSION,
   interactionRuleVersion: INTERACTION_RULE_VERSION,
   luckRuleVersion: LUCK_RULE_VERSION,
-  resultSchemaVersion: RESULT_SCHEMA_VERSION
+  resultSchemaVersion: RESULT_SCHEMA_VERSION,
+  referenceTaxonomyVersion: REFERENCE_TAXONOMY_VERSION,
+  referenceIndexVersion: REFERENCE_INDEX_VERSION,
+  referenceCoverageVersion: REFERENCE_COVERAGE_VERSION
 };

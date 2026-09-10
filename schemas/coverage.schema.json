@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/coverage.schema.json",
+  "title": "BaziJS Reference Coverage Report",
+  "type": "object",
+  "required": ["coverageVersion", "catalogVersion", "scope", "totals", "dimensions", "entries"],
+  "properties": {
+    "coverageVersion": {"type": "string"},
+    "taxonomyVersion": {"type": "string"},
+    "catalogVersion": {"type": "string"},
+    "scope": {"type": "string"},
+    "totals": {"type": "object", "required": ["concepts", "rules"]},
+    "dimensions": {"type": "object"},
+    "entries": {"type": "array", "items": {"type": "object"}}
+  }
+}

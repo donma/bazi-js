@@ -420,8 +420,12 @@ console.log(comparison.luckCycles.startAge);
 | 位置 | 內容 | 讀取目的 |
 | --- | --- | --- |
 | [`sources/`](sources/) | 古籍書目、卷次、原始判定依據、版本差異與 evidence | 查「這條規則從哪裡來」 |
+| [`sources/variants.json`](sources/variants.json) | 年界、月界、子時、真太陽時、起運、命宮、人元分日與模型差異 | 查「不同約定會差在哪裡」 |
 | [`profiles/`](profiles/) | canonical 與比較用多流派設定 | 查「這次用哪套切界」 |
-| [`schemas/`](schemas/) | 規則、Profile、命盤結果與驗證資料的 JSON Schema | 驗證資料格式 |
+| [`schemas/`](schemas/) | 規則、概念、來源、變體、命盤結果與驗證資料的 JSON Schema | 驗證資料格式 |
+| [`src/reference/`](src/reference/) | 統一 taxonomy、規則／來源索引、coverage 與 AI Context | 查「這個概念屬於哪一類、有哪些證據」 |
+| [`docs/reference/generated/`](docs/reference/generated/) | 由 registry 與 sources 生成的概念文件 | 快速瀏覽規則狀態 |
+| [`docs/coverage/`](docs/coverage/)、[`validation/coverage/`](validation/coverage/) | 概念、來源、定位、變體、實作與驗證覆蓋率 | 查看資料完整度，不宣稱命理準確率 |
 | [`validation/external/`](validation/external/) | 公開來源抽樣資料與擷取日期 | 重跑外部交叉比對 |
 | [`validation/interpretation/`](validation/interpretation/) | 解讀驗證的獨立校核資料契約 | 目前只有 protocol-only，未宣稱解讀已驗證 |
 | [`docs/governance/`](docs/governance/) | 規則分級、來源要求、升版與 CI 治理 | 查「怎麼新增與升版」 |
@@ -467,6 +471,28 @@ console.log(classicalVariant.strength.monthCommander.modelId); // san-ming-volum
 ```
 
 只有 `fuyi-canonical` 與既有 canonical 掌訣會產生目前已實作的決定；其餘研究模型會明確回傳 `research-only`、`finalDecision: false` 與證據，不會讓畫面出現未完成的斷語。
+
+### Reference API：給 SDK 使用者與 AI 的規則索引
+
+Reference API 不會改變 `Bazi.calculate()` 的命盤結果，也不會增加 Demo 主畫面的文字；它把「概念、規則、古籍、變體與狀態」整理成可查詢資料。
+
+```js
+const concept = Bazi.Reference.getConcept('pattern.zheng-guan');
+console.log(concept.conceptType, concept.patternType, concept.status);
+
+const rule = Bazi.Reference.getRule('PT_REGULAR_ZHENGGUAN_001');
+console.log(rule.sourceIds, rule.baseOn, rule.references, rule.evidence);
+
+const sources = Bazi.Reference.getSourcesForRule('PT_REGULAR_ZHENGGUAN_001');
+const variants = Bazi.Reference.getVariants('SE_TIANSHE_001');
+const context = Bazi.Reference.toContext({
+  conceptIds: ['pattern.zheng-guan'],
+  includeSources: true,
+  includeVariants: true
+});
+```
+
+分類的重點是：`shensha` 是一般神煞；`special-rule` 是固定柱位／季節條件；`pattern` 再用 `regular` 或 `special` 區分正格候選與特殊格研究架構。`candidate-only`、`research-only` 不代表已完成成格或跨流派定論；請讀 `status`、`variants`、`researchNotes` 與 `claimPolicy`。概念總表見 [`docs/reference/generated/`](docs/reference/generated/)，覆蓋率見 [`docs/coverage/coverage-matrix.md`](docs/coverage/coverage-matrix.md)。
 
 需要在自己的工具查看證據索引時：
 
@@ -594,6 +620,11 @@ console.log(result.accuracy.trueSolarTimeUsed);
 - 本批未實作完整從格／專旺、調候、通關與歲運多層轉化；它們仍依治理規範留在 Patterns／研究模型，待獨立條件與驗證資料完成後再升級。
 - 新增 `src/patterns/regular.js` 的十個正格結構候選（正官、七殺、正財、偏財、正印、偏印、食神、傷官、建祿、月刃），只辨識月令／祿刃結構，不直接宣告成格；特殊格仍維持獨立 `research-only`。
 - 新增 `validation/interpretation/` 與 `schemas/interpretation-validation.schema.json`，明確把「計算驗證」與「命理解讀校核」分開；目前維持 `protocol-only`，沒有自行製造解讀 expected value。
+- 建立 Reference ontology 與查詢 API：`Bazi.Reference.getConcept()`、`getRule()`、`getSourcesForRule()`、`getRulesFromSource()`、`getVariants()`、`getCoverage()` 與 `toContext()`；68 條既有規則、68 個概念與 6 個來源可雙向追溯，且不改變 `Bazi.calculate()` 或 Demo 主畫面。
+- 正格候選改以 `pattern/regular` 表達，壬騎龍背等全局格局以 `pattern/special/research-only` 表達；舊 runtime 分類仍保留相容欄位，避免將特殊格混入 ShenSha。
+- 新增 `schemas/concept.schema.json`、`taxonomy.schema.json`、`source.schema.json`、`evidence.schema.json`、`variant.schema.json`、`coverage.schema.json`；新增自動生成的 [`Reference 概念文件`](docs/reference/generated/index.md) 與 [`Coverage Matrix`](docs/coverage/coverage-matrix.md)。
+- 新增 [`sources/variants.json`](sources/variants.json) 與 `variants-catalog.schema.json`，將 Profile 與算法差異提升為可查詢資料；包含年界、月界、子時、真太陽時、起運、命宮、人元分日、神煞查法與用神模型。
+- 新增 taxonomy／Reference／coverage CI gate 與相關資料契約斷言；`npm test` 通過 724/724，外部 coverage 仍誠實標記 `not-collected`，不把來源覆蓋率冒充準確率。
 
 ### 2026-09-10
 

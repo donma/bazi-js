@@ -13,6 +13,9 @@
 | use-god resolver | `0.1.0` | `src/analysis/use-god-resolver.js`；多模型 candidates/conflicts/finalDecision |
 | transit graph | `0.1.0` | `src/transit/index.js`；原局／大運／流年月日時節點與已觀測 edge |
 | regular patterns | `0.2.0` | `src/patterns/regular.js`；十個正格的月令／祿刃結構候選 |
+| reference taxonomy | `0.1.0` | `src/reference/taxonomy.js`；概念類型、patternType、狀態與 legacy mapping |
+| reference index | `0.1.0` | `src/reference/index.js`；概念／規則／來源／variants／AI Context 查詢 |
+| reference coverage | `0.1.0` | `validation/coverage/coverage.json`；分開記錄來源、定位、變體、實作與驗證覆蓋 |
 
 ## 對齊規則
 

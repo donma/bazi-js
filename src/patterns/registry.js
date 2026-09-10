@@ -6,7 +6,9 @@ const refs = (...references) => references.map(([title, locator, url, note]) => 
 const researchPattern = (definition) => ({
   aliases: [],
   tradition: CLASSICAL_ZIPING,
-  conceptType: 'special-pattern',
+  conceptType: 'pattern',
+  patternType: 'special',
+  legacyConceptType: 'special-pattern',
   ruleFamily: 'whole-chart-pattern',
   scope: 'natal',
   category: 'neutral',
@@ -91,7 +93,7 @@ export function validateSpecialPatternRegistry(registry = SPECIAL_PATTERN_REGIST
     ids.add(rule.id);
     if (!rule.ruleId || ruleIds.has(rule.ruleId)) errors.push(`duplicate ruleId: ${rule.ruleId || '(empty)'}`);
     ruleIds.add(rule.ruleId);
-    for (const field of ['name', 'tradition', 'conceptType', 'ruleFamily', 'scope', 'category', 'confidence', 'version', 'description']) {
+    for (const field of ['name', 'tradition', 'conceptType', 'patternType', 'ruleFamily', 'scope', 'category', 'confidence', 'version', 'description']) {
       if (!rule[field]) errors.push(`${rule.id}: ${field} is required`);
     }
     if (!Array.isArray(rule.baseOn) || rule.baseOn.length === 0) errors.push(`${rule.id}: baseOn is required`);

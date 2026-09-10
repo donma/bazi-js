@@ -7,6 +7,9 @@
 - 新增強弱氣數層 unit test；完整驗證仍以 `npm test`、`npm run validate`、`npm run build` 與 `npm run check:demo` 為準。
 - 新增十個正格的保守結構候選引擎與 `result.patterns`；它只依月令司令／建祿／月刃辨識候選，不宣告完整成格或破格，特殊格仍獨立留在 research registry。
 - 新增解讀驗證資料契約 `validation/interpretation/`；目前為 `protocol-only`，不把 BaziJS 自己的輸出當成命理解讀的外部真值。
+- 建立 Reference ontology 與 API，統一 `shensha`、`special-rule`、`pattern/regular`、`pattern/special` 分類；68 條規則與 68 個概念可連到 6 個來源，提供規則／來源雙向查詢、variants、coverage 與 AI reference context。
+- 新增概念、taxonomy、來源、evidence、variant、coverage schemas，以及生成式概念文件與 CI gate；這批是資料與治理層，不改變 `Bazi.calculate()` 的 canonical 結果或 Demo 畫面。
+- 新增 `sources/variants.json`，把 Profile／算法差異改成可查詢的 first-class 資料，並加入 variants catalog schema 與測試。
 - 全系統輸入契約強化：實際日期、時區、經緯度、規則值與時辰地支均在計算前驗證。
 - 真正支援 `lunar_new_year` 年界與 `lunar_month` 月界，並將實際 ruleId 寫入 `result.rules.applied`。
 - 流年解析支援 UTC、負時區、半時區與明確 invalid Date 錯誤。

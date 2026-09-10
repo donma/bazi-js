@@ -20,11 +20,5 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Unit and contract tests
-        run: npm test
-      - name: External validation ledger
-        run: npm run validate
-      - name: Browser bundle
-        run: npm run build
-      - name: Demo static checks
-        run: npm run check:demo
+      - name: Full SDK, reference and demo verification
+        run: npm run ci

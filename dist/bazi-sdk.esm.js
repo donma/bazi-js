@@ -1941,6 +1941,9 @@ var TRANSIT_GRAPH_VERSION = "0.1.0";
 var INTERACTION_RULE_VERSION = "1.0.0";
 var LUCK_RULE_VERSION = "1.1.0";
 var RESULT_SCHEMA_VERSION = "2.1.0";
+var REFERENCE_TAXONOMY_VERSION = "0.1.0";
+var REFERENCE_INDEX_VERSION = "0.1.0";
+var REFERENCE_COVERAGE_VERSION = "0.1.0";
 var VERSIONS = {
   engineVersion: ENGINE_VERSION,
   apiVersion: API_VERSION,
@@ -1962,7 +1965,10 @@ var VERSIONS = {
   transitGraphVersion: TRANSIT_GRAPH_VERSION,
   interactionRuleVersion: INTERACTION_RULE_VERSION,
   luckRuleVersion: LUCK_RULE_VERSION,
-  resultSchemaVersion: RESULT_SCHEMA_VERSION
+  resultSchemaVersion: RESULT_SCHEMA_VERSION,
+  referenceTaxonomyVersion: REFERENCE_TAXONOMY_VERSION,
+  referenceIndexVersion: REFERENCE_INDEX_VERSION,
+  referenceCoverageVersion: REFERENCE_COVERAGE_VERSION
 };
 
 // src/strength/qi-layers.js
@@ -5545,10 +5551,10 @@ var ANALYSIS_RULE_IDS = Object.freeze({
   "research-registry": "PATTERN_RESEARCH_ONLY_001",
   "patterns-research": "PATTERN_RESEARCH_ONLY_001"
 });
-function getAnalysisRuleId(modelId, dimension) {
-  return ANALYSIS_RULE_IDS[modelId] || `ANALYSIS_${String(dimension).toUpperCase().replaceAll("-", "_")}_UNREGISTERED`;
+function getAnalysisRuleId(modelId, dimension2) {
+  return ANALYSIS_RULE_IDS[modelId] || `ANALYSIS_${String(dimension2).toUpperCase().replaceAll("-", "_")}_UNREGISTERED`;
 }
-function noDecisionModel(modelId, dimension, profileId) {
+function noDecisionModel(modelId, dimension2, profileId) {
   const definition = MODEL_DEFINITIONS[modelId];
   return {
     ...definition || {
@@ -5557,15 +5563,15 @@ function noDecisionModel(modelId, dimension, profileId) {
       status: "research-only",
       confidence: "research",
       conceptType: "analysis",
-      ruleFamily: dimension,
+      ruleFamily: dimension2,
       baseOn: ["wholeChart"],
       scope: "whole-chart",
-      ruleId: `ANALYSIS_${dimension.toUpperCase()}_UNREGISTERED`,
+      ruleId: `ANALYSIS_${dimension2.toUpperCase()}_UNREGISTERED`,
       version: "0.1.0",
       references: [],
       description: "\u5C1A\u672A\u5EFA\u7ACB\u53EF\u5BE9\u6838\u7684\u6A21\u578B\u5B9A\u7FA9\u3002"
     },
-    dimension,
+    dimension: dimension2,
     profileId,
     finalDecision: false,
     result: null,
@@ -5576,15 +5582,15 @@ function noDecisionModel(modelId, dimension, profileId) {
     }
   };
 }
-function selectedRule(profile, dimension) {
-  const rule3 = profile?.rules?.analysis?.[dimension];
-  return rule3 || { value: dimension === "seasonal" || dimension === "mediator" ? "none" : "research-registry", ruleId: "PROFILE_ANALYSIS_DEFAULT_001", version: ANALYSIS_RULE_VERSION2 };
+function selectedRule(profile, dimension2) {
+  const rule3 = profile?.rules?.analysis?.[dimension2];
+  return rule3 || { value: dimension2 === "seasonal" || dimension2 === "mediator" ? "none" : "research-registry", ruleId: "PROFILE_ANALYSIS_DEFAULT_001", version: ANALYSIS_RULE_VERSION2 };
 }
 function buildAnalysisResult({ profile, strength = null, auxiliary = null, patterns = null } = {}) {
   const profileId = profile?.id || "canonical";
-  const selected = Object.fromEntries(ANALYSIS_DIMENSIONS.map((dimension) => {
-    const rule3 = selectedRule(profile, dimension);
-    return [dimension, { ...rule3, modelId: rule3.value }];
+  const selected = Object.fromEntries(ANALYSIS_DIMENSIONS.map((dimension2) => {
+    const rule3 = selectedRule(profile, dimension2);
+    return [dimension2, { ...rule3, modelId: rule3.value }];
   }));
   const useGodRule = selected.useGod;
   const useGodModel = useGodRule.modelId;
@@ -5649,14 +5655,14 @@ function getAnalysisModel(id) {
 }
 function validateAnalysisProfileRules(profile) {
   const errors = [];
-  for (const dimension of ANALYSIS_DIMENSIONS) {
-    const rule3 = profile?.rules?.analysis?.[dimension];
+  for (const dimension2 of ANALYSIS_DIMENSIONS) {
+    const rule3 = profile?.rules?.analysis?.[dimension2];
     if (!rule3) {
-      errors.push(`rules.analysis.${dimension} is required`);
+      errors.push(`rules.analysis.${dimension2} is required`);
       continue;
     }
-    if (!ANALYSIS_MODEL_IDS[dimension].includes(rule3.value)) errors.push(`rules.analysis.${dimension}.value is invalid: ${rule3.value}`);
-    if (!rule3.ruleId || !rule3.version) errors.push(`rules.analysis.${dimension} requires ruleId/version`);
+    if (!ANALYSIS_MODEL_IDS[dimension2].includes(rule3.value)) errors.push(`rules.analysis.${dimension2}.value is invalid: ${rule3.value}`);
+    if (!rule3.ruleId || !rule3.version) errors.push(`rules.analysis.${dimension2} requires ruleId/version`);
   }
   return errors;
 }
@@ -5669,10 +5675,10 @@ function clone(value) {
 function rule2(value, ruleId, overridden = false) {
   return { value, ruleId, version: "1.0.0", ...overridden ? { overridden: true } : {} };
 }
-function analysisRule(value, dimension) {
+function analysisRule(value, dimension2) {
   return {
     value,
-    ruleId: getAnalysisRuleId(value, dimension),
+    ruleId: getAnalysisRuleId(value, dimension2),
     version: value.endsWith("-research") || value === "research-registry" ? "0.1.0" : "1.0.0",
     overridden: true
   };
@@ -5716,8 +5722,8 @@ function buildComparisonProfile({ id, name, description, overrides, differences,
     );
   }
   if (overrides.analysis) {
-    for (const [dimension, modelId] of Object.entries(overrides.analysis)) {
-      profile.rules.analysis[dimension] = analysisRule(modelId, dimension);
+    for (const [dimension2, modelId] of Object.entries(overrides.analysis)) {
+      profile.rules.analysis[dimension2] = analysisRule(modelId, dimension2);
     }
   }
   return profile;
@@ -5928,22 +5934,22 @@ var ProfileRegistry = class {
         if (!val || typeof val !== "object" || Array.isArray(val)) {
           throw new BaziRuleError("analysis \u8986\u5BEB\u5FC5\u9808\u662F dimension \u2192 modelId \u7269\u4EF6", "PROFILE_OVERRIDE_INVALID", { key, value: val });
         }
-        for (const [dimension, modelId] of Object.entries(val)) {
-          if (!ANALYSIS_DIMENSIONS.includes(dimension)) {
-            throw new BaziRuleError(`\u4E0D\u652F\u63F4\u7684 analysis \u7DAD\u5EA6\uFF1A${dimension}`, "PROFILE_OVERRIDE_INVALID", { key, dimension });
+        for (const [dimension2, modelId] of Object.entries(val)) {
+          if (!ANALYSIS_DIMENSIONS.includes(dimension2)) {
+            throw new BaziRuleError(`\u4E0D\u652F\u63F4\u7684 analysis \u7DAD\u5EA6\uFF1A${dimension2}`, "PROFILE_OVERRIDE_INVALID", { key, dimension: dimension2 });
           }
-          if (!ANALYSIS_MODEL_IDS[dimension].includes(modelId)) {
-            throw new BaziRuleError(`\u7121\u6548 analysis model\uFF1A${dimension}=${modelId}`, "PROFILE_OVERRIDE_INVALID", { key, dimension, value: modelId });
+          if (!ANALYSIS_MODEL_IDS[dimension2].includes(modelId)) {
+            throw new BaziRuleError(`\u7121\u6548 analysis model\uFF1A${dimension2}=${modelId}`, "PROFILE_OVERRIDE_INVALID", { key, dimension: dimension2, value: modelId });
           }
-          const baseRule = newProfile.rules.analysis[dimension];
-          newProfile.rules.analysis[dimension] = {
+          const baseRule = newProfile.rules.analysis[dimension2];
+          newProfile.rules.analysis[dimension2] = {
             value: modelId,
-            ruleId: getAnalysisRuleId(modelId, dimension),
+            ruleId: getAnalysisRuleId(modelId, dimension2),
             version: modelId.endsWith("-research") || modelId === "research-registry" ? "0.1.0" : "1.0.0",
             overridden: true
           };
           (_a = newProfile.diff).analysis || (_a.analysis = {});
-          newProfile.diff.analysis[dimension] = { from: baseRule.value, to: modelId };
+          newProfile.diff.analysis[dimension2] = { from: baseRule.value, to: modelId };
         }
       } else {
         throw new BaziRuleError(`\u4E0D\u652F\u63F4\u7684 Profile \u8986\u5BEB\u6B04\u4F4D\uFF1A${key}`, "PROFILE_OVERRIDE_UNSUPPORTED", { key });
@@ -6563,7 +6569,9 @@ var refs3 = (...references) => references.map(([title, locator, url, note]) => (
 var researchPattern = (definition) => ({
   aliases: [],
   tradition: CLASSICAL_ZIPING4,
-  conceptType: "special-pattern",
+  conceptType: "pattern",
+  patternType: "special",
+  legacyConceptType: "special-pattern",
   ruleFamily: "whole-chart-pattern",
   scope: "natal",
   category: "neutral",
@@ -6674,7 +6682,7 @@ function validateSpecialPatternRegistry(registry = SPECIAL_PATTERN_REGISTRY) {
     ids.add(rule3.id);
     if (!rule3.ruleId || ruleIds.has(rule3.ruleId)) errors.push(`duplicate ruleId: ${rule3.ruleId || "(empty)"}`);
     ruleIds.add(rule3.ruleId);
-    for (const field of ["name", "tradition", "conceptType", "ruleFamily", "scope", "category", "confidence", "version", "description"]) {
+    for (const field of ["name", "tradition", "conceptType", "patternType", "ruleFamily", "scope", "category", "confidence", "version", "description"]) {
       if (!rule3[field]) errors.push(`${rule3.id}: ${field} is required`);
     }
     if (!Array.isArray(rule3.baseOn) || rule3.baseOn.length === 0) errors.push(`${rule3.id}: baseOn is required`);
@@ -6727,7 +6735,9 @@ var regularPattern = ({ id, name, aliases, ruleId, description, match, baseOn = 
   displayName: name,
   aliases,
   tradition: CLASSICAL_ZIPING5,
-  conceptType: "special-pattern",
+  conceptType: "pattern",
+  patternType: "regular",
+  legacyConceptType: "special-pattern",
   ruleFamily: "month-commander-pattern",
   baseOn,
   scope: "natal",
@@ -6817,6 +6827,7 @@ function calculateRegularPatterns({ pillars, monthCommander = null } = {}) {
       aliases: rule3.aliases,
       tradition: rule3.tradition,
       conceptType: rule3.conceptType,
+      patternType: rule3.patternType,
       ruleFamily: rule3.ruleFamily,
       baseOn: rule3.baseOn,
       scope: rule3.scope,
@@ -6861,7 +6872,7 @@ function validateRegularPatternRegistry(registry = REGULAR_PATTERN_REGISTRY) {
     ids.add(rule3.id);
     if (!rule3.ruleId || ruleIds.has(rule3.ruleId)) errors.push(`duplicate ruleId: ${rule3.ruleId || "(empty)"}`);
     ruleIds.add(rule3.ruleId);
-    for (const field of ["name", "tradition", "conceptType", "ruleFamily", "scope", "category", "confidence", "ruleId", "version", "description"]) {
+    for (const field of ["name", "tradition", "conceptType", "patternType", "ruleFamily", "scope", "category", "confidence", "ruleId", "version", "description"]) {
       if (!rule3[field]) errors.push(`${rule3.id}: ${field} is required`);
     }
     if (!Array.isArray(rule3.baseOn) || rule3.baseOn.length === 0) errors.push(`${rule3.id}: baseOn is required`);
@@ -6882,6 +6893,7 @@ function listResearchPatterns() {
     id: rule3.id,
     name: rule3.name,
     conceptType: rule3.conceptType,
+    patternType: rule3.patternType,
     ruleFamily: rule3.ruleFamily,
     implemented: rule3.implemented,
     status: rule3.status,
@@ -6895,6 +6907,7 @@ function calculatePatterns(options = {}) {
     name: rule3.name,
     displayName: rule3.displayName || rule3.name,
     conceptType: rule3.conceptType,
+    patternType: rule3.patternType,
     ruleFamily: rule3.ruleFamily,
     baseOn: rule3.baseOn,
     scope: rule3.scope,
@@ -7369,10 +7382,10 @@ function calculate(input, options = {}) {
           version: profile.rules.strength.version,
           categoryMethod: profile.rules.strength.categoryMethod
         },
-        ...Object.entries(profile.rules.analysis || {}).map(([dimension, profileRule]) => ({
+        ...Object.entries(profile.rules.analysis || {}).map(([dimension2, profileRule]) => ({
           ...profileRule,
           domain: "analysis",
-          dimension,
+          dimension: dimension2,
           value: profileRule.value
         }))
       ]
@@ -7429,6 +7442,1012 @@ var Chart = class {
     return toContext(this.result, options);
   }
 };
+
+// src/reference/index.js
+var reference_exports = {};
+__export(reference_exports, {
+  CANONICAL_RULES: () => CANONICAL_RULES,
+  CONCEPTS: () => CONCEPTS,
+  RULES: () => RULES,
+  findConcept: () => findConcept,
+  getConcept: () => getConcept,
+  getCoverage: () => getCoverage,
+  getCoverageReport: () => getCoverageReport,
+  getRule: () => getRule,
+  getRulesFromSource: () => getRulesFromSource,
+  getSource: () => getSource,
+  getSourcesForRule: () => getSourcesForRule,
+  getTaxonomy: () => getTaxonomy,
+  getVariants: () => getVariants,
+  toContext: () => toContext2,
+  validateReferenceIndex: () => validateReferenceIndex
+});
+
+// sources/classical-texts.json
+var classical_texts_default = {
+  schemaVersion: "1.0.0",
+  catalogId: "bazi-js-classical-evidence",
+  catalogVersion: "2026.09",
+  textStatus: "bibliographic-and-rule-evidence-index",
+  disclaimer: "\u672C\u76EE\u9304\u63D0\u4F9B\u5377\u6B21\u8207\u5224\u5B9A\u4F9D\u64DA\u7D22\u5F15\uFF0C\u4E0D\u5BA3\u7A31\u5DF2\u5B8C\u6210\u6240\u6709\u50B3\u672C\u7684\u6821\u52D8\u6216\u5168\u6587\u6578\u4F4D\u5316\u3002",
+  evidenceLedger: "sources/evidence-ledger.json",
+  sources: [
+    {
+      sourceId: "san-ming-tong-hui",
+      title: "\u4E09\u547D\u901A\u6703",
+      author: "\u842C\u6C11\u82F1",
+      period: "\u660E",
+      sourceStatus: "primary",
+      sourceType: "classical-text",
+      editionNote: "\u4EE5\u53EF\u6838\u5C0D\u7684\u5377\u6B21\u8207\u7BC7\u540D\u4F5C\u70BA\u7D22\u5F15\uFF1B\u7248\u672C\u3001\u6A19\u9EDE\u8207\u5217\u6578\u5DEE\u7570\u53E6\u8A18\u65BC evidenceRecords\u3002",
+      locators: ["\u5377\u4E8C\uFF1A\u4EBA\u5143\u53F8\u4E8B\u3001\u80CE\u5143\u3001\u5750\u547D\u5B98", "\u5377\u4E09\uFF1A\u795E\u715E\u8207\u65E5\u4F8B\u3001\u8AD6\u7A7A\u4EA1", "\u5377\u4E94\uFF1A\u5341\u60E1\u5927\u6557\u65E5", "\u5377\u516D\uFF1A\u7279\u6B8A\u683C\u8207\u7279\u6B8A\u65E5\u67F1"],
+      references: [
+        "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u4E8C",
+        "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D",
+        "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703_(\u56DB\u5EAB\u5168\u66F8\u672C)/\u537703"
+      ]
+    },
+    {
+      sourceId: "yuan-hai-zi-ping",
+      title: "\u6DF5\u6D77\u5B50\u5E73",
+      author: "\u5F90\u5927\u5347\u50B3\u3001\u5F8C\u4E16\u589E\u8A02\u50B3\u672C",
+      period: "\u5B8B\u5143\u4EE5\u964D\u50B3\u672C",
+      sourceStatus: "primary",
+      sourceType: "classical-text",
+      editionNote: "\u66F8\u540D\u8207\u7BC7\u7AE0\u5728\u4E0D\u540C\u50B3\u672C\u6709\u7DE8\u6B21\u5DEE\u7570\uFF1B\u672C\u5C08\u6848\u53EA\u4FDD\u5B58\u53EF\u56DE\u67E5\u7684\u7BC7\u540D\uFF0C\u4E0D\u628A\u5F8C\u4E16\u6458\u8981\u7576\u539F\u6587\u3002",
+      locators: ["\u9B41\u7F61", "\u5341\u60E1\u5927\u6557", "\u65E5\u8CB4\u3001\u65E5\u5FB7", "\u516B\u5C08\u3001\u91D1\u795E", "\u5929\u8D66\u3001\u56DB\u5EE2"],
+      references: ["https://zh.wikisource.org/zh-hant/\u6DF5\u6D77\u5B50\u5E73"]
+    },
+    {
+      sourceId: "xie-ji-bian-fang-shu",
+      title: "\u6B3D\u5B9A\u5354\u7D00\u8FA8\u65B9\u66F8",
+      author: "\u6E05\u5EF7\u7E82\u4FEE",
+      period: "\u6E05",
+      sourceStatus: "primary-reference",
+      sourceType: "reference-text",
+      editionNote: "\u4F5C\u70BA\u5929\u8D66\u7B49\u64C7\u65E5\u985E\u689D\u76EE\u7684\u4EA4\u53C9\u4F86\u6E90\uFF1B\u5B83\u8207\u5B50\u5E73\u547D\u7406\u7684\u4F7F\u7528\u76EE\u7684\u4E0D\u540C\u3002",
+      locators: ["\u5377\u4E94\uFF1A\u5929\u8D66"],
+      references: ["https://zh.wikisource.org/wiki/\u6B3D\u5B9A\u5354\u7D00\u8FA8\u65B9\u66F8_(\u56DB\u5EAB\u5168\u66F8\u672C)/\u537705"]
+    },
+    {
+      sourceId: "di-tian-sui-yan-wei",
+      title: "\u6EF4\u5929\u9AD3\u95E1\u5FAE",
+      author: "\u4EFB\u9435\u6A35\u6CE8",
+      period: "\u6E05",
+      sourceStatus: "commentary",
+      sourceType: "commentary",
+      editionNote: "\u4F5C\u70BA\u4EBA\u5143\u53F8\u4EE4\u3001\u6708\u4EE4\u8207\u5168\u5C40\u53D6\u7528\u7684\u7406\u8AD6\u53C3\u8003\uFF0C\u4E0D\u7528\u4F86\u66FF\u4EE3\u56FA\u5B9A\u65E5\u67F1\u539F\u59CB\u689D\u6587\u3002",
+      locators: ["\u4EBA\u5143\u53F8\u4EE4", "\u6708\u4EE4\u8207\u5168\u5C40\u53D6\u7528"],
+      references: ["https://zh.wikisource.org/zh-hant/\u6EF4\u5929\u9AD3\u95E1\u5FAE", "docs/references/sample1-audit.md"]
+    },
+    {
+      sourceId: "zi-ping-zhen-quan",
+      title: "\u5B50\u5E73\u771F\u8A6E",
+      author: "\u6C88\u5B5D\u77BB",
+      period: "\u6E05",
+      sourceStatus: "classical-commentary",
+      sourceType: "commentary",
+      editionNote: "\u7528\u65BC\u6708\u4EE4\u3001\u683C\u5C40\u6982\u5FF5\u7684\u80CC\u666F\u5C0D\u8B80\uFF1B\u4E0D\u5C07\u683C\u5C40\u689D\u4EF6\u7C21\u5316\u6210\u795E\u715E\u547D\u4E2D\u3002",
+      locators: ["\u6708\u4EE4\u53D6\u683C", "\u683C\u5C40\u8207\u7528\u795E"],
+      references: ["docs/references/rule-differences.md"]
+    },
+    {
+      sourceId: "gu-jin-tu-shu-ji-cheng",
+      title: "\u6B3D\u5B9A\u53E4\u4ECA\u5716\u66F8\u96C6\u6210",
+      author: "\u6E05\u5EF7\u7E82\u4FEE",
+      period: "\u6E05",
+      sourceStatus: "reference-index",
+      sourceType: "reference-encyclopedia",
+      editionNote: "\u50C5\u4F5C\u73FE\u6709\u795E\u715E\u689D\u76EE\u7684\u66F8\u76EE\u5B9A\u4F4D\uFF1B\u5C1A\u672A\u5C07\u767E\u79D1\u689D\u6587\u9010\u689D\u6821\u52D8\u70BA BaziJS canonical \u898F\u5247\u3002",
+      locators: ["\u85DD\u8853\u5178\u7B2C728\u5377"],
+      references: ["\u672A\u5EFA\u7ACB\u53EF\u5B9A\u4F4D\u516C\u958B\u9023\u7D50"]
+    }
+  ],
+  evidenceRecords: [
+    {
+      evidenceId: "EV-SP-KUIGANG-001",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      ruleIds: ["SP_KUIGANG_001"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D\u3008\u9B41\u7F61\u3009\uFF1B\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u9B41\u7F61\u3009",
+      originalBasis: "\u65E5\u67F1\u70BA\u5E9A\u8FB0\u3001\u58EC\u8FB0\u3001\u620A\u620C\u3001\u5E9A\u620C\u4E4B\u4E00\uFF1B\u6B64\u8A18\u9304\u56FA\u5B9A\u65E5\u67F1\u689D\u4EF6\uFF0C\u4E0D\u7B49\u540C\u5B8C\u6574\u9B41\u7F61\u683C\u6210\u683C\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [],
+      researchNotes: "\u56FA\u5B9A\u65E5\u67F1\u8207\u6574\u5C40\u6210\u683C\u5206\u96E2\u3002"
+    },
+    {
+      evidenceId: "EV-SP-SHIEDABAI-002",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      ruleIds: ["SP_SHIEDABAI_002"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E94\u3008\u5341\u60E1\u5927\u6557\u65E5\u3009\uFF1B\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u5341\u60E1\u5927\u6557\u3009",
+      originalBasis: "\u7532\u8FB0\u3001\u4E59\u5DF3\u3001\u4E19\u7533\u3001\u4E01\u4EA5\u3001\u620A\u620C\u3001\u5DF1\u4E11\u3001\u5E9A\u8FB0\u3001\u8F9B\u5DF3\u3001\u58EC\u7533\u3001\u7678\u4EA5\u5341\u65E5\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [],
+      researchNotes: "\u540D\u7A31\u8207\u5409\u51F6\u89E3\u8B80\u4E0D\u4EE3\u8868\u6574\u5C40\u5FC5\u7136\u51F6\u6557\u3002"
+    },
+    {
+      evidenceId: "EV-SP-RIGUI-003",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      ruleIds: ["SP_RIGUI_003"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D\u3008\u65E5\u8CB4\u3009\uFF1B\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u65E5\u8CB4\u3009",
+      originalBasis: "\u4E01\u9149\u3001\u4E01\u4EA5\u3001\u7678\u5DF3\u3001\u7678\u536F\u56DB\u65E5\u3002\u665D\u8CB4\u3001\u591C\u8CB4\u5206\u914D\u53E6\u6709\u7248\u672C\u5DEE\u7570\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [{ id: "day-night", note: "\u665D\u8CB4/\u591C\u8CB4\u5206\u914D\u9700\u6309\u7248\u672C\u4FDD\u5B58\u3002" }],
+      researchNotes: "\u76EE\u524D\u53EA\u8B58\u5225\u65E5\u67F1\uFF0C\u4E0D\u4EE3\u66FF\u5B8C\u6574\u65E5\u8CB4\u683C\u5224\u5B9A\u3002"
+    },
+    {
+      evidenceId: "EV-SP-RIDE-004",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      ruleIds: ["SP_RIDE_004"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D\u3008\u65E5\u5FB7\u3009\uFF1B\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u65E5\u5FB7\u3009",
+      originalBasis: "\u7532\u5BC5\u3001\u4E19\u8FB0\u3001\u620A\u8FB0\u3001\u5E9A\u8FB0\u3001\u58EC\u620C\u4E94\u65E5\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [],
+      researchNotes: "\u5B8C\u6574\u65E5\u5FB7\u683C\u4ECD\u9808\u6574\u5C40\u8003\u5BDF\u3002"
+    },
+    {
+      evidenceId: "EV-SP-BAZHUAN-005",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      ruleIds: ["SP_BAZHUAN_005"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D\u3008\u516B\u5C08\u797F\u65FA\u3009\uFF1B\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u516B\u5C08\u3009",
+      originalBasis: "\u7532\u5BC5\u3001\u4E59\u536F\u3001\u5DF1\u672A\u3001\u4E01\u672A\u3001\u5E9A\u7533\u3001\u8F9B\u9149\u3001\u620A\u620C\u3001\u7678\u4E11\u516B\u65E5\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [{ id: "four-day-core", note: "\u90E8\u5206\u50B3\u672C\u6216\u8A3B\u5BB6\u53EA\u53D6\u7532\u5BC5\u3001\u4E59\u536F\u3001\u5E9A\u7533\u3001\u8F9B\u9149\u56DB\u65E5\u3002" }],
+      researchNotes: "\u56DB\u65E5\u6838\u5FC3\u8207\u516B\u65E5\u64F4\u5C55\u4E0D\u53EF\u8996\u70BA\u6C92\u6709\u5DEE\u7570\u3002"
+    },
+    {
+      evidenceId: "EV-SP-JIUCHOU-006",
+      sourceIds: ["san-ming-tong-hui"],
+      ruleIds: ["SP_JIUCHOU_006"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09\u3008\u4E5D\u919C\u65E5\u3009",
+      originalBasis: "\u620A\u5B50\u3001\u620A\u5348\u3001\u5DF1\u536F\u3001\u5DF1\u9149\u3001\u8F9B\u536F\u3001\u8F9B\u9149\u3001\u58EC\u5B50\u3001\u58EC\u5348\u3001\u4E01\u9149\u3001\u4E59\u536F\u5341\u65E5\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [{ id: "later-nine-day-list", note: "\u5F8C\u4E16\u5E38\u898B\u4E5D\u65E5\u8868\u6709\u522A\u6E1B\u6216\u6539\u5217\u3002" }],
+      researchNotes: "\u4E5D\u919C\u4E4B\u540D\u8207\u539F\u6587\u5341\u65E5\u5217\u6CD5\u6709\u6578\u76EE\u885D\u7A81\uFF0C\u9810\u8A2D\u63A1\u53EF\u56DE\u67E5\u7684\u5377\u4E09\u5217\u6CD5\u3002"
+    },
+    {
+      evidenceId: "EV-SP-GULUAN-007",
+      sourceIds: ["san-ming-tong-hui"],
+      ruleIds: ["SP_GULUAN_007"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09\u3008\u5B64\u9E1E\u715E\u3009\u3001\u5377\u516D\u3008\u5B64\u9E1E\u3009",
+      originalBasis: "\u4E59\u5DF3\u3001\u4E01\u5DF3\u3001\u8F9B\u4EA5\u3001\u620A\u7533\u3001\u7532\u5BC5\u3001\u4E19\u5348\u3001\u620A\u5348\u3001\u58EC\u5B50\u516B\u65E5\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [{ id: "legacy-conservative-five", note: "\u820A BaziJS vNext \u66FE\u63A1\u4E94\u67F1\u3002" }],
+      researchNotes: "\u672C\u7248\u9810\u8A2D\u539F\u5178\u516B\u65E5\uFF0C\u4FDD\u7559\u820A\u7248\u4E94\u67F1\u5DEE\u7570\u3002"
+    },
+    {
+      evidenceId: "EV-SP-YYCC-008",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      ruleIds: ["SP_YYCC_008"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09\u3008\u9670\u967D\u5DEE\u932F\u3009\uFF1B\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u9670\u967D\u5DEE\u932F\u3009",
+      originalBasis: "\u4E19\u5B50\u3001\u4E01\u4E11\u3001\u620A\u5BC5\u3001\u8F9B\u536F\u3001\u58EC\u8FB0\u3001\u7678\u5DF3\u3001\u4E19\u5348\u3001\u4E01\u672A\u3001\u620A\u7533\u3001\u8F9B\u9149\u3001\u58EC\u620C\u3001\u7678\u4EA5\u5341\u4E8C\u65E5\u3002",
+      scope: "dayPillar",
+      evidenceStatus: "implemented",
+      variants: [],
+      researchNotes: "\u56FA\u5B9A\u65E5\u67F1\u8B58\u5225\uFF0C\u4E0D\u76F4\u63A5\u8F38\u51FA\u5A5A\u59FB\u7D50\u8AD6\u3002"
+    },
+    {
+      evidenceId: "EV-SP-JINSHEN-009",
+      sourceIds: ["yuan-hai-zi-ping", "san-ming-tong-hui"],
+      ruleIds: ["SP_JINSHEN_009"],
+      citation: "\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u91D1\u795E\u3009\uFF1B\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D\u3008\u91D1\u795E\u3009",
+      originalBasis: "\u6642\u67F1\u70BA\u7678\u9149\u3001\u5DF1\u5DF3\u3001\u4E59\u4E11\u4E4B\u4E00\uFF1B\u706B\u5236\u3001\u6708\u4EE4\u8207\u5168\u5C40\u53D6\u7528\u53E6\u884C\u5224\u65B7\u3002",
+      scope: "hourPillar",
+      evidenceStatus: "implemented",
+      variants: [],
+      researchNotes: "\u91D1\u795E\u6642\u8B58\u5225\u8207\u5B8C\u6574\u91D1\u795E\u683C\u53D6\u7528\u5206\u96E2\u3002"
+    },
+    {
+      evidenceId: "EV-SE-TIANSHE-001",
+      sourceIds: ["yuan-hai-zi-ping", "xie-ji-bian-fang-shu"],
+      ruleIds: ["SE_TIANSHE_001"],
+      citation: "\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u5929\u8D66\u3009\uFF1B\u300A\u6B3D\u5B9A\u5354\u7D00\u8FA8\u65B9\u66F8\u300B\u5377\u4E94\u3008\u5929\u8D66\u3009",
+      originalBasis: "\u6625\u620A\u5BC5\u3001\u590F\u7532\u5348\u3001\u79CB\u620A\u7533\u3001\u51AC\u7532\u5B50\uFF1B\u5B63\u7BC0\u4F9D\u7BC0\u4EE4\u6708\u652F\uFF0C\u4E0D\u4F9D\u570B\u66C6\u6708\u4EFD\u786C\u5207\u3002",
+      scope: "season + dayPillar",
+      evidenceStatus: "implemented",
+      variants: [{ id: "calendar-variants", note: "\u5176\u4ED6\u66C6\u66F8\u65E5\u4F8B\u6216\u5B63\u7BC0\u754C\u7DDA\u53EF\u80FD\u6709\u7570\u6587\u3002" }],
+      researchNotes: "evidence \u5FC5\u9808\u4FDD\u7559 season\u3001seasonSource\u3001monthBranch\u3002"
+    },
+    {
+      evidenceId: "EV-SE-SIFEI-002",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      ruleIds: ["SE_SIFEI_002"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D\u3008\u56DB\u5EE2\u65E5\u4F8B\u3009\uFF1B\u300A\u6DF5\u6D77\u5B50\u5E73\u300B\u3008\u56DB\u5EE2\u3009",
+      originalBasis: "\u6625\u5E9A\u7533\u8F9B\u9149\u3001\u590F\u58EC\u5B50\u7678\u4EA5\u3001\u79CB\u7532\u5BC5\u4E59\u536F\u3001\u51AC\u4E19\u5348\u4E01\u5DF3\u3002",
+      scope: "season + dayPillar",
+      evidenceStatus: "implemented",
+      variants: [{ id: "season-boundary", note: "\u5B63\u7BC0\u4EE5\u5BC5\u536F\u8FB0\u3001\u5DF3\u5348\u672A\u3001\u7533\u9149\u620C\u3001\u4EA5\u5B50\u4E11\u6B78\u985E\u3002" }],
+      researchNotes: "\u4E0D\u80FD\u53EA\u7528 dayPillar \u5224\u5B9A\u3002"
+    },
+    {
+      evidenceId: "EV-PT-CLASSICAL-006",
+      sourceIds: ["san-ming-tong-hui", "zi-ping-zhen-quan", "di-tian-sui-yan-wei"],
+      ruleIds: ["PT_RENQILONG_001", "PT_LIUYIN_002", "PT_LIUYI_003", "PT_RILUGUI_004", "PT_GONGLU_005", "PT_GONGGUI_006", "PT_FUDE_007"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u516D\u5404\u7279\u6B8A\u683C\u689D\u76EE\uFF1B\u4E26\u4EE5\u5B50\u5E73\u683C\u5C40\u6CE8\u5BB6\u4F5C\u6982\u5FF5\u5C0D\u8B80",
+      originalBasis: "\u58EC\u9A0E\u9F8D\u80CC\u3001\u516D\u9670\u671D\u967D\u3001\u516D\u4E59\u9F20\u8CB4\u3001\u65E5\u797F\u6B78\u6642\u3001\u62F1\u797F\u3001\u62F1\u8CB4\u3001\u798F\u5FB7\u79C0\u6C23\u5747\u9700\u65E5\u6642\u3001\u6708\u4EE4\u3001\u900F\u5E72\u3001\u5408\u5C40\u3001\u5211\u6C96\u7834\u5BB3\u7B49\u5168\u5C40\u689D\u4EF6\u3002",
+      scope: "wholeChart",
+      evidenceStatus: "research-only",
+      variants: [{ id: "textual-and-school-variants", note: "\u5404\u683C\u7684\u6838\u5FC3\u65E5\u5E72\u3001\u6642\u67F1\u3001\u865B\u795E\u8207\u7834\u683C\u689D\u4EF6\u9700\u9010\u689D\u6821\u52D8\u3002" }],
+      researchNotes: "\u9019\u4E9B\u662F SpecialPatterns\uFF0C\u4E0D\u5F97\u653E\u5165 ShenSha Catalog\uFF1B\u76EE\u524D\u53EA\u767B\u9304\u67B6\u69CB\u3002"
+    },
+    {
+      evidenceId: "EV-FC-CLASSICAL-007",
+      sourceIds: ["di-tian-sui-yan-wei"],
+      ruleIds: ["STR_FIVE_CATEGORY_CANONICAL_DERIVED"],
+      citation: "\u300A\u6EF4\u5929\u9AD3\u95E1\u5FAE\u300B\u559C\u795E\u3001\u5FCC\u795E\u3001\u4EC7\u795E\u3001\u9592\u795E\u76F8\u95DC\u6CE8\u89E3\uFF1B\u73FE\u4EE3\u8853\u8A9E\u5B9A\u7FA9\u4F5C\u70BA\u5C0D\u7167\u3002",
+      originalBasis: "\u5148\u7531\u672C\u6B21\u6276\u6291 Profile \u9078\u51FA\u7528\u795E\uFF0C\u518D\u4F9D\u4E94\u884C\u751F\u524B\u95DC\u4FC2\u5C55\u958B\u559C\u3001\u9592\u3001\u4EC7\u3001\u5FCC\uFF1B\u9019\u662F SDK \u7684\u53EF\u91CD\u73FE\u63A8\u5C0E\uFF0C\u4E0D\u662F\u53E4\u7C4D\u56FA\u5B9A\u6392\u5E8F\u3002",
+      scope: "wholeChart",
+      evidenceStatus: "implemented",
+      variants: [{ id: "profile-selected-use", note: "\u8ABF\u5019\u3001\u683C\u5C40\u3001\u901A\u95DC\u6216\u900F\u5E72\u53D6\u7528\u6703\u4F7F\u4E94\u5206\u985E\u6539\u8B8A\u3002" }],
+      researchNotes: "\u53E4\u7C4D\u63D0\u4F9B\u8853\u8A9E\u8207\u53D6\u7528\u601D\u8DEF\uFF0C\u672A\u63D0\u4F9B\u53EF\u8DE8\u6D41\u6D3E\u76F4\u63A5\u5957\u7528\u7684\u55AE\u4E00\u4E94\u5206\u985E\u6F14\u7B97\u6CD5\u3002"
+    },
+    {
+      evidenceId: "EV-MC-REN-YUAN-008",
+      sourceIds: ["san-ming-tong-hui", "di-tian-sui-yan-wei"],
+      ruleIds: ["STR_MONTH_COMMANDER_001"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E8C\u3008\u8AD6\u4EBA\u5143\u53F8\u4E8B\u3009\u3001\u3008\u8AD6\u56DB\u6642\u7BC0\u6C23\u3009\uFF1B\u300A\u6EF4\u5929\u9AD3\u95E1\u5FAE\u300B\u6708\u4EE4\u8207\u4EBA\u5143\u6CE8\u89E3\u3002",
+      originalBasis: "\u4EE5\u6708\u652F\u70BA\u63D0\u7DB1\uFF0C\u6309\u7BC0\u5F8C\u7D93\u904E\u65E5\u6578\u843D\u5165\u672C\u5C08\u6848\u7684\u5206\u6BB5\u8868\uFF0C\u9078\u51FA\u7576\u6708\u503C\u4EE4\u85CF\u5E72\uFF1B\u65E5\u6578\u53D6\u6CD5\u8207\u5206\u6BB5\u8868\u53E6\u6709\u50B3\u672C\u5DEE\u7570\u3002",
+      scope: "seasonalMonth",
+      evidenceStatus: "implemented",
+      variants: [{ id: "phase-table", note: "\u5404\u5BB6\u4EBA\u5143\u53F8\u4EE4\u5206\u65E5\u6BD4\u4F8B\u4E0D\u540C\u3002" }, { id: "day-rounding", note: "\u7BC0\u5F8C\u6574\u65E5\u8207\u7CBE\u78BA\u6642\u523B\u53D6\u6CD5\u4E0D\u540C\u3002" }],
+      researchNotes: "\u4FDD\u5B58\u672C\u7248\u672C\u6F14\u7B97\u6CD5\u8207\u5DEE\u7570\uFF0C\u4E0D\u628A\u5206\u65E5\u8868\u5BA3\u7A31\u70BA\u552F\u4E00\u53E4\u6CD5\u3002"
+    },
+    {
+      evidenceId: "EV-KW-XUN-009",
+      sourceIds: ["san-ming-tong-hui"],
+      ruleIds: ["AUX_KONGWANG_SIX_XUN_001"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E09\u3008\u8AD6\u7A7A\u4EA1\u3009\u3002",
+      originalBasis: "\u7532\u65EC\u76E1\u8655\u70BA\u7A7A\u4EA1\uFF1B\u516D\u5341\u7532\u5B50\u5206\u516D\u65EC\uFF0C\u6BCF\u65EC\u5341\u652F\uFF0C\u9918\u4E0B\u5169\u652F\u70BA\u65EC\u7A7A\u3002",
+      scope: "dayPillarAndYearPillar",
+      evidenceStatus: "implemented",
+      variants: [{ id: "day-xun", note: "\u65E5\u7A7A\u8207\u5E74\u7A7A\u61C9\u5206\u6B04\u4FDD\u5B58\u3002" }],
+      researchNotes: "\u53EA\u6838\u7B97\u65EC\u7A7A\u5730\u652F\u8207\u547D\u76E4\u547D\u4E2D\u77E9\u9663\uFF0C\u4E0D\u7531\u6B64\u6B04\u76F4\u63A5\u5224\u5409\u51F6\u3002"
+    },
+    {
+      evidenceId: "EV-AUX-PALACE-010",
+      sourceIds: ["san-ming-tong-hui"],
+      ruleIds: ["AUX_TAIYUAN_001", "AUX_TAIXI_002", "AUX_MINGGONG_003", "AUX_SHENGONG_004", "AUX_CLASSICAL_AUXILIARY_001"],
+      citation: "\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E8C\u3008\u8AD6\u80CE\u5143\u3009\u3001\u3008\u8AD6\u5750\u547D\u5B98\u3009\u53CA\u76F8\u95DC\u80CE\u606F\u3001\u547D\u5BAE\u3001\u8EAB\u5BAE\u8CC7\u6599\u3002",
+      originalBasis: "\u80CE\u5143\u3001\u80CE\u606F\u3001\u547D\u5BAE\u3001\u8EAB\u5BAE\u4F9D\u76EE\u524D canonical \u516C\u5F0F\u96C6\u4E2D\u8F38\u51FA\uFF1B\u547D\u5BAE\u8EAB\u5BAE\u53E6\u6709\u4E2D\u6C23\u904E\u5BAE\u3001\u6708\u5EFA\u8207\u5B50\u6642\u5206\u754C\u5DEE\u7570\u3002",
+      scope: "wholeChartAuxiliary",
+      evidenceStatus: "implemented",
+      variants: [{ id: "solar-term-over-month", note: "\u4E2D\u6C23\u904E\u5BAE\u53EF\u80FD\u6539\u8B8A\u547D\u5BAE\u8EAB\u5BAE\u3002" }, { id: "zi-hour-boundary", note: "\u5B50\u6642\u63DB\u65E5\u53EF\u80FD\u6539\u8B8A\u7D50\u679C\u3002" }],
+      researchNotes: "\u8CC7\u6599\u96C6\u4E2D\u5448\u73FE\u53EF\u9A57\u8B49\u7684\u8A08\u7B97\u7D50\u679C\uFF0C\u4E0D\u628A\u8F14\u52A9\u5BAE\u4F4D\u7576\u6210\u5B50\u5E73\u683C\u5C40\u6216\u795E\u715E\u3002"
+    }
+  ]
+};
+
+// sources/evidence-ledger.json
+var evidence_ledger_default = {
+  schemaVersion: "1.0.0",
+  catalogId: "bazi-js-classical-evidence-ledger",
+  catalogVersion: "2026.09",
+  purpose: "\u53EF\u5B9A\u4F4D\u7684\u53E4\u7C4D\u6458\u9304\u3001\u7248\u672C\u8207\u6821\u52D8\u72C0\u614B\uFF1B\u4E0D\u628A\u672A\u6838\u5BE6\u7684\u9801\u78BC\u6216\u50B3\u672C\u5DEE\u7570\u5BEB\u6210\u78BA\u5B9A\u4E8B\u5BE6\u3002",
+  editionRecords: [
+    {
+      editionId: "wikisource-san-ming-tong-hui",
+      sourceId: "san-ming-tong-hui",
+      title: "\u300A\u4E09\u547D\u901A\u6703\u300B\u7DAD\u57FA\u6587\u5EAB\u6578\u4F4D\u8F49\u9304\u672C",
+      provider: "Wikisource",
+      editionStatus: "digital-transcription",
+      publicationYear: null,
+      notes: "\u6B64\u70BA\u53EF\u516C\u958B\u5B9A\u4F4D\u7684\u6578\u4F4D\u8F49\u9304\uFF1B\u4E0D\u662F\u5F71\u50CF\u7248\uFF0C\u9801\u78BC\u4E0D\u5F37\u884C\u63A8\u5B9A\u3002"
+    },
+    {
+      editionId: "wikisource-di-tian-sui-yan-wei",
+      sourceId: "di-tian-sui-yan-wei",
+      title: "\u300A\u6EF4\u5929\u9AD3\u95E1\u5FAE\u300B\u7DAD\u57FA\u6587\u5EAB\u6578\u4F4D\u8F49\u9304\u672C",
+      provider: "Wikisource",
+      editionStatus: "digital-transcription",
+      publicationYear: null,
+      notes: "\u4F5C\u70BA\u7406\u8AD6\u80CC\u666F\u7D22\u5F15\uFF1B\u5BE6\u969B\u898F\u5247\u4ECD\u9700\u9010\u689D\u4FDD\u5B58\u539F\u6587\u8207\u8B8A\u9AD4\u3002"
+    }
+  ],
+  citations: [
+    {
+      evidenceId: "EV-MC-SANMING-001",
+      sourceId: "san-ming-tong-hui",
+      ruleIds: ["STR_MONTH_COMMANDER_SANMING_002"],
+      edition: "wikisource-san-ming-tong-hui",
+      locator: {
+        type: "section",
+        section: "\u5377\u4E8C\u3008\u8AD6\u4EBA\u5143\u53F8\u4E8B\u3009",
+        page: null,
+        url: "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u4E8C",
+        accessedAt: "2026-09-09"
+      },
+      originalExcerpt: "\u5BC5\u4E2D\u6709\u826E\u571F\u7528\u4E8B\u4E94\u65E5\uFF0C\u4E19\u706B\u9577\u751F\u4E94\u65E5\uFF0C\u7532\u6728\u4E8C\u5341\u65E5",
+      transcription: "\u5BC5\uFF1A\u620A\u4E94\u65E5\u3001\u4E19\u4E94\u65E5\u3001\u7532\u4E8C\u5341\u65E5\uFF1B\u5176\u9918\u6708\u4F9D\u539F\u689D\u6587\u8868\u5217\u3002",
+      ocrNotes: "\u6B64\u70BA\u6578\u4F4D\u8F49\u9304\uFF0C\u7121 OCR \u5F71\u50CF\u5C64\u3002",
+      collationNotes: "\u76EE\u524D\u53EA\u63A1\u53EF\u5B9A\u4F4D\u689D\u6587\uFF1B\u5B8C\u6574\u5206\u65E5\u8868\u8207\u5176\u4ED6\u50B3\u672C\u7684\u5DEE\u7570\u4FDD\u7559\u5728 SAN_MING_MONTH_COMMAND_PHASES \u8207 variants\u3002",
+      verificationStatus: "source-located",
+      variants: [{ id: "bazi-js-human-element", note: "BaziJS canonical \u63A1\u53E6\u4E00\u5957\u53EF\u91CD\u73FE\u5206\u6BB5\u8868\u3002" }],
+      researchNotes: "\u53E4\u7C4D\u5206\u65E5\u8207\u5F8C\u4E16\u4EBA\u5143\u53F8\u4EE4\u8868\u4E0D\u53EF\u76F4\u63A5\u8996\u70BA\u540C\u4E00\u898F\u5247\u3002"
+    },
+    {
+      evidenceId: "EV-SP-RILU-002",
+      sourceId: "san-ming-tong-hui",
+      ruleIds: ["PATTERN_RILU_GUI_SHI_RESEARCH_001"],
+      edition: "wikisource-san-ming-tong-hui",
+      locator: {
+        type: "section",
+        section: "\u5377\u516D\u3008\u65E5\u797F\u6B78\u6642\u3009",
+        page: null,
+        url: "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D",
+        accessedAt: "2026-09-09"
+      },
+      originalExcerpt: "\u65E5\u797F\u6B78\u6642\u6C92\u5B98\u661F\uFF0C\u865F\u9752\u96F2\u5F97\u8DEF\u3002",
+      transcription: "\u6642\u67F1\u8207\u65E5\u797F\u6B78\u6642\u76F8\u95DC\uFF0C\u4ECD\u9808\u914D\u5408\u5168\u5C40\u6210\u683C\u689D\u4EF6\u3002",
+      ocrNotes: "\u6B64\u70BA\u6578\u4F4D\u8F49\u9304\uFF0C\u7121 OCR \u5F71\u50CF\u5C64\u3002",
+      collationNotes: "\u77ED\u6458\u9304\u53EA\u8B49\u660E\u53E4\u7C4D\u689D\u540D\u8207\u6982\u5FF5\uFF0C\u4E0D\u8DB3\u4EE5\u63A8\u51FA\u5B8C\u6574\u6210\u683C\u7B97\u6CD5\u3002",
+      verificationStatus: "source-located",
+      variants: [],
+      researchNotes: "\u5217\u5165 Patterns \u7814\u7A76\uFF0C\u4E0D\u5217\u5165\u4E00\u822C\u795E\u715E\u3002"
+    },
+    {
+      evidenceId: "EV-SP-GONGLU-003",
+      sourceId: "san-ming-tong-hui",
+      ruleIds: ["PATTERN_GONGLU_RESEARCH_001"],
+      edition: "wikisource-san-ming-tong-hui",
+      locator: {
+        type: "section",
+        section: "\u5377\u516D\u3008\u62F1\u797F\u62F1\u8CB4\u3009",
+        page: null,
+        url: "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D",
+        accessedAt: "2026-09-09"
+      },
+      originalExcerpt: "\u62F1\u797F\u62F1\u8CB4\uFF0C\u586B\u5BE6\u5247\u51F6\u3002",
+      transcription: "\u62F1\u797F\u3001\u62F1\u8CB4\u4EE5\u5169\u67F1\u593E\u62F1\u689D\u4EF6\u7814\u7A76\uFF0C\u4E0D\u80FD\u53EA\u7528\u55AE\u67F1\u547D\u4E2D\u3002",
+      ocrNotes: "\u6B64\u70BA\u6578\u4F4D\u8F49\u9304\uFF0C\u7121 OCR \u5F71\u50CF\u5C64\u3002",
+      collationNotes: "\u5C1A\u672A\u5C07\u6240\u6709\u586B\u5BE6\u3001\u6C96\u7834\u8207\u6708\u4EE4\u689D\u4EF6\u6574\u7406\u6210 canonical predicate\u3002",
+      verificationStatus: "source-located",
+      variants: [],
+      researchNotes: "\u5217\u5165 Patterns \u7814\u7A76\uFF0C\u4E0D\u5217\u5165\u4E00\u822C\u795E\u715E\u3002"
+    },
+    {
+      evidenceId: "EV-SP-LIUYI-004",
+      sourceId: "san-ming-tong-hui",
+      ruleIds: ["PATTERN_LIUYI_SHUGUI_RESEARCH_001"],
+      edition: "wikisource-san-ming-tong-hui",
+      locator: {
+        type: "section",
+        section: "\u5377\u516D\u3008\u516D\u4E59\u9F20\u8CB4\u3009",
+        page: null,
+        url: "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u516D",
+        accessedAt: "2026-09-09"
+      },
+      originalExcerpt: "\u9670\u6728\u7368\u9047\u5B50\u6642\uFF0C\u70BA\u516D\u4E59\u9F20\u8CB4\u4E4B\u5730\u3002",
+      transcription: "\u516D\u4E59\u9F20\u8CB4\u81F3\u5C11\u6D89\u53CA\u4E59\u65E5\u8207\u5B50\u6642\uFF0C\u5B8C\u6574\u6210\u683C\u689D\u4EF6\u5F85\u7814\u7A76\u3002",
+      ocrNotes: "\u6B64\u70BA\u6578\u4F4D\u8F49\u9304\uFF0C\u7121 OCR \u5F71\u50CF\u5C64\u3002",
+      collationNotes: "\u4E0D\u628A\u689D\u540D\u6216\u55AE\u4E00\u65E5\u6642\u689D\u4EF6\u76F4\u63A5\u8F49\u6210\u795E\u715E\u547D\u4E2D\u3002",
+      verificationStatus: "source-located",
+      variants: [],
+      researchNotes: "\u5217\u5165 Patterns \u7814\u7A76\uFF0C\u4E0D\u5217\u5165\u4E00\u822C\u795E\u715E\u3002"
+    },
+    {
+      evidenceId: "EV-AUX-MINGGONG-005",
+      sourceId: "san-ming-tong-hui",
+      ruleIds: ["AUX_CANONICAL_PALM_001"],
+      edition: "wikisource-san-ming-tong-hui",
+      locator: {
+        type: "section",
+        section: "\u5377\u4E8C\u3008\u8AD6\u5750\u547D\u5B98\u3009",
+        page: null,
+        url: "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u4E8C",
+        accessedAt: "2026-09-09"
+      },
+      originalExcerpt: "\u6B64\u6CD5\u770B\u662F\u4F55\u6708\u751F\u4EBA\u5750\u65BC\u4F55\u6642\uFF0C\u7136\u5F8C\u65B9\u5B9A\u547D\u5750\u4F55\u5BAE\u3002",
+      transcription: "\u547D\u5BAE\u7B97\u6CD5\u4EE5\u51FA\u751F\u6708\u652F\u8207\u6642\u652F\u70BA\u57FA\u790E\uFF0C\u518D\u4F9D\u4E94\u864E\u9041\u53D6\u547D\u5BAE\u5929\u5E72\u3002",
+      ocrNotes: "\u6B64\u70BA\u6578\u4F4D\u8F49\u9304\uFF0C\u7121 OCR \u5F71\u50CF\u5C64\u3002",
+      collationNotes: "\u5B8C\u6574\u638C\u8A23\u3001\u8D77\u6CD5\u8207\u4E0D\u540C\u8853\u6D3E\u7B97\u6CD5\u5C1A\u672A\u5168\u90E8\u5C0D\u8B80\uFF1Bcanonical \u516C\u5F0F\u8207\u7814\u7A76 Profile \u5206\u96E2\u3002",
+      verificationStatus: "source-located",
+      variants: [{ id: "san-ming-palm-research", note: "\u9810\u7559\u5B8C\u6574\u8B8A\u9AD4\u7814\u7A76\uFF0C\u4E0D\u8986\u84CB canonical\u3002" }],
+      researchNotes: "\u6B64\u8B49\u64DA\u53EA\u652F\u63F4\u6708\u6642\u53D6\u547D\u5BAE\u7684\u4F86\u6E90\u65B9\u5411\uFF0C\u4E0D\u5BA3\u7A31\u76EE\u524D\u516C\u5F0F\u662F\u552F\u4E00\u50B3\u627F\u3002"
+    },
+    {
+      evidenceId: "EV-LUCK-006",
+      sourceId: "san-ming-tong-hui",
+      ruleIds: ["LUCK_START_DIFF_DIV_3"],
+      edition: "wikisource-san-ming-tong-hui",
+      locator: {
+        type: "section",
+        section: "\u5377\u4E8C\u3008\u8AD6\u5927\u904B\u3009",
+        page: null,
+        url: "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u4E8C",
+        accessedAt: "2026-09-09"
+      },
+      originalExcerpt: "\u53E4\u4EBA\u4EE5\u5927\u904B\u5247\u4E00\u8FB0\u5341\u6B72\uFF0C\u6298\u9664\u4EE5\u4E09\u65E5\u70BA\u5E74\u8005\u4F55\uFF1F",
+      transcription: "\u5927\u904B\u8D77\u904B\u7684\u7BC0\u6C23\u8DDD\u96E2\u8207\u4E09\u65E5\u4E00\u6B72\u63DB\u7B97\uFF0C\u4FDD\u7559\u70BA\u53EF\u8FFD\u6EAF\u65B9\u6CD5\u3002",
+      ocrNotes: "\u6B64\u70BA\u6578\u4F4D\u8F49\u9304\uFF0C\u7121 OCR \u5F71\u50CF\u5C64\u3002",
+      collationNotes: "\u4E0D\u540C\u8D77\u904B\u6298\u7B97\u6CD5\u53E6\u4EE5 luckCycles.variants \u4FDD\u5B58\uFF0C\u4E0D\u5728\u6B64\u689D\u6587\u4E0B\u5047\u5B9A\u552F\u4E00\u3002",
+      verificationStatus: "source-located",
+      variants: [{ id: "jieqi-whole-days-divide-3", note: "\u7BC0\u6C23\u5DEE\u5148\u53D6\u6574\u65E5\u518D\u9664\u4E09\u7684\u6BD4\u8F03\u65B9\u6CD5\u3002" }],
+      researchNotes: "\u53E4\u7C4D\u5F15\u6587\u8207\u672C SDK \u5BE6\u4F5C\u65B9\u6CD5\u9700\u4FDD\u6301\u53EF\u5340\u5206\u3002"
+    }
+  ]
+};
+
+// sources/variants.json
+var variants_default = {
+  schemaVersion: "1.0.0",
+  catalogId: "bazi-js-rule-variants",
+  catalogVersion: "2026.09",
+  purpose: "\u8A18\u9304\u53EF\u91CD\u73FE\u7684\u6D41\u6D3E\u3001\u7B97\u6CD5\u8207\u8CC7\u6599\u7D04\u5B9A\u5DEE\u7570\uFF1B\u4E0D\u628A\u5DEE\u7570\u88C1\u6C7A\u6210\u8DE8\u6D41\u6D3E\u552F\u4E00\u771F\u503C\u3002",
+  variants: [
+    {
+      variantId: "VAR_YEAR_BOUNDARY_LUNAR_NEW_YEAR",
+      conceptId: "profile.year-boundary",
+      tradition: "calendar-convention",
+      sourceIds: [],
+      status: "comparison",
+      condition: "\u5E74\u67F1\u4EE5\u6B63\u6708\u521D\u4E00\u5207\u63DB\uFF0C\u800C\u975E\u4EE5\u7ACB\u6625\u5207\u63DB\u3002",
+      algorithm: "yearBoundary=lunar_new_year",
+      profileIds: ["lunar-calendar"],
+      differencesFromCanonical: "\u53EF\u80FD\u6539\u8B8A\u7ACB\u6625\u524D\u570B\u66C6\u65E5\u671F\u7684\u5E74\u67F1\u8207\u5F8C\u7E8C\u5E74\u652F\u67E5\u6CD5\u3002",
+      evidence: "Profile differential fixtures \u5DF2\u56FA\u5B9A\u5E74\u754C\u5DEE\u7570\uFF1B\u4E0D\u5BA3\u7A31\u67D0\u4E00\u7D04\u5B9A\u662F\u552F\u4E00\u6D41\u6D3E\u7B54\u6848\u3002"
+    },
+    {
+      variantId: "VAR_MONTH_BOUNDARY_LUNAR_MONTH",
+      conceptId: "profile.month-boundary",
+      tradition: "calendar-convention",
+      sourceIds: [],
+      status: "comparison",
+      condition: "\u6708\u67F1\u4F9D\u8FB2\u66C6\u6708\u754C\uFF0C\u800C\u975E\u7BC0\u6C23\u6708\u754C\u3002",
+      algorithm: "monthBoundary=lunar_month",
+      profileIds: ["lunar-calendar"],
+      differencesFromCanonical: "\u7BC0\u6C23\u524D\u5F8C\u53EF\u80FD\u5F97\u5230\u4E0D\u540C\u6708\u67F1\u3002",
+      evidence: "Profile differential fixtures \u5DF2\u56FA\u5B9A\u6708\u754C\u5DEE\u7570\u3002"
+    },
+    {
+      variantId: "VAR_DAY_BOUNDARY_CIVIL_MIDNIGHT",
+      conceptId: "profile.day-boundary",
+      tradition: "day-boundary-convention",
+      sourceIds: [],
+      status: "comparison",
+      condition: "\u4EE5\u6C11\u7528\u5348\u591C 00:00 \u5207\u63DB\u65E5\u67F1\uFF0C\u800C\u975E canonical \u7684\u665A\u5B50 23:00\u3002",
+      algorithm: "dayBoundary=00:00",
+      profileIds: ["civil-midnight"],
+      differencesFromCanonical: "23:00\u201323:59 \u7684\u65E5\u671F\u8207\u65E5\u67F1\u53EF\u80FD\u4E0D\u540C\u3002",
+      evidence: "Profile differential fixtures \u8207\u5B50\u6642\u908A\u754C\u62BD\u6A23\u53EF\u91CD\u8DD1\u3002"
+    },
+    {
+      variantId: "VAR_TRUE_SOLAR_TIME_LONGITUDE",
+      conceptId: "profile.true-solar-time",
+      tradition: "astronomical-time-convention",
+      sourceIds: [],
+      status: "comparison",
+      condition: "\u4EE5\u51FA\u751F\u5730\u7D93\u5EA6\u4FEE\u6B63\u5730\u65B9\u771F\u592A\u967D\u6642\u5F8C\u518D\u5224\u5B9A\u6642\u67F1\u3002",
+      algorithm: "trueSolarTime=true",
+      profileIds: ["true-solar"],
+      differencesFromCanonical: "\u6642\u67F1\u8207\u65E5\u754C\u908A\u754C\u6848\u4F8B\u53EF\u80FD\u6539\u8B8A\uFF1B\u9700\u8981\u7D93\u5EA6\u8CC7\u6599\u3002",
+      evidence: "round-03\u3001round-04 \u5DF2\u4FDD\u5B58\u8DE8\u7D93\u5EA6\u771F\u592A\u967D\u6642\u89C0\u5BDF\uFF1B\u4E0D\u628A\u5916\u90E8\u5F15\u64CE\u5DEE\u7570\u76F4\u63A5\u7576\u4F5C BaziJS \u932F\u8AA4\u3002"
+    },
+    {
+      variantId: "VAR_HUMAN_ELEMENT_SANMING_PHASES",
+      conceptId: "month-commander.human-element",
+      tradition: "classical-ziping",
+      sourceIds: ["san-ming-tong-hui"],
+      status: "comparison",
+      condition: "\u4F9D\u300A\u4E09\u547D\u901A\u6703\u300B\u5377\u4E8C\u7684\u5206\u65E5\uFF0F\u4EBA\u5143\u53F8\u4EE4\u8AAA\u660E\u4FDD\u5B58\u4E00\u5957\u6BD4\u8F03\u8868\u3002",
+      algorithm: "monthCommanderModel=san-ming-volume-2",
+      profileIds: ["classical-sanming"],
+      differencesFromCanonical: "\u5206\u6BB5\u5929\u6578\u8207\u53F8\u4EE4\u5929\u5E72\u53EF\u80FD\u4E0D\u540C\uFF1Bcanonical \u8207\u53E4\u7C4D\u6BD4\u8F03\u8868\u4E26\u5217\u3002",
+      evidence: "EV-MC-SANMING-001\uFF1B\u539F\u6587\u6458\u9304\u3001\u9801\u78BC\u72C0\u614B\u8207 BaziJS \u5206\u6BB5\u5DEE\u7570\u898B evidence-ledger\u3002"
+    },
+    {
+      variantId: "VAR_LUCK_START_WHOLE_DAY",
+      conceptId: "luck.start-age",
+      tradition: "classical-ziping",
+      sourceIds: ["san-ming-tong-hui"],
+      status: "comparison",
+      condition: "\u7BC0\u6C23\u8DDD\u96E2\u5148\u53D6\u6574\u65E5\uFF0C\u518D\u4EE5\u4E09\u65E5\u4E00\u6B72\u63DB\u7B97\u8D77\u904B\u3002",
+      algorithm: "luckStartMethod=jieqi-whole-day",
+      profileIds: ["jieqi-whole-day"],
+      differencesFromCanonical: "\u8D77\u904B\u65E5\u671F\u53EF\u80FD\u8207\u7CBE\u78BA\u7BC0\u6C23\u5DEE\u9664\u4E09\u4E0D\u540C\u3002",
+      evidence: "EV-LUCK-006\uFF1B\u4FDD\u7559\u7CBE\u78BA\u6CD5\u8207\u6574\u65E5\u6BD4\u8F03\u6CD5\uFF0C\u4E0D\u6697\u793A\u53E4\u7C4D\u53EA\u6709\u55AE\u4E00\u5BE6\u4F5C\u3002"
+    },
+    {
+      variantId: "VAR_PALACE_SANMING_PALM",
+      conceptId: "auxiliary.palace",
+      tradition: "classical-ziping",
+      sourceIds: ["san-ming-tong-hui"],
+      status: "comparison",
+      condition: "\u4EE5\u51FA\u751F\u6708\u652F\u8207\u6642\u652F\u4F9D\u53E4\u6CD5\u638C\u8A23\u63A8\u547D\u5BAE\u3001\u8EAB\u5BAE\uFF0C\u4E26\u914D\u5408\u4E94\u864E\u9041\u53D6\u5929\u5E72\u3002",
+      algorithm: "palaceModel=san-ming-palm",
+      profileIds: ["classical-sanming"],
+      differencesFromCanonical: "\u638C\u8A23\u3001\u9806\u9006\u8207\u8D77\u5E72\u7D30\u7BC0\u4ECD\u53EF\u80FD\u6709\u50B3\u627F\u5DEE\u7570\u3002",
+      evidence: "EV-AUX-MINGGONG-005\uFF1B\u76EE\u524D canonical \u516C\u5F0F\u8207\u7814\u7A76 Profile \u5206\u96E2\u3002"
+    },
+    {
+      variantId: "VAR_SHENSHA_TRADITIONAL_LIST",
+      conceptId: "shensha.catalog",
+      tradition: "classical-ziping",
+      sourceIds: ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      status: "comparison",
+      condition: "\u4E0D\u540C\u50B3\u672C\uFF0F\u8A3B\u5BB6\u53EF\u80FD\u589E\u6E1B\u795E\u715E\u3001\u6539\u540D\u6216\u63A1\u7528\u4E0D\u540C\u67E5\u6CD5\u3002",
+      algorithm: "shenshaPreset=classical|full|minimal",
+      profileIds: [],
+      differencesFromCanonical: "\u795E\u715E\u6578\u91CF\u4E0D\u4F5C\u6B0A\u5A01\u7A0B\u5EA6\u6307\u6A19\uFF1B\u6BCF\u689D\u898F\u5247\u4ECD\u9700\u7368\u7ACB source\u3001ruleId \u8207 evidence\u3002",
+      evidence: "\u898F\u5247 registry \u7684 references\u3001variants \u8207 researchNotes\uFF1B\u7279\u6B8A\u67F1\u4F4D\u4E0D\u5F97\u56DE\u585E\u4E00\u822C ShenSha\u3002"
+    },
+    {
+      variantId: "VAR_USE_GOD_MODEL_FUYI",
+      conceptId: "use-god.model",
+      tradition: "analysis-model",
+      sourceIds: [],
+      status: "comparison",
+      condition: "\u4EE5\u6276\u6291\u6A21\u578B\u7684\u559C\u7528\u4E94\u884C\u7B2C\u4E00\u9806\u4F4D\u4F5C\u70BA canonical-use-derived\u3002",
+      algorithm: "useGodModel=fuyi-canonical",
+      profileIds: ["canonical"],
+      differencesFromCanonical: "\u8ABF\u5019\u3001\u901A\u95DC\u3001\u683C\u5C40\u3001\u5F9E\u5316\u7B49\u6A21\u578B\u53EF\u80FD\u7522\u751F\u4E0D\u540C\u5019\u9078\uFF0C\u4E0D\u61C9\u5728\u672A\u5B8C\u6210\u6642\u8986\u5BEB canonical\u3002",
+      evidence: "result.analysis.useGodResolver \u4FDD\u7559 candidates\u3001conflicts\u3001finalDecision \u8207 model evidence\u3002"
+    }
+  ]
+};
+
+// src/reference/taxonomy.js
+var TAXONOMY_VERSION = "0.1.0";
+var TAXONOMY_ID = "bazi-js-reference-ontology";
+var CONCEPT_TYPES = Object.freeze([
+  "calendar",
+  "pillar",
+  "stem-branch",
+  "five-element",
+  "ten-god",
+  "hidden-stem",
+  "nayin",
+  "twelve-stage",
+  "kongwang",
+  "interaction",
+  "strength",
+  "month-commander",
+  "pattern",
+  "use-god",
+  "shensha",
+  "special-rule",
+  "auxiliary",
+  "luck",
+  "transit",
+  "profile"
+]);
+var PATTERN_TYPES = Object.freeze([
+  "regular",
+  "special",
+  "conformity",
+  "transformation",
+  "other"
+]);
+var CONCEPT_STATUSES = Object.freeze([
+  "canonical",
+  "implemented",
+  "candidate-only",
+  "research-only",
+  "conflicted",
+  "deprecated"
+]);
+var REGULAR_CONCEPT_IDS = Object.freeze({
+  direct_officer: "pattern.zheng-guan",
+  seven_killings: "pattern.qi-sha",
+  direct_wealth: "pattern.zheng-cai",
+  indirect_wealth: "pattern.pian-cai",
+  direct_resource: "pattern.zheng-yin",
+  indirect_resource: "pattern.pian-yin",
+  eating_god: "pattern.shi-shen",
+  hurting_officer: "pattern.shang-guan",
+  built_lu: "pattern.jian-lu",
+  month_blade: "pattern.yang-ren"
+});
+var LEGACY_TYPE_MAP = Object.freeze({
+  "special-pattern": { conceptType: "pattern", patternType: "special" },
+  "special-pillar": { conceptType: "special-rule" },
+  "seasonal-special": { conceptType: "special-rule" },
+  pattern: { conceptType: "pattern", patternType: "special" }
+});
+var slug = (value) => String(value || "").trim().replace(/([a-z])([A-Z])/g, "$1-$2").replace(/[^\p{Letter}\p{Number}]+/gu, "-").replace(/^-+|-+$/g, "").toLowerCase();
+function getCanonicalTaxonomy(rule3 = {}) {
+  const legacyConceptType = rule3.conceptType || null;
+  const mapped = LEGACY_TYPE_MAP[legacyConceptType] || { conceptType: legacyConceptType || "auxiliary" };
+  const conceptType = mapped.conceptType;
+  const patternType = conceptType === "pattern" ? rule3.patternType || mapped.patternType || (rule3.ruleFamily === "month-commander-pattern" ? "regular" : "special") : void 0;
+  return {
+    conceptType,
+    ...patternType ? { patternType } : {},
+    ...legacyConceptType && legacyConceptType !== conceptType ? { legacyConceptType } : {}
+  };
+}
+function getConceptId(rule3 = {}) {
+  if (rule3.conceptId) return rule3.conceptId;
+  if (REGULAR_CONCEPT_IDS[rule3.id]) return REGULAR_CONCEPT_IDS[rule3.id];
+  const taxonomy = getCanonicalTaxonomy(rule3);
+  return `${taxonomy.conceptType}.${slug(rule3.id || rule3.name || rule3.ruleId)}`;
+}
+function getConceptStatus(rule3 = {}) {
+  if (CONCEPT_STATUSES.includes(rule3.status)) return rule3.status;
+  if (rule3.implemented === false || rule3.tier === "research") return "research-only";
+  if (rule3.tier === "candidate") return "candidate-only";
+  return "canonical";
+}
+function canonicalizeRuleTaxonomy(rule3 = {}) {
+  const taxonomy = getCanonicalTaxonomy(rule3);
+  return {
+    ...taxonomy,
+    conceptId: getConceptId(rule3),
+    status: getConceptStatus(rule3)
+  };
+}
+function validateTaxonomy(rules = [], concepts = []) {
+  const errors = [];
+  const conceptIds = /* @__PURE__ */ new Set();
+  for (const rule3 of rules) {
+    const taxonomy = canonicalizeRuleTaxonomy(rule3);
+    if (!CONCEPT_TYPES.includes(taxonomy.conceptType)) {
+      errors.push(`${rule3.ruleId || rule3.id}: invalid conceptType ${taxonomy.conceptType}`);
+    }
+    if (taxonomy.conceptType === "pattern" && !PATTERN_TYPES.includes(taxonomy.patternType)) {
+      errors.push(`${rule3.ruleId || rule3.id}: invalid patternType ${taxonomy.patternType}`);
+    }
+    if (!taxonomy.conceptId) errors.push(`${rule3.ruleId || rule3.id}: conceptId is required`);
+  }
+  for (const concept of concepts) {
+    if (!concept.conceptId) errors.push("concept: conceptId is required");
+    if (conceptIds.has(concept.conceptId)) errors.push(`duplicate conceptId: ${concept.conceptId}`);
+    conceptIds.add(concept.conceptId);
+    if (!CONCEPT_TYPES.includes(concept.conceptType)) errors.push(`${concept.conceptId}: invalid conceptType`);
+    if (concept.conceptType === "pattern" && !PATTERN_TYPES.includes(concept.patternType)) {
+      errors.push(`${concept.conceptId}: patternType is required`);
+    }
+  }
+  return { valid: errors.length === 0, errors, ruleCount: rules.length, conceptCount: concepts.length };
+}
+function getTaxonomy() {
+  return {
+    schemaVersion: "1.0.0",
+    taxonomyId: TAXONOMY_ID,
+    version: TAXONOMY_VERSION,
+    conceptTypes: CONCEPT_TYPES.slice(),
+    patternTypes: PATTERN_TYPES.slice(),
+    statuses: CONCEPT_STATUSES.slice(),
+    legacyMappings: Object.fromEntries(Object.entries(LEGACY_TYPE_MAP).map(([key, value]) => [key, { ...value }]))
+  };
+}
+
+// src/reference/index.js
+var RULES = Object.freeze([
+  ...SHENSHA_REGISTRY,
+  ...SPECIAL_RULE_REGISTRY,
+  ...REGULAR_PATTERN_REGISTRY,
+  ...SPECIAL_PATTERN_REGISTRY
+]);
+var SOURCE_HINTS = Object.freeze([
+  ["san-ming-tong-hui", ["\u4E09\u547D\u901A\u6703", "\u4E09\u547D\u901A\u4F1A"]],
+  ["yuan-hai-zi-ping", ["\u6DF5\u6D77\u5B50\u5E73", "\u6E0A\u6D77\u5B50\u5E73"]],
+  ["xie-ji-bian-fang-shu", ["\u5354\u7D00\u8FA8\u65B9\u66F8", "\u534F\u7EAA\u8FA8\u65B9\u4E66"]],
+  ["di-tian-sui-yan-wei", ["\u6EF4\u5929\u9AD3\u95E1\u5FAE", "\u6EF4\u5929\u9AD3\u9610\u5FAE"]],
+  ["zi-ping-zhen-quan", ["\u5B50\u5E73\u771F\u8A6E", "\u5B50\u5E73\u771F\u8BE0"]],
+  ["gu-jin-tu-shu-ji-cheng", ["\u53E4\u4ECA\u5716\u66F8\u96C6\u6210", "\u53E4\u4ECA\u56FE\u4E66\u96C6\u6210"]]
+]);
+var clone3 = (value) => {
+  if (typeof value === "function" || value === void 0) return void 0;
+  if (Array.isArray(value)) return value.map(clone3).filter((item) => item !== void 0);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, clone3(item)]).filter(([, item]) => item !== void 0));
+  }
+  return value;
+};
+var sourceRecords = Array.isArray(classical_texts_default.sources) ? classical_texts_default.sources : [];
+var sourceMap = new Map(sourceRecords.map((source) => [source.sourceId, source]));
+var catalogEvidence = Array.isArray(classical_texts_default.evidenceRecords) ? classical_texts_default.evidenceRecords : [];
+var ledgerCitations = Array.isArray(evidence_ledger_default.citations) ? evidence_ledger_default.citations : [];
+var editionRecords = Array.isArray(evidence_ledger_default.editionRecords) ? evidence_ledger_default.editionRecords : [];
+var catalogVariants = Array.isArray(variants_default.variants) ? variants_default.variants : [];
+function ruleText(rule3) {
+  return [
+    rule3.name,
+    rule3.displayName,
+    ...rule3.aliases || [],
+    rule3.reference,
+    ...(rule3.references || []).flatMap((ref) => [ref.title, ref.locator, ref.note])
+  ].filter(Boolean).join(" ");
+}
+function inferSourceIds(rule3) {
+  const text = ruleText(rule3);
+  const explicit = new Set(rule3.sourceIds || []);
+  for (const [sourceId, hints] of SOURCE_HINTS) {
+    if (hints.some((hint) => text.includes(hint))) explicit.add(sourceId);
+  }
+  return [...explicit].filter((sourceId) => sourceMap.has(sourceId));
+}
+function ruleEvidence(rule3) {
+  const ruleIds = [rule3.ruleId, rule3.id].filter(Boolean);
+  return [
+    ...catalogEvidence.filter((record) => ruleIds.some((id) => (record.ruleIds || []).includes(id))),
+    ...ledgerCitations.filter((record) => ruleIds.some((id) => (record.ruleIds || []).includes(id)))
+  ];
+}
+function sourceIdsForRule(rule3) {
+  const ids = new Set(inferSourceIds(rule3));
+  for (const record of ruleEvidence(rule3)) {
+    for (const sourceId of record.sourceIds || [record.sourceId]) {
+      if (sourceMap.has(sourceId)) ids.add(sourceId);
+    }
+  }
+  return [...ids];
+}
+function canonicalRule(rule3) {
+  const taxonomy = canonicalizeRuleTaxonomy(rule3);
+  const sourceIds = sourceIdsForRule(rule3);
+  const evidence = ruleEvidence(rule3);
+  return clone3({
+    id: rule3.id,
+    ruleId: rule3.ruleId,
+    conceptId: taxonomy.conceptId,
+    name: rule3.name,
+    displayName: rule3.displayName || rule3.name,
+    aliases: rule3.aliases || [],
+    tradition: rule3.tradition,
+    conceptType: taxonomy.conceptType,
+    ...taxonomy.patternType ? { patternType: taxonomy.patternType } : {},
+    ...taxonomy.legacyConceptType ? { legacyConceptType: taxonomy.legacyConceptType } : {},
+    ruleFamily: rule3.ruleFamily,
+    baseOn: rule3.baseOn || rule3.basedOn || [],
+    scope: rule3.scope,
+    category: rule3.category,
+    confidence: rule3.confidence,
+    status: getConceptStatus(rule3),
+    version: rule3.version,
+    sourceIds,
+    references: rule3.references || [],
+    description: rule3.description || "",
+    interpretation: rule3.interpretation || "",
+    variants: rule3.variants || [],
+    researchNotes: rule3.researchNotes || {},
+    evidence: evidence.length ? evidence : [],
+    implementation: {
+      status: rule3.implemented === false ? "not-implemented" : "implemented",
+      runtimeRegistry: RULES.includes(rule3),
+      module: rule3.conceptType === "shensha" ? "src/shensha" : taxonomy.conceptType === "special-rule" ? "src/special-rules" : "src/patterns"
+    }
+  });
+}
+var CANONICAL_RULES = Object.freeze(RULES.map(canonicalRule));
+var RULE_BY_ID = new Map(CANONICAL_RULES.flatMap((rule3) => [[rule3.ruleId, rule3], [rule3.id, rule3]]));
+function conceptDescription(rules) {
+  return rules.find((rule3) => rule3.description)?.description || "";
+}
+function buildConcept(rules) {
+  const first = rules[0];
+  const sourceIds = [...new Set(rules.flatMap((rule3) => rule3.sourceIds || []))];
+  const aliases = [...new Set(rules.flatMap((rule3) => rule3.aliases || []))];
+  return clone3({
+    conceptId: first.conceptId,
+    name: first.name,
+    aliases,
+    conceptType: first.conceptType,
+    ...first.patternType ? { patternType: first.patternType } : {},
+    traditions: [...new Set(rules.map((rule3) => rule3.tradition).filter(Boolean))],
+    status: rules.some((rule3) => rule3.status === "canonical") ? "canonical" : first.status,
+    ruleIds: rules.map((rule3) => rule3.ruleId),
+    sourceIds,
+    description: conceptDescription(rules),
+    version: [...new Set(rules.map((rule3) => rule3.version).filter(Boolean))].join(", "),
+    ruleFamily: [...new Set(rules.map((rule3) => rule3.ruleFamily).filter(Boolean))],
+    confidence: [...new Set(rules.map((rule3) => rule3.confidence).filter(Boolean))],
+    implementation: {
+      status: rules.every((rule3) => rule3.implementation?.status === "not-implemented") ? "not-implemented" : "registered",
+      modules: [...new Set(rules.map((rule3) => rule3.implementation?.module).filter(Boolean))]
+    }
+  });
+}
+var conceptMap = /* @__PURE__ */ new Map();
+for (const rule3 of CANONICAL_RULES) {
+  const list = conceptMap.get(rule3.conceptId) || [];
+  list.push(rule3);
+  conceptMap.set(rule3.conceptId, list);
+}
+var CONCEPTS = Object.freeze([...conceptMap.values()].map(buildConcept));
+var CONCEPT_BY_ID = new Map(CONCEPTS.map((concept) => [concept.conceptId, concept]));
+function getConcept(query) {
+  if (!query) return null;
+  const value = String(query).trim().toLowerCase();
+  const concept = CONCEPTS.find((item) => [item.conceptId, item.name, ...item.aliases || []].some((field) => String(field).toLowerCase() === value));
+  if (!concept) return null;
+  return clone3({
+    ...concept,
+    rules: concept.ruleIds.map((ruleId) => getRule(ruleId)),
+    sources: concept.sourceIds.map((sourceId) => getSource(sourceId)),
+    variants: getVariants(concept.conceptId)
+  });
+}
+function findConcept(query = "") {
+  const value = String(query).trim().toLowerCase();
+  if (!value) return CONCEPTS.map(clone3);
+  return CONCEPTS.filter((concept) => [concept.conceptId, concept.name, ...concept.aliases || [], concept.description].some((field) => String(field).toLowerCase().includes(value))).map(clone3);
+}
+function getRule(query) {
+  const raw = RULE_BY_ID.get(query) || RULE_BY_ID.get(String(query || "").trim());
+  if (!raw) return null;
+  return clone3({
+    ...raw,
+    sources: raw.sourceIds.map((sourceId) => getSource(sourceId))
+  });
+}
+function getSource(sourceId) {
+  const source = sourceMap.get(sourceId);
+  if (!source) return null;
+  const citations = [
+    ...catalogEvidence.filter((record) => (record.sourceIds || []).includes(sourceId)),
+    ...ledgerCitations.filter((record) => record.sourceId === sourceId)
+  ];
+  return clone3({
+    ...source,
+    editionRecords: editionRecords.filter((record) => record.sourceId === sourceId),
+    citations
+  });
+}
+function getSourcesForRule(ruleQuery) {
+  const rule3 = getRule(ruleQuery);
+  return rule3 ? rule3.sourceIds.map(getSource).filter(Boolean) : [];
+}
+function getRulesFromSource(sourceId) {
+  return CANONICAL_RULES.filter((rule3) => rule3.sourceIds.includes(sourceId)).map((rule3) => getRule(rule3.ruleId));
+}
+function getVariants(query) {
+  const ruleIds = CONCEPT_BY_ID.has(query) ? CONCEPT_BY_ID.get(query).ruleIds : [getRule(query)?.ruleId].filter(Boolean);
+  const variants = [];
+  for (const variant of catalogVariants.filter((item) => !query || item.variantId === query || item.conceptId === query)) {
+    variants.push({
+      ...clone3(variant),
+      sourceIds: variant.sourceIds || [],
+      status: variant.status || "comparison",
+      variantId: variant.variantId,
+      condition: variant.condition || ""
+    });
+  }
+  for (const ruleId of ruleIds) {
+    const rule3 = RULE_BY_ID.get(ruleId);
+    if (!rule3) continue;
+    for (const variant of rule3.variants || []) {
+      variants.push({
+        variantId: `${rule3.ruleId}:${variant.id || variants.length + 1}`,
+        conceptId: rule3.conceptId,
+        ruleId: rule3.ruleId,
+        tradition: rule3.tradition,
+        sourceIds: rule3.sourceIds,
+        status: "research-only",
+        condition: variant.condition || variant.description || variant.note || "",
+        ...clone3(variant)
+      });
+    }
+    for (const record of ruleEvidence(rule3)) {
+      for (const variant of record.variants || []) {
+        variants.push({
+          variantId: `${rule3.ruleId}:${variant.id || record.evidenceId}`,
+          conceptId: rule3.conceptId,
+          ruleId: rule3.ruleId,
+          tradition: rule3.tradition,
+          sourceIds: record.sourceIds || [record.sourceId],
+          status: "research-only",
+          condition: variant.condition || variant.description || variant.note || "",
+          ...clone3(variant)
+        });
+      }
+    }
+  }
+  const unique = new Map(variants.map((variant) => [variant.variantId, variant]));
+  return [...unique.values()];
+}
+function coverageEntry(concept) {
+  const rules = concept.ruleIds.map((ruleId) => RULE_BY_ID.get(ruleId)).filter(Boolean);
+  const hasSource = concept.sourceIds.length > 0;
+  const hasLocator = concept.sourceIds.some((sourceId) => {
+    const source = getSource(sourceId);
+    return source?.citations?.some((citation) => citation.locator || citation.scope || citation.originalBasis);
+  });
+  return {
+    conceptId: concept.conceptId,
+    conceptType: concept.conceptType,
+    status: concept.status,
+    ruleCount: rules.length,
+    sourceLinked: hasSource,
+    locatorBacked: hasLocator,
+    variantsDocumented: rules.some((rule3) => (rule3.variants || []).length > 0 || rule3.evidence?.some((item) => (item.variants || []).length > 0)),
+    machineReadable: true,
+    implemented: rules.some((rule3) => rule3.implementation?.status === "implemented"),
+    testStatus: "not-collected",
+    externalStatus: "not-collected"
+  };
+}
+function dimension(entries, key) {
+  const total = entries.length;
+  const covered = entries.filter((entry) => entry[key]).length;
+  return { covered, total, percent: total ? Number((covered / total * 100).toFixed(1)) : 0 };
+}
+function getCoverage(type = null) {
+  const entries = CONCEPTS.filter((concept) => !type || concept.conceptType === type).map(coverageEntry);
+  return {
+    coverageVersion: "0.1.0",
+    catalogVersion: classical_texts_default.catalogVersion,
+    scope: type || "all",
+    totals: { concepts: entries.length, rules: entries.reduce((sum, entry) => sum + entry.ruleCount, 0) },
+    dimensions: {
+      sourceLinked: dimension(entries, "sourceLinked"),
+      locatorBacked: dimension(entries, "locatorBacked"),
+      variantsDocumented: dimension(entries, "variantsDocumented"),
+      machineReadable: dimension(entries, "machineReadable"),
+      implemented: dimension(entries, "implemented"),
+      tests: { covered: 0, total: entries.length, status: "not-collected" },
+      external: { covered: 0, total: entries.length, status: "not-collected" },
+      documentation: { covered: entries.filter((entry) => entry.sourceLinked && entry.machineReadable).length, total: entries.length, percent: entries.length ? Number((entries.filter((entry) => entry.sourceLinked && entry.machineReadable).length / entries.length * 100).toFixed(1)) : 0 }
+    },
+    entries
+  };
+}
+function getCoverageReport() {
+  return {
+    coverageVersion: "0.1.0",
+    taxonomyVersion: TAXONOMY_VERSION,
+    catalogVersion: classical_texts_default.catalogVersion,
+    scopes: ["all", ...CONCEPT_TYPES].map((scope) => getCoverage(scope === "all" ? null : scope))
+  };
+}
+function toContext2(options = {}) {
+  const requested = options.conceptIds || options.concepts || null;
+  const concepts = requested ? requested.map((id) => getConcept(id)).filter(Boolean) : CONCEPTS.map((concept) => getConcept(concept.conceptId));
+  const rules = concepts.flatMap((concept) => concept.rules || []);
+  const sources = options.includeSources === false ? [] : [...new Map(concepts.flatMap((concept) => concept.sources || []).map((source) => [source.sourceId, source])).values()];
+  const variants = options.includeVariants === false ? [] : concepts.flatMap((concept) => concept.variants || []);
+  return clone3({
+    contextType: "bazi-js-reference-context",
+    taxonomy: getTaxonomy(),
+    concepts: concepts.map((concept) => ({ ...concept, rules: void 0, sources: void 0, variants: void 0 })),
+    rules,
+    ...options.includeSources === false ? {} : { sources },
+    ...options.includeVariants === false ? {} : { variants },
+    ...options.includeExamples === false ? {} : { examples: [] },
+    ...options.includeResearchNotes === false ? {} : { researchNotes: rules.flatMap((rule3) => rule3.researchNotes ? [{ ruleId: rule3.ruleId, ...rule3.researchNotes }] : []) },
+    claimPolicy: {
+      mayStateAsImplemented: rules.filter((rule3) => rule3.implementation?.status === "implemented").map((rule3) => rule3.ruleId),
+      mayStateAsCanonical: rules.filter((rule3) => rule3.status === "canonical").map((rule3) => rule3.ruleId),
+      mustMentionVariant: variants.map((variant) => variant.variantId),
+      mustCiteSource: rules.map((rule3) => rule3.ruleId)
+    }
+  });
+}
+function validateReferenceIndex() {
+  const errors = [];
+  const ruleIds = /* @__PURE__ */ new Set();
+  for (const rule3 of CANONICAL_RULES) {
+    if (ruleIds.has(rule3.ruleId)) errors.push(`duplicate ruleId: ${rule3.ruleId}`);
+    ruleIds.add(rule3.ruleId);
+    if (!rule3.sourceIds.length) errors.push(`${rule3.ruleId}: no linked source`);
+    for (const sourceId of rule3.sourceIds) if (!sourceMap.has(sourceId)) errors.push(`${rule3.ruleId}: unknown source ${sourceId}`);
+    if (!CONCEPT_TYPES.includes(rule3.conceptType)) errors.push(`${rule3.ruleId}: invalid canonical conceptType`);
+    if (rule3.conceptType === "pattern" && !rule3.patternType) errors.push(`${rule3.ruleId}: patternType is required`);
+  }
+  const taxonomy = validateTaxonomy(RULES, CONCEPTS);
+  errors.push(...taxonomy.errors);
+  for (const concept of CONCEPTS) {
+    if (concept.ruleIds.length === 0) errors.push(`${concept.conceptId}: orphan concept`);
+    if (concept.sourceIds.some((sourceId) => !sourceMap.has(sourceId))) errors.push(`${concept.conceptId}: unknown source link`);
+  }
+  const variantIds = /* @__PURE__ */ new Set();
+  for (const variant of catalogVariants) {
+    if (variantIds.has(variant.variantId)) errors.push(`duplicate variantId: ${variant.variantId}`);
+    variantIds.add(variant.variantId);
+    for (const sourceId of variant.sourceIds || []) if (!sourceMap.has(sourceId)) errors.push(`${variant.variantId}: unknown source ${sourceId}`);
+  }
+  return {
+    valid: errors.length === 0,
+    errors,
+    counts: { rules: CANONICAL_RULES.length, concepts: CONCEPTS.length, sources: sourceRecords.length, variants: catalogVariants.length, catalogEvidence: catalogEvidence.length, ledgerCitations: ledgerCitations.length }
+  };
+}
 
 // src/renderer/themes/index.js
 var THEMES = {
@@ -8164,7 +9183,12 @@ var Bazi = {
     auxiliary: { version: VERSIONS.auxiliaryRuleVersion },
     classicalSummary: { version: VERSIONS.classicalSummaryRuleVersion },
     analysis: { version: VERSIONS.analysisRuleVersion },
-    luck: { version: VERSIONS.luckRuleVersion }
+    luck: { version: VERSIONS.luckRuleVersion },
+    reference: {
+      taxonomyVersion: VERSIONS.referenceTaxonomyVersion,
+      indexVersion: VERSIONS.referenceIndexVersion,
+      coverageVersion: VERSIONS.referenceCoverageVersion
+    }
   },
   calculate,
   calculateSafe,
@@ -8192,6 +9216,7 @@ var Bazi = {
   Validation,
   ValidationData: validation_exports2,
   Errors: errors_exports,
+  Reference: reference_exports,
   Constants: stems_exports
 };
 var index_default = Bazi;
@@ -8208,6 +9233,7 @@ export {
   luck_exports as Luck,
   lunar_exports as Lunar,
   patterns_exports as Patterns,
+  reference_exports as Reference,
   Renderer,
   rule_registry_exports as Rules,
   shensha_exports as ShenSha,

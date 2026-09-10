@@ -24,7 +24,9 @@ const regularPattern = ({ id, name, aliases, ruleId, description, match, baseOn 
   displayName: name,
   aliases,
   tradition: CLASSICAL_ZIPING,
-  conceptType: 'special-pattern',
+  conceptType: 'pattern',
+  patternType: 'regular',
+  legacyConceptType: 'special-pattern',
   ruleFamily: 'month-commander-pattern',
   baseOn,
   scope: 'natal',
@@ -107,6 +109,7 @@ export function calculateRegularPatterns({ pillars, monthCommander = null } = {}
       aliases: rule.aliases,
       tradition: rule.tradition,
       conceptType: rule.conceptType,
+      patternType: rule.patternType,
       ruleFamily: rule.ruleFamily,
       baseOn: rule.baseOn,
       scope: rule.scope,
@@ -152,7 +155,7 @@ export function validateRegularPatternRegistry(registry = REGULAR_PATTERN_REGIST
     ids.add(rule.id);
     if (!rule.ruleId || ruleIds.has(rule.ruleId)) errors.push(`duplicate ruleId: ${rule.ruleId || '(empty)'}`);
     ruleIds.add(rule.ruleId);
-    for (const field of ['name', 'tradition', 'conceptType', 'ruleFamily', 'scope', 'category', 'confidence', 'ruleId', 'version', 'description']) {
+    for (const field of ['name', 'tradition', 'conceptType', 'patternType', 'ruleFamily', 'scope', 'category', 'confidence', 'ruleId', 'version', 'description']) {
       if (!rule[field]) errors.push(`${rule.id}: ${field} is required`);
     }
     if (!Array.isArray(rule.baseOn) || rule.baseOn.length === 0) errors.push(`${rule.id}: baseOn is required`);

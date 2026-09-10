@@ -23,6 +23,7 @@ import * as AI from './ai/index.js';
 import * as InputValidation from './core/utils/validation.js';
 import * as ValidationData from './validation/index.js';
 import * as Errors from './core/errors/index.js';
+import * as Reference from './reference/index.js';
 import * as Constants from './core/constants/stems.js';
 import { Renderer } from './renderer/index.js';
 import { VERSIONS } from './rules/versions.js';
@@ -56,6 +57,7 @@ export {
   Validation,
   ValidationData,
   Errors,
+  Reference,
   Constants,
   VERSIONS
 };
@@ -71,7 +73,12 @@ const Bazi = {
     auxiliary: { version: VERSIONS.auxiliaryRuleVersion },
     classicalSummary: { version: VERSIONS.classicalSummaryRuleVersion },
     analysis: { version: VERSIONS.analysisRuleVersion },
-    luck: { version: VERSIONS.luckRuleVersion }
+    luck: { version: VERSIONS.luckRuleVersion },
+    reference: {
+      taxonomyVersion: VERSIONS.referenceTaxonomyVersion,
+      indexVersion: VERSIONS.referenceIndexVersion,
+      coverageVersion: VERSIONS.referenceCoverageVersion
+    }
   },
   calculate,
   calculateSafe,
@@ -99,6 +106,7 @@ const Bazi = {
   Validation,
   ValidationData,
   Errors,
+  Reference,
   Constants
 };
 

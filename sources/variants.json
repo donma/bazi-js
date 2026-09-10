@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "1.0.0",
+  "catalogId": "bazi-js-rule-variants",
+  "catalogVersion": "2026.09",
+  "purpose": "記錄可重現的流派、算法與資料約定差異；不把差異裁決成跨流派唯一真值。",
+  "variants": [
+    {
+      "variantId": "VAR_YEAR_BOUNDARY_LUNAR_NEW_YEAR",
+      "conceptId": "profile.year-boundary",
+      "tradition": "calendar-convention",
+      "sourceIds": [],
+      "status": "comparison",
+      "condition": "年柱以正月初一切換，而非以立春切換。",
+      "algorithm": "yearBoundary=lunar_new_year",
+      "profileIds": ["lunar-calendar"],
+      "differencesFromCanonical": "可能改變立春前國曆日期的年柱與後續年支查法。",
+      "evidence": "Profile differential fixtures 已固定年界差異；不宣稱某一約定是唯一流派答案。"
+    },
+    {
+      "variantId": "VAR_MONTH_BOUNDARY_LUNAR_MONTH",
+      "conceptId": "profile.month-boundary",
+      "tradition": "calendar-convention",
+      "sourceIds": [],
+      "status": "comparison",
+      "condition": "月柱依農曆月界，而非節氣月界。",
+      "algorithm": "monthBoundary=lunar_month",
+      "profileIds": ["lunar-calendar"],
+      "differencesFromCanonical": "節氣前後可能得到不同月柱。",
+      "evidence": "Profile differential fixtures 已固定月界差異。"
+    },
+    {
+      "variantId": "VAR_DAY_BOUNDARY_CIVIL_MIDNIGHT",
+      "conceptId": "profile.day-boundary",
+      "tradition": "day-boundary-convention",
+      "sourceIds": [],
+      "status": "comparison",
+      "condition": "以民用午夜 00:00 切換日柱，而非 canonical 的晚子 23:00。",
+      "algorithm": "dayBoundary=00:00",
+      "profileIds": ["civil-midnight"],
+      "differencesFromCanonical": "23:00–23:59 的日期與日柱可能不同。",
+      "evidence": "Profile differential fixtures 與子時邊界抽樣可重跑。"
+    },
+    {
+      "variantId": "VAR_TRUE_SOLAR_TIME_LONGITUDE",
+      "conceptId": "profile.true-solar-time",
+      "tradition": "astronomical-time-convention",
+      "sourceIds": [],
+      "status": "comparison",
+      "condition": "以出生地經度修正地方真太陽時後再判定時柱。",
+      "algorithm": "trueSolarTime=true",
+      "profileIds": ["true-solar"],
+      "differencesFromCanonical": "時柱與日界邊界案例可能改變；需要經度資料。",
+      "evidence": "round-03、round-04 已保存跨經度真太陽時觀察；不把外部引擎差異直接當作 BaziJS 錯誤。"
+    },
+    {
+      "variantId": "VAR_HUMAN_ELEMENT_SANMING_PHASES",
+      "conceptId": "month-commander.human-element",
+      "tradition": "classical-ziping",
+      "sourceIds": ["san-ming-tong-hui"],
+      "status": "comparison",
+      "condition": "依《三命通會》卷二的分日／人元司令說明保存一套比較表。",
+      "algorithm": "monthCommanderModel=san-ming-volume-2",
+      "profileIds": ["classical-sanming"],
+      "differencesFromCanonical": "分段天數與司令天干可能不同；canonical 與古籍比較表並列。",
+      "evidence": "EV-MC-SANMING-001；原文摘錄、頁碼狀態與 BaziJS 分段差異見 evidence-ledger。"
+    },
+    {
+      "variantId": "VAR_LUCK_START_WHOLE_DAY",
+      "conceptId": "luck.start-age",
+      "tradition": "classical-ziping",
+      "sourceIds": ["san-ming-tong-hui"],
+      "status": "comparison",
+      "condition": "節氣距離先取整日，再以三日一歲換算起運。",
+      "algorithm": "luckStartMethod=jieqi-whole-day",
+      "profileIds": ["jieqi-whole-day"],
+      "differencesFromCanonical": "起運日期可能與精確節氣差除三不同。",
+      "evidence": "EV-LUCK-006；保留精確法與整日比較法，不暗示古籍只有單一實作。"
+    },
+    {
+      "variantId": "VAR_PALACE_SANMING_PALM",
+      "conceptId": "auxiliary.palace",
+      "tradition": "classical-ziping",
+      "sourceIds": ["san-ming-tong-hui"],
+      "status": "comparison",
+      "condition": "以出生月支與時支依古法掌訣推命宮、身宮，並配合五虎遁取天干。",
+      "algorithm": "palaceModel=san-ming-palm",
+      "profileIds": ["classical-sanming"],
+      "differencesFromCanonical": "掌訣、順逆與起干細節仍可能有傳承差異。",
+      "evidence": "EV-AUX-MINGGONG-005；目前 canonical 公式與研究 Profile 分離。"
+    },
+    {
+      "variantId": "VAR_SHENSHA_TRADITIONAL_LIST",
+      "conceptId": "shensha.catalog",
+      "tradition": "classical-ziping",
+      "sourceIds": ["san-ming-tong-hui", "yuan-hai-zi-ping"],
+      "status": "comparison",
+      "condition": "不同傳本／註家可能增減神煞、改名或採用不同查法。",
+      "algorithm": "shenshaPreset=classical|full|minimal",
+      "profileIds": [],
+      "differencesFromCanonical": "神煞數量不作權威程度指標；每條規則仍需獨立 source、ruleId 與 evidence。",
+      "evidence": "規則 registry 的 references、variants 與 researchNotes；特殊柱位不得回塞一般 ShenSha。"
+    },
+    {
+      "variantId": "VAR_USE_GOD_MODEL_FUYI",
+      "conceptId": "use-god.model",
+      "tradition": "analysis-model",
+      "sourceIds": [],
+      "status": "comparison",
+      "condition": "以扶抑模型的喜用五行第一順位作為 canonical-use-derived。",
+      "algorithm": "useGodModel=fuyi-canonical",
+      "profileIds": ["canonical"],
+      "differencesFromCanonical": "調候、通關、格局、從化等模型可能產生不同候選，不應在未完成時覆寫 canonical。",
+      "evidence": "result.analysis.useGodResolver 保留 candidates、conflicts、finalDecision 與 model evidence。"
+    }
+  ]
+}

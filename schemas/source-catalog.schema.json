@@ -21,7 +21,9 @@
           "author": {"type": "string"},
           "period": {"type": "string"},
           "sourceStatus": {"type": "string"},
+          "sourceType": {"type": "string"},
           "editionNote": {"type": "string"},
+          "editions": {"type": "array", "items": {"type": "object"}},
           "locators": {"type": "array", "items": {"type": "string"}, "minItems": 1},
           "references": {"type": "array", "items": {"type": "string"}, "minItems": 1}
         }

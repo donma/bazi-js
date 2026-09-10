@@ -12,6 +12,7 @@
       "author": "萬民英",
       "period": "明",
       "sourceStatus": "primary",
+      "sourceType": "classical-text",
       "editionNote": "以可核對的卷次與篇名作為索引；版本、標點與列數差異另記於 evidenceRecords。",
       "locators": ["卷二：人元司事、胎元、坐命官", "卷三：神煞與日例、論空亡", "卷五：十惡大敗日", "卷六：特殊格與特殊日柱"],
       "references": [
@@ -26,6 +27,7 @@
       "author": "徐大升傳、後世增訂傳本",
       "period": "宋元以降傳本",
       "sourceStatus": "primary",
+      "sourceType": "classical-text",
       "editionNote": "書名與篇章在不同傳本有編次差異；本專案只保存可回查的篇名，不把後世摘要當原文。",
       "locators": ["魁罡", "十惡大敗", "日貴、日德", "八專、金神", "天赦、四廢"],
       "references": ["https://zh.wikisource.org/zh-hant/淵海子平"]
@@ -36,6 +38,7 @@
       "author": "清廷纂修",
       "period": "清",
       "sourceStatus": "primary-reference",
+      "sourceType": "reference-text",
       "editionNote": "作為天赦等擇日類條目的交叉來源；它與子平命理的使用目的不同。",
       "locators": ["卷五：天赦"],
       "references": ["https://zh.wikisource.org/wiki/欽定協紀辨方書_(四庫全書本)/卷05"]
@@ -46,6 +49,7 @@
       "author": "任鐵樵注",
       "period": "清",
       "sourceStatus": "commentary",
+      "sourceType": "commentary",
       "editionNote": "作為人元司令、月令與全局取用的理論參考，不用來替代固定日柱原始條文。",
       "locators": ["人元司令", "月令與全局取用"],
       "references": ["https://zh.wikisource.org/zh-hant/滴天髓闡微", "docs/references/sample1-audit.md"]
@@ -56,9 +60,21 @@
       "author": "沈孝瞻",
       "period": "清",
       "sourceStatus": "classical-commentary",
+      "sourceType": "commentary",
       "editionNote": "用於月令、格局概念的背景對讀；不將格局條件簡化成神煞命中。",
       "locators": ["月令取格", "格局與用神"],
       "references": ["docs/references/rule-differences.md"]
+    },
+    {
+      "sourceId": "gu-jin-tu-shu-ji-cheng",
+      "title": "欽定古今圖書集成",
+      "author": "清廷纂修",
+      "period": "清",
+      "sourceStatus": "reference-index",
+      "sourceType": "reference-encyclopedia",
+      "editionNote": "僅作現有神煞條目的書目定位；尚未將百科條文逐條校勘為 BaziJS canonical 規則。",
+      "locators": ["藝術典第728卷"],
+      "references": ["未建立可定位公開連結"]
     }
   ],
   "evidenceRecords": [

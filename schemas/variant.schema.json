@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/variant.schema.json",
+  "title": "BaziJS Rule Variant",
+  "type": "object",
+  "required": ["variantId", "conceptId", "ruleId", "tradition", "sourceIds", "status", "condition"],
+  "properties": {
+    "variantId": {"type": "string"},
+    "conceptId": {"type": "string"},
+    "ruleId": {"type": "string"},
+    "tradition": {"type": "string"},
+    "sourceIds": {"type": "array", "items": {"type": "string"}},
+    "status": {"type": "string"},
+    "condition": {"type": "string"},
+    "id": {"type": "string"},
+    "description": {"type": "string"},
+    "note": {"type": "string"}
+  }
+}

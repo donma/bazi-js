@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/concept.schema.json",
+  "title": "BaziJS Reference Concept",
+  "type": "object",
+  "required": ["conceptId", "name", "aliases", "conceptType", "traditions", "status", "ruleIds", "sourceIds", "description", "version"],
+  "properties": {
+    "conceptId": {"type": "string"},
+    "name": {"type": "string"},
+    "aliases": {"type": "array", "items": {"type": "string"}},
+    "conceptType": {"enum": ["calendar", "pillar", "stem-branch", "five-element", "ten-god", "hidden-stem", "nayin", "twelve-stage", "kongwang", "interaction", "strength", "month-commander", "pattern", "use-god", "shensha", "special-rule", "auxiliary", "luck", "transit", "profile"]},
+    "patternType": {"enum": ["regular", "special", "conformity", "transformation", "other"]},
+    "traditions": {"type": "array", "items": {"type": "string"}},
+    "status": {"enum": ["canonical", "implemented", "candidate-only", "research-only", "conflicted", "deprecated"]},
+    "ruleIds": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "sourceIds": {"type": "array", "items": {"type": "string"}},
+    "description": {"type": "string"},
+    "version": {"type": "string"},
+    "ruleFamily": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": "array", "items": {"type": "string"}},
+    "implementation": {"type": "object"}
+  }
+}

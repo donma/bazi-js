@@ -124,7 +124,19 @@ Profile 的差異是有意義的輸入契約；不能用畫面上的標籤取代
 - 變更沒有意外改動 Demo 公開文字；若確實改變命盤結果，附上 Profile 與版本說明。
 - README 更新紀錄已寫入實際測試結果。
 
-## 9. 非目標
+## 9. 本輪施工狀態（2026-09-10）
+
+已完成且不改變 Demo 主畫面的資料／治理層：
+
+- P0 核心：新增 `src/reference/taxonomy.js`，統一 `shensha`、`special-rule`、`pattern/regular`、`pattern/special`，並保留舊 runtime 分類作相容。
+- P1 證據索引：現有 6 個來源、古籍 evidence ledger 與 9 組可查詢 variants；未知頁碼仍保留 `null`，沒有虛構版本資訊。
+- P2／P5 API：新增 `Bazi.Reference` 的概念、規則、來源、變體、coverage 與 AI context 查詢；Profile 差異集中於 `sources/variants.json`。
+- P3／P4：新增 coverage artifact、生成式概念文件與對應 Schema；文件由 registry／sources 生成，不手工複製規則內容。
+- P13：GitHub Actions 改由 `npm run ci` 執行測試、外部 ledger、taxonomy、Reference、coverage、bundle 與 Demo 檢查。
+
+保留在研究狀態：完整古籍全文／影像校勘、所有 Profile 的實際替換算法、特殊格完整成格判定，以及以概念為單位的外部正確率矩陣。這些若資料不足，維持 `research-only` 或 `not-collected`，不為了填滿數字而升格。
+
+## 10. 非目標
 
 vNext 不承諾：
 
@@ -133,6 +145,6 @@ vNext 不承諾：
 - 以大量斷語、醫療、財務或人生預測充當 SDK 驗證。
 - 因為資料被收錄，就自動把研究規則升為 canonical。
 
-## 10. 更新方式
+## 11. 更新方式
 
 本文件若修改治理定義或升版門檻，必須同步更新 README 更新紀錄；若只是新增施工項目，保留原有項目的完成狀態與限制，不刪除歷史決策。

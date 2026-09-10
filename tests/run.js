@@ -284,6 +284,22 @@ async function runUnit() {
   assert(summerPardon.some((item) => item.id === 'tian_she' && item.evidence.season === 'summer'), 'UT-SEASONAL-TIANSHE-SUMMER', JSON.stringify(summerPardon));
   assert(Bazi.calculate({ birthDate: '2000-01-01', birthTime: '12:00', gender: 'male' }).specialRules.every((item) => item.conceptType !== 'shensha'), 'UT-CHART-SPECIAL-RULES', 'chart.specialRules 應為獨立分類');
 
+  // Reference taxonomy / API：概念、規則、來源與變體可雙向追溯，且不把研究格局當成已完成判斷。
+  const referenceCheck = Bazi.Reference.validateReferenceIndex();
+  assert(referenceCheck.valid && referenceCheck.counts.rules === 68 && referenceCheck.counts.sources >= 6, 'UT-REFERENCE-INDEX-VALID', JSON.stringify(referenceCheck));
+  const regularConcept = Bazi.Reference.getConcept('pattern.zheng-guan');
+  assert(regularConcept?.conceptType === 'pattern' && regularConcept.patternType === 'regular' && regularConcept.status === 'candidate-only', 'UT-REFERENCE-REGULAR-TAXONOMY', JSON.stringify(regularConcept));
+  assert(Bazi.Reference.findConcept('正官格').some((concept) => concept.conceptId === 'pattern.zheng-guan'), 'UT-REFERENCE-ALIAS-LOOKUP', '正官格應可由 alias 查到');
+  const regularRule = Bazi.Reference.getRule('PT_REGULAR_ZHENGGUAN_001');
+  assert(regularRule?.conceptType === 'pattern' && regularRule.patternType === 'regular' && regularRule.sourceIds.includes('zi-ping-zhen-quan'), 'UT-REFERENCE-RULE-LOOKUP', JSON.stringify(regularRule));
+  assert(Bazi.Reference.getSourcesForRule('PT_REGULAR_ZHENGGUAN_001').some((source) => source.sourceId === 'san-ming-tong-hui'), 'UT-REFERENCE-RULE-SOURCE-BIDIRECTIONAL', '規則應能回查古籍');
+  assert(Bazi.Reference.getRulesFromSource('san-ming-tong-hui').some((rule) => rule.ruleId === 'PT_REGULAR_ZHENGGUAN_001'), 'UT-REFERENCE-SOURCE-RULE-BIDIRECTIONAL', '古籍應能回查規則');
+  assert(Bazi.Reference.getVariants('SE_TIANSHE_001').length > 0, 'UT-REFERENCE-VARIANTS', '天赦的季節變體應可查詢');
+  assert(Bazi.Reference.getVariants('profile.year-boundary').some((variant) => variant.variantId === 'VAR_YEAR_BOUNDARY_LUNAR_NEW_YEAR'), 'UT-REFERENCE-PROFILE-VARIANTS', 'Profile 年界變體應可查詢');
+  const referenceContext = Bazi.Reference.toContext({ conceptIds: ['pattern.zheng-guan'], includeExamples: true });
+  assert(referenceContext.contextType === 'bazi-js-reference-context' && referenceContext.claimPolicy.mustCiteSource.includes('PT_REGULAR_ZHENGGUAN_001') && JSON.stringify(referenceContext).length > 100, 'UT-REFERENCE-AI-CONTEXT', 'Reference Context 必須可供 AI / SDK 使用');
+  assert(Bazi.Reference.getCoverage('pattern').dimensions.external.status === 'not-collected', 'UT-REFERENCE-COVERAGE-NOT-ACCURACY', '未建立外部矩陣時不得宣稱準確率');
+
   // 大運 / 流年神煞結構（v1.0.1）
   assert(Array.isArray(d1.luckCycles.cycles[0].shenSha), 'UT-LUCK-SHENSHATYPE', '');
   assert(Array.isArray(d1.transits.shenShaYear), 'UT-TRANSIT-SHENSHATYPE', '');
@@ -478,12 +494,15 @@ async function runDataContracts() {
   const external = readJson('../validation/external/round-01-samples.json');
   const specialSystems = readJson('../validation/external/round-02-special-systems.json');
   const evidenceLedger = readJson('../sources/evidence-ledger.json');
+  const variantsCatalog = readJson('../sources/variants.json');
   const independent = readJson('../validation/external/independent-ledger.json');
   const boundaryRound = readJson('../validation/external/round-03-boundary-samples.json');
   const secondEngineRound = readJson('../validation/external/round-04-second-engine.json');
   const celebrityRound = readJson('../validation/external/round-05-celebrity-cases.json');
   const interpretationBenchmark = readJson('../validation/interpretation/benchmark.json');
   const validationManifest = Bazi.Validation.getValidationManifest();
+  const referenceTaxonomy = Bazi.Reference.getTaxonomy();
+  const referenceCoverage = Bazi.Reference.getCoverageReport();
   const schemaFiles = [
     ['../schemas/source-catalog.schema.json', sourceCatalog],
     ['../schemas/profile.schema.json', profileCatalog.profiles[0]],
@@ -496,7 +515,10 @@ async function runDataContracts() {
     ['../schemas/independent-validation.schema.json', secondEngineRound],
     ['../schemas/celebrity-validation.schema.json', celebrityRound],
     ['../schemas/interpretation-validation.schema.json', interpretationBenchmark],
-    ['../schemas/validation-manifest.schema.json', validationManifest]
+    ['../schemas/validation-manifest.schema.json', validationManifest],
+    ['../schemas/taxonomy.schema.json', referenceTaxonomy],
+    ['../schemas/coverage.schema.json', referenceCoverage.scopes[0]],
+    ['../schemas/variants-catalog.schema.json', variantsCatalog]
   ];
 
   for (const [file, sample] of schemaFiles) {
@@ -504,6 +526,33 @@ async function runDataContracts() {
     assert(schema.$schema === 'https://json-schema.org/draft/2020-12/schema', `UT-SCHEMA-DRAFT-${file}`, schema.$schema);
     assert(schemaErrors(sample, schema).length === 0, `UT-SCHEMA-${file}`, schemaErrors(sample, schema).join('; '));
   }
+
+  const conceptSchema = readJson('../schemas/concept.schema.json');
+  const sourceSchema = readJson('../schemas/source.schema.json');
+  const evidenceSchema = readJson('../schemas/evidence.schema.json');
+  const variantSchema = readJson('../schemas/variant.schema.json');
+  for (const concept of Bazi.Reference.CONCEPTS) {
+    const errors = schemaErrors(concept, conceptSchema);
+    assert(errors.length === 0, `UT-CONCEPT-SCHEMA-${concept.conceptId}`, errors.join('; '));
+  }
+  const referenceSourceIds = [...new Set(Bazi.Reference.CONCEPTS.flatMap((concept) => concept.sourceIds))];
+  for (const sourceId of referenceSourceIds) {
+    const source = Bazi.Reference.getSource(sourceId);
+    const errors = schemaErrors(source, sourceSchema);
+    assert(errors.length === 0, `UT-REFERENCE-SOURCE-SCHEMA-${sourceId}`, errors.join('; '));
+  }
+  for (const record of [...sourceCatalog.evidenceRecords, ...evidenceLedger.citations]) {
+    const normalized = { ...record, sourceIds: record.sourceIds || [record.sourceId] };
+    const errors = schemaErrors(normalized, evidenceSchema);
+    assert(errors.length === 0, `UT-REFERENCE-EVIDENCE-SCHEMA-${record.evidenceId}`, errors.join('; '));
+  }
+  const allVariants = Bazi.Reference.CONCEPTS.flatMap((concept) => Bazi.Reference.getVariants(concept.conceptId));
+  for (const variant of allVariants) {
+    const errors = schemaErrors(variant, variantSchema);
+    assert(errors.length === 0, `UT-REFERENCE-VARIANT-SCHEMA-${variant.variantId}`, errors.join('; '));
+  }
+  assert(fs.existsSync(new URL('../docs/reference/generated/index.md', import.meta.url)), 'UT-REFERENCE-DOCS-GENERATED', 'Reference 文件索引不存在');
+  assert(fs.existsSync(new URL('../validation/coverage/coverage.json', import.meta.url)), 'UT-COVERAGE-GENERATED', 'coverage artifact 不存在');
 
   const profileSchema = readJson('../schemas/profile.schema.json');
   const ruleSchema = readJson('../schemas/rule.schema.json');

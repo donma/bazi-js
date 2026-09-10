@@ -12,7 +12,13 @@
     "validate": "node scripts/validate-external.js",
     "gen-golden": "node scripts/generate-golden.js",
     "check:demo": "node scripts/check-demo.js",
-    "ci": "npm test && npm run validate && npm run build && npm run check:demo"
+    "validate:taxonomy": "node scripts/validate-taxonomy.js",
+    "validate:references": "node scripts/validate-references.js",
+    "generate:reference-docs": "node scripts/generate-reference-docs.js",
+    "check:reference-docs": "node scripts/generate-reference-docs.js --check",
+    "generate:coverage": "node scripts/generate-coverage.js",
+    "validate:coverage": "node scripts/generate-coverage.js --check",
+    "ci": "npm test && npm run validate && npm run validate:taxonomy && npm run validate:references && npm run generate:reference-docs && npm run generate:coverage && npm run build && npm run check:demo && npm run check:reference-docs && npm run validate:coverage"
   },
   "files": [
     "VERSIONS.md",
