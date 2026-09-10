@@ -16,6 +16,7 @@ const checks = [
   ['demo renders hidden-stem and ten-god info tooltips', /renderHiddenStemInfo/.test(app) && /hidden-label:/.test(app) && /ten-god:hidden:/.test(app)],
   ['demo renders summary ShenSha info triggers inline', /renderShenShaInline\(result\.shenSha/.test(app) && /responsive-inline-shensha/.test(app + styles)],
   ['demo renders transit-detail ShenSha info triggers inline', /responsive-transit-shensha[\s\S]*renderShenShaInline\(transitShenSha/.test(app)],
+  ['demo renders transit structural events only when present', /transitGraph[\s\S]*events/.test(app) && /transitEvents\.length \?/.test(app) && /responsive-transit-events/.test(app + styles)],
   ['demo renders special-rule info triggers inline', /formatSpecialRulesInline\(result\.specialRules\)/.test(app) && /responsive-inline-special-rule/.test(app + styles)],
   ['demo has ShenSha info tooltip', /shensha-info-tooltip/.test(app + styles)],
   ['demo tooltip avoids viewport clipping', /position:\s*fixed/.test(styles) && /positionShenShaTooltip/.test(app)],

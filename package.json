@@ -1,6 +1,6 @@
 {
   "name": "bazijs",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Browser-first, zero-dependency BaZi (Four Pillars) calculation SDK in JavaScript.",
   "main": "dist/bazi-sdk.js",
   "browser": "dist/bazi-sdk.js",
@@ -15,6 +15,7 @@
     "ci": "npm test && npm run validate && npm run build && npm run check:demo"
   },
   "files": [
+    "VERSIONS.md",
     "dist",
     "src",
     "sources",
@@ -35,6 +36,6 @@
   "author": "BaziJS Contributors",
   "license": "Apache-2.0",
   "devDependencies": {
-    "esbuild": "^0.23.0"
+    "esbuild": "^0.28.2"
   }
 }

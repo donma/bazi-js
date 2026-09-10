@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "0.1.0",
+  "datasetId": "bazi-js-interpretation-benchmark",
+  "capturedAt": "2026-09-10",
+  "status": "protocol-only",
+  "purpose": "分離命盤計算正確性與命理解讀校核；目前不以 SDK 自己的輸出建立解讀 expected value。",
+  "methodology": {
+    "independence": "requires-independent-expert-or-published-source",
+    "requiredEvidence": ["fixed-input", "profile-and-version", "independent-source", "adjudication-notes"],
+    "allowedClassifications": ["match", "difference", "undetermined"]
+  },
+  "cases": []
+}

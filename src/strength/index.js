@@ -18,8 +18,10 @@ import { BRANCHES, BRANCH_INDEX } from '../core/constants/branches.js';
 import { getHiddenStems } from '../core/constants/hidden-stems-data.js';
 import { elementRelation, ELEMENTS } from '../core/constants/elements.js';
 import { calculateFiveElementCategories, FIVE_CATEGORY_METHOD } from './five-category.js';
+import { buildEffectiveQiSnapshot, buildQiSnapshot, buildTransformationLayer, STRENGTH_QI_LAYER_VERSION } from './qi-layers.js';
 
 export { calculateFiveElementCategories, FIVE_CATEGORY_METHOD } from './five-category.js';
+export { buildEffectiveQiSnapshot, buildQiSnapshot, buildTransformationLayer, STRENGTH_QI_LAYER_VERSION } from './qi-layers.js';
 
 // 月令五行旺衰係數（旺=1.0, 相=0.8, 休=0.4, 囚=0.2, 死=0.1）
 // 寅卯月：木旺、火相、水休、金囚、土死
@@ -177,6 +179,7 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
   // 天干：年干 8分、月干 12分、時干 10分（日主不計自身透出，日主為受測主體）
   // 地支：月令地支 40分（八字最重提綱）、日支 15分、時支 15分、年支 10分
   const elementScores = { '木': 0, '火': 0, '土': 0, '金': 0, '水': 0 };
+  const rawElementScores = { '木': 0, '火': 0, '土': 0, '金': 0, '水': 0 };
 
   // 天干透出計分
   const stemWeights = [
@@ -187,6 +190,7 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
 
   for (const item of stemWeights) {
     const el = STEMS[STEM_INDEX[item.stem]].element;
+    rawElementScores[el] += item.weight;
     elementScores[el] += item.weight;
     evidence.push({
       ruleId: 'STR_STEM_TRANSPARENCY',
@@ -221,6 +225,8 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
 
     for (const h of hiddenList) {
       const el = STEMS[STEM_INDEX[h.stem]].element;
+      const rawScore = item.baseWeight * h.weight;
+      rawElementScores[el] += rawScore;
       const score = item.baseWeight * h.weight * clashDamp;
       elementScores[el] += score;
       evidence.push({
@@ -247,6 +253,13 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
   const monthCommander = calculateMonthCommander(monthBranch, elapsedDays, {
     model: calendarContext.monthCommanderModel
   });
+
+  const rawQi = buildQiSnapshot(rawElementScores, dmElement);
+  const transformations = buildTransformationLayer(interactions, {
+    monthBranch,
+    seasonalStates: SEASON_STATES[monthBranch] || {}
+  });
+  const effectiveQi = buildEffectiveQiSnapshot(elementScores, dmElement, transformations);
 
   evidence.push({
     ruleId: 'STR_DE_LING',
@@ -403,6 +416,38 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
     }
   };
 
+  const assessment = {
+    modelId: 'bazi-js-weighted-ally-enemy',
+    ruleId: 'STR_DAY_MASTER_ASSESSMENT_001',
+    version: STRENGTH_QI_LAYER_VERSION,
+    status: 'implemented',
+    dayMaster: dmElement,
+    score: finalScore,
+    levelCode,
+    level: levelCode === 'extremelyStrong' ? '極強' : levelCode === 'strong' ? '偏強' : levelCode === 'balanced' ? '中和' : levelCode === 'weak' ? '偏弱' : '極弱',
+    deLing,
+    deDi,
+    deShi,
+    allyScore: Number(allyScore.toFixed(1)),
+    enemyScore: Number(enemyScore.toFixed(1)),
+    evidence: {
+      matched: true,
+      source: 'effectiveQi',
+      note: '固定閾值只描述強弱帶，不直接宣告從格、專旺或其他特殊格；特殊格需由 Patterns 層另行判定。'
+    }
+  };
+
+  const decision = {
+    modelId: useGod.modelId,
+    ruleId: useGod.ruleId,
+    version: STRENGTH_QI_LAYER_VERSION,
+    status: useGod.status,
+    finalDecision: useGod.finalDecision,
+    favorableElements: [...new Set(favorableElements)],
+    unfavorableElements: [...new Set(unfavorableElements)],
+    evidence: useGod.evidence
+  };
+
   return {
     dayMaster: dmElement,
     score: finalScore,
@@ -421,6 +466,18 @@ export function calculateStrength(pillars, interactions = null, calendarContext 
       deLing
     },
     monthCommander,
+    rawQi,
+    effectiveQi,
+    transformations,
+    assessment,
+    decision,
+    layers: {
+      rawQi,
+      transformation: transformations,
+      effectiveQi,
+      dayMasterAssessment: assessment,
+      decision
+    },
     useGod,
     seasonalStates: Object.fromEntries(Object.entries(SEASON_STATES[monthBranch] || {}).map(([element, name]) => [element, {
       name,

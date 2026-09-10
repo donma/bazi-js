@@ -12,6 +12,7 @@ BaziJS 是一套給瀏覽器使用的 JavaScript 八字（四柱）排盤 SDK。
 - 公曆、農曆、節氣與四柱干支
 - 十神、藏干、納音、十二長生與空亡
 - 五行分布、日主強弱與判定依據
+- 分層強弱 evidence：`rawQi`、互動折損後的 `effectiveQi`、轉化候選與日主 assessment
 - 用神推導的用／喜／閒／仇／忌五分類（明確標示模型假設）
 - 天干地支合、沖、刑、害、破等互動
 - 大運、流年與流運神煞
@@ -226,6 +227,20 @@ console.log(result.strength.distribution);       // 木火土金水比例
 console.log(result.strength.favorableElements);  // 喜用方向
 console.log(result.strength.unfavorableElements);// 忌仇方向
 console.log(result.strength.evidence);           // 判定依據
+console.log(result.strength.rawQi);               // 互動折損前的五行氣數
+console.log(result.strength.effectiveQi);         // 套用既有互動折損後的氣數
+console.log(result.strength.transformations);     // 合局／會局的成化候選與 evidence
+console.log(result.strength.assessment);           // 日主強弱 assessment（不等同特殊格）
+```
+
+多模型用神與流年 graph 目前以可追溯資料形式提供：
+
+```js
+console.log(result.analysis.useGodResolver.candidates); // 扶抑、格局、調候、通關等候選
+console.log(result.analysis.useGodResolver.finalDecision); // 只有已實作模型才會有決定
+console.log(result.transits.transitGraph.nodes);           // 原局／大運／流年月日時節點
+console.log(result.transits.transitGraph.edges);           // 時間層連線與已觀測到的跨層互動
+console.log(result.transits.transitGraph.events);          // 結構事件；不直接等同吉凶
 ```
 
 分數與旺衰是目前規則模型的結果，不是科學測量值。
@@ -408,6 +423,8 @@ console.log(comparison.luckCycles.startAge);
 | [`profiles/`](profiles/) | canonical 與比較用多流派設定 | 查「這次用哪套切界」 |
 | [`schemas/`](schemas/) | 規則、Profile、命盤結果與驗證資料的 JSON Schema | 驗證資料格式 |
 | [`validation/external/`](validation/external/) | 公開來源抽樣資料與擷取日期 | 重跑外部交叉比對 |
+| [`validation/interpretation/`](validation/interpretation/) | 解讀驗證的獨立校核資料契約 | 目前只有 protocol-only，未宣稱解讀已驗證 |
+| [`docs/governance/`](docs/governance/) | 規則分級、來源要求、升版與 CI 治理 | 查「怎麼新增與升版」 |
 
 使用內建 Profile：
 
@@ -426,7 +443,7 @@ SDK 也提供不增加主盤內容的驗證資料索引：
 
 ```js
 const manifest = Bazi.Validation.getValidationManifest();
-console.log(manifest.totals); // 目前固定索引：50 組、2 個獨立來源
+console.log(manifest.totals); // 目前固定索引：55 組、12 個外部來源
 
 const datasets = await Promise.all(
   manifest.datasets.map((item) => fetch(`./${item.fixture}`).then((response) => response.json()))
@@ -460,9 +477,11 @@ console.log(evidence.evidenceRecords);
 
 Schema 是資料格式契約；它不替古籍裁決流派。遇到異文，請讀 `variants` 與 `researchNotes`；`SpecialPatterns` 目前只在 `Bazi.Patterns` 登錄研究架構，不會混進一般 `result.shenSha`。
 
-`validation/external/round-01-samples.json` 保存曆法抽樣；`round-02-special-systems.json` 保存命卦、五分類與起運方法的網路抽樣；`round-03-boundary-samples.json` 保存 34 組獨立引擎的跨日期、時區、子時、節氣與真太陽時邊界觀察；`round-04-second-engine.json` 再以第二個獨立引擎保存 16 組民用日期／真太陽時抽樣，兩輪合計 50 組。每輪資料都包含來源、擷取日期、輸入與分類。驗證是把當時公開資料固定下來再重跑，避免網站改版、廣告或即時內容讓結果無法重現；它能保證「在指定 Profile、版本與證據範圍內可重現」，不能宣稱傳統命理存在跨流派的絕對唯一答案。
+`validation/external/round-01-samples.json` 保存曆法抽樣；`round-02-special-systems.json` 保存命卦、五分類與起運方法的網路抽樣；`round-03-boundary-samples.json` 保存 34 組獨立引擎的跨日期、時區、子時、節氣與真太陽時邊界觀察；`round-04-second-engine.json` 再以第二個獨立引擎保存 16 組民用日期／真太陽時抽樣，兩輪合計 50 組；[`round-05-celebrity-cases.json`](validation/external/round-05-celebrity-cases.json) 另保存 5 組中國、台灣、香港華人公開人物案例，統一以 `+08:00`、未知時辰比對三柱。每輪資料都包含來源、擷取日期、輸入與分類。驗證是把當時公開資料固定下來再重跑，避免網站改版、廣告或即時內容讓結果無法重現；它能保證「在指定 Profile、版本與證據範圍內可重現」，不能宣稱傳統命理存在跨流派的絕對唯一答案。
 
-`sources/evidence-ledger.json` 另保存古籍版本狀態、原文摘錄、定位 URL、頁碼（未知時為 `null`）、OCR／校勘註記。`validation/external/independent-ledger.json` 專門保存獨立引擎的觀察，並分成 `match`、`difference`、`undetermined`；沒有外部輸出的案例不會被 SDK 自己的結果填補。治理規則見 [`docs/governance/authority-model.md`](/D:/AI_PROJECTS/BaZi/docs/governance/authority-model.md) 與 [`docs/governance/rule-addition-protocol.md`](/D:/AI_PROJECTS/BaZi/docs/governance/rule-addition-protocol.md)。
+`sources/evidence-ledger.json` 另保存古籍版本狀態、原文摘錄、定位 URL、頁碼（未知時為 `null`）、OCR／校勘註記。`validation/external/independent-ledger.json` 專門保存獨立引擎的觀察，並分成 `match`、`difference`、`undetermined`；沒有外部輸出的案例不會被 SDK 自己的結果填補。現行治理規則見 [`authority-model.md`](docs/governance/authority-model.md)、[`rule-addition-protocol.md`](docs/governance/rule-addition-protocol.md) 與下一階段目標 [`vNext.md`](docs/governance/vNext.md)。
+
+計算驗證與解讀驗證分開：`validation/external/` 可核對四柱與規則輸出；`validation/interpretation/benchmark.json` 目前是 `protocol-only`，因為沒有獨立專業校核資料時，不應把 SDK 自己的結果當作解讀真值。
 
 ## 7. SVG、PNG 與 AI Context
 
@@ -567,8 +586,21 @@ console.log(result.accuracy.trueSolarTimeUsed);
 
 ## 更新紀錄
 
+### 2026-09-10（vNext 施工）
+
+- 依 [`VERSIONS.md`](VERSIONS.md) 對齊 package／lock／engine 版本契約，修正 `npm ls` 對 `esbuild` 的 invalid dependency 狀態；這項整理不改變命盤計算。
+- 強弱計算增加 `result.strength.rawQi`、`effectiveQi`、`transformations`、`assessment`、`decision` 與 `layers`。`rawQi` 是未套用六沖折損的五行氣數，`effectiveQi` 是目前 canonical 的互動調整結果；合局／會局只作可追溯候選，未冒充已成化。
+- 新增 `result.analysis.useGodResolver` 與 `result.transits.transitGraph`：前者集中保存扶抑、格局、調候、通關、從化的模型候選與未決衝突，後者保存原局／大運／流年月日時節點與已觀測互動；研究模型仍不覆寫 canonical。
+- 本批未實作完整從格／專旺、調候、通關與歲運多層轉化；它們仍依治理規範留在 Patterns／研究模型，待獨立條件與驗證資料完成後再升級。
+- 新增 `src/patterns/regular.js` 的十個正格結構候選（正官、七殺、正財、偏財、正印、偏印、食神、傷官、建祿、月刃），只辨識月令／祿刃結構，不直接宣告成格；特殊格仍維持獨立 `research-only`。
+- 新增 `validation/interpretation/` 與 `schemas/interpretation-validation.schema.json`，明確把「計算驗證」與「命理解讀校核」分開；目前維持 `protocol-only`，沒有自行製造解讀 expected value。
+
 ### 2026-09-10
 
+- 建立 [`docs/governance/vNext.md`](docs/governance/vNext.md) 作為下一階段治理目標：明確定義 canonical／comparison／research-only／undetermined、文獻衝突、Profile 實際運算、breaking change、升版門檻與 P0–P4 施工階段；此文件不改變 SDK 或 Demo 行為。
+- 新增 [`round-05-celebrity-cases.json`](validation/external/round-05-celebrity-cases.json) 與 [`round-05-celebrity-cross-validation.md`](validation/reports/round-05-celebrity-cross-validation.md)：改用高行健、姚明、成龍、元彪、林青霞 5 組華人公開人物樣板，出生地限定中國／台灣／香港，輸入統一為 `+08:00`；Nobel Prize、FIBA、香港電影資料館與台灣文化部核對出生事實，Deep Oracle 只作外部三柱 observation。
+- 五案公開時辰都不可核實，因此只比較年、月、日；5/5 `match`、0 `difference`、0 `undetermined`，不把成龍與林青霞頁面的示意時柱當成出生資料，也不因此修改 canonical。
+- 驗證 manifest 更新為 55 組案例、12 個外部來源；新增 `schemas/celebrity-validation.schema.json`，`npm test` 通過 534/534，`npm run validate` 通過所有固定案例。
 - 完成第二個獨立引擎交叉驗證：新增 `baziflow-core@0.1.0` 固定 source commit、16 組外部 observation 與可重現擷取腳本；12 組民用日期、4 組真太陽時全部一致。
 - round-03 的 34 組邊界資料與 round-04 的 16 組第二引擎資料合計 50 組；測試會檢查兩批來源、分類、差異與總數，不會把 BaziJS 自己的輸出當成外部 expected。
 - `npm run ci` 驗證結果：`npm test` 515/515、`npm run validate` 全部通過、`npm run build` 與 `npm run check:demo` 全部通過。

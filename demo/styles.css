@@ -1168,6 +1168,28 @@ input:focus, select:focus {
   border-top: 1px solid var(--responsive-border);
 }
 
+.responsive-transit-events {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--responsive-border);
+}
+
+.responsive-transit-events span {
+  color: var(--responsive-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.responsive-transit-events strong {
+  color: var(--responsive-accent, var(--accent));
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .responsive-transit-shensha p {
   color: var(--responsive-text);
   font-size: 14px;
@@ -1378,6 +1400,10 @@ footer {
     border-top: 1px solid var(--responsive-border);
   }
   .responsive-transit-shensha {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .responsive-transit-events {
     grid-template-columns: 1fr;
     gap: 4px;
   }

@@ -46,17 +46,83 @@
     "strength": {
       "type": "object",
       "properties": {
-        "fiveCategory": {"type": ["object", "null"]}
+        "fiveCategory": {"type": ["object", "null"]},
+        "rawQi": {"$ref": "#/$defs/qiSnapshot"},
+        "effectiveQi": {"$ref": "#/$defs/qiSnapshot"},
+        "transformations": {"$ref": "#/$defs/transformationLayer"},
+        "assessment": {"type": "object"},
+        "decision": {"type": "object"},
+        "layers": {"type": "object"}
+      }
+    },
+    "interactions": {
+      "type": "object",
+      "properties": {
+        "stems": {"type": "array", "items": {"$ref": "#/$defs/interaction"}},
+        "branches": {"type": "array", "items": {"$ref": "#/$defs/interaction"}}
       }
     },
     "classicalSummary": {"$ref": "#/$defs/classicalSummary"},
     "analysis": {"$ref": "#/$defs/analysis"},
+    "patterns": {"type": ["object", "null"]},
     "luckCycles": {"type": ["object", "null"]},
-    "transits": {"type": ["object", "null"]},
+    "transits": {
+      "type": ["object", "null"],
+      "properties": {
+        "transitGraph": {"$ref": "#/$defs/transitGraph"}
+      }
+    },
     "rules": {"type": "object", "required": ["applied"]}
   },
   "$defs": {
     "pillar": {"type": "object", "required": ["ganzhi", "stem", "branch"]},
+    "qiSnapshot": {
+      "type": "object",
+      "required": ["modelId", "version", "distribution", "totalScore", "evidence"],
+      "properties": {
+        "modelId": {"type": "string"},
+        "version": {"type": "string"},
+        "distribution": {"type": "object"},
+        "totalScore": {"type": "number"},
+        "evidence": {"type": "object"}
+      }
+    },
+    "transformationLayer": {
+      "type": "object",
+      "required": ["modelId", "version", "status", "applied", "candidates", "evidence"],
+      "properties": {
+        "modelId": {"type": "string"},
+        "version": {"type": "string"},
+        "status": {"type": "string"},
+        "applied": {"type": "array"},
+        "candidates": {"type": "array"},
+        "evidence": {"type": "object"}
+      }
+    },
+    "interaction": {
+      "type": "object",
+      "required": ["type", "formation", "transformability", "evidence"],
+      "properties": {
+        "type": {"type": "string"},
+        "formation": {"type": "object"},
+        "transformability": {"type": "object"},
+        "evidence": {"type": "object"}
+      }
+    },
+    "transitGraph": {
+      "type": "object",
+      "required": ["modelId", "version", "layers", "nodes", "edges", "evidence"],
+      "properties": {
+        "modelId": {"type": "string"},
+        "version": {"type": "string"},
+        "layers": {"type": "array", "minItems": 2},
+        "activeLuck": {"type": ["object", "null"]},
+        "nodes": {"type": "array"},
+        "edges": {"type": "array"},
+        "events": {"type": "array"},
+        "evidence": {"type": "object"}
+      }
+    },
     "reference": {
       "type": "object",
       "required": ["sourceId", "title", "locator", "url"],

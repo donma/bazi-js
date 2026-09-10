@@ -33,12 +33,36 @@ const VALIDATION_MANIFEST = {
       classifications: { match: 16, difference: 0, undetermined: 0 },
       canonicalChangeRequired: 0,
       status: 'pinned-observation'
+    },
+    {
+      datasetId: 'bazi-js-public-figure-round-05',
+      label: 'UTC+08 華人公開人物命盤交叉驗證',
+      capturedAt: '2026-09-10',
+      fixture: 'validation/external/round-05-celebrity-cases.json',
+      report: 'validation/reports/round-05-celebrity-cross-validation.md',
+      sourceIds: [
+        'deeporacle-gao-xingjian',
+        'deeporacle-yao-ming',
+        'deeporacle-jackie-chan',
+        'deeporacle-yuen-biao',
+        'deeporacle-brigitte-lin',
+        'nobel-gao-xingjian',
+        'fiba-yao-ming',
+        'hkfa-jackie-chan',
+        'hkfa-yuen-biao',
+        'moc-brigitte-lin'
+      ],
+      scope: ['public-figure-birth-data', 'pillars', 'utc+08', 'unknown-birth-time'],
+      cases: 5,
+      classifications: { match: 5, difference: 0, undetermined: 0 },
+      canonicalChangeRequired: 0,
+      status: 'pinned-observation'
     }
   ],
   totals: {
-    cases: 50,
-    classifications: { match: 44, difference: 6, undetermined: 0 },
-    sources: 2
+    cases: 55,
+    classifications: { match: 49, difference: 6, undetermined: 0 },
+    sources: 12
   }
 };
 
@@ -74,7 +98,12 @@ export function summarizeValidationDataset(dataset) {
     const classification = item?.adjudication?.classification;
     if (Object.prototype.hasOwnProperty.call(classifications, classification)) increment(classifications, classification);
     increment(groups, item?.group || 'ungrouped');
-    for (const observation of Array.isArray(item?.observations) ? item.observations : []) {
+    const observationsForCase = Array.isArray(item?.observations)
+      ? item.observations
+      : item?.externalObservation
+        ? [item.externalObservation]
+        : [];
+    for (const observation of observationsForCase) {
       observations++;
       if (observation.sourceId) sourceIds.add(observation.sourceId);
     }

@@ -79,11 +79,12 @@ async function runUnit() {
   assert(ctx.pillars && ctx.pillars.day.ganzhi === '戊午' && ctx.metadata.profileId === 'canonical', 'UT-AI-CONTEXT', '');
   assert(ctx.dayMaster.fiveCategory && ctx.auxiliary.mingGua && ctx.luckCyclesSummary.variants.length === 2, 'UT-AI-NEW-SYSTEMS', 'AI Context 必須保留五分類、命卦與起運方法 variants');
   assert(d1.meta.apiVersion === '1.0.0' && d1.meta.governanceVersion === '1.0.0', 'UT-API-GOVERNANCE-VERSIONS', JSON.stringify(d1.meta));
+  assert(d1.meta.strengthQiLayerVersion === '1.1.0' && Bazi.rules.strength.qiLayerVersion === '1.1.0', 'UT-STRENGTH-QI-VERSION', JSON.stringify(d1.meta));
   assert(d1.meta.profile?.rules?.dayBoundary?.value === '23:00' && d1.meta.profile?.tradition === 'classical-ziping', 'UT-PROFILE-SNAPSHOT', JSON.stringify(d1.meta.profile));
   assert(d1.accuracy.precision.timezone.offsetHours === 8 && d1.accuracy.precision.timezone.dstSupported === false, 'UT-ACCURACY-TIMEZONE-MODEL', JSON.stringify(d1.accuracy.precision.timezone));
   assert(d1.accuracy.precision.solarTermsModel.modelId === 'meeus-solar-longitude-low-precision' && d1.accuracy.limitations.some((item) => item.id === 'solar-term-minute-precision'), 'UT-ACCURACY-SOLAR-TERM-LIMIT', JSON.stringify(d1.accuracy));
   const validationManifest = Bazi.Validation.getValidationManifest();
-  assert(validationManifest.manifestId === 'bazi-js-validation-manifest' && validationManifest.totals.cases === 50 && validationManifest.datasets.length === 2, 'UT-VALIDATION-MANIFEST', JSON.stringify(validationManifest));
+  assert(validationManifest.manifestId === 'bazi-js-validation-manifest' && validationManifest.totals.cases === 55 && validationManifest.datasets.length === 3, 'UT-VALIDATION-MANIFEST', JSON.stringify(validationManifest));
 
   // 新增的可選系統：五分類、八宅命卦、起運方法 variants。
   const mingGua2020 = Bazi.Auxiliary.calculateMingGua({ effectiveYear: 2020, gender: 'female' });
@@ -91,13 +92,48 @@ async function runUnit() {
   const fiveCategory = Bazi.Strength.calculateFiveElementCategories({ useElement: '金', favorableElements: ['金', '水', '土'] });
   assert(JSON.stringify(fiveCategory.groups) === JSON.stringify({ use: ['金'], joy: ['土'], idle: ['水'], adversary: ['木'], taboo: ['火'] }), 'UT-FIVE-CATEGORY-DETERMINISTIC', JSON.stringify(fiveCategory.groups));
   assert(d1.strength.fiveCategory && d1.strength.fiveCategory.evidence.matched, 'UT-FIVE-CATEGORY-IN-RESULT', JSON.stringify(d1.strength.fiveCategory));
+  assert(d1.strength.rawQi && d1.strength.rawQi.distribution && d1.strength.rawQi.evidence.matched, 'UT-STRENGTH-RAW-QI-LAYER', JSON.stringify(d1.strength.rawQi));
+  assert(d1.strength.effectiveQi && d1.strength.effectiveQi.status === 'interaction-adjusted' && d1.strength.effectiveQi.evidence.interactionAdjustment, 'UT-STRENGTH-EFFECTIVE-QI-LAYER', JSON.stringify(d1.strength.effectiveQi));
+  assert(d1.strength.layers?.dayMasterAssessment?.evidence?.note.includes('特殊格'), 'UT-STRENGTH-ASSESSMENT-SEPARATES-PATTERNS', JSON.stringify(d1.strength.assessment));
+  assert(Array.isArray(d1.strength.transformations.candidates) && d1.strength.transformations.applied.length === 0, 'UT-STRENGTH-TRANSFORMATION-EVIDENCE-ONLY', JSON.stringify(d1.strength.transformations));
+  assert(d1.interactions.stems.every((item) => item.evidence?.matched && item.formation && item.transformability), 'UT-INTERACTIONS-TRACEABLE-METADATA', JSON.stringify(d1.interactions.stems));
+  assert(d1.interactions.branches.every((item) => item.evidence?.matched && item.formation && item.transformability), 'UT-BRANCH-INTERACTIONS-TRACEABLE-METADATA', JSON.stringify(d1.interactions.branches));
   assert(d1.strength.monthCommander === null || (d1.strength.monthCommander.ruleId === 'STR_MONTH_COMMANDER_001' && d1.strength.monthCommander.evidence.matched), 'UT-MONTH-COMMANDER-PROVENANCE', JSON.stringify(d1.strength.monthCommander));
   assert(d1.analysis && d1.analysis.selected.useGod.modelId === 'fuyi-canonical' && d1.analysis.models.useGod.finalDecision === true, 'UT-ANALYSIS-CANONICAL-SELECTION', JSON.stringify(d1.analysis));
+  assert(d1.analysis.useGodResolver && d1.analysis.useGodResolver.candidates.length === 5 && d1.analysis.useGodResolver.finalDecision?.modelId === 'fuyi-canonical', 'UT-USE-GOD-RESOLVER-CANDIDATES', JSON.stringify(d1.analysis.useGodResolver));
+  assert(d1.patterns && d1.patterns.regular.candidates.length === 10 && d1.patterns.special.length === 7 && d1.patterns.evidence.matched, 'UT-REGULAR-PATTERN-CANDIDATE-ENGINE', JSON.stringify(d1.patterns));
+  assert(Bazi.Patterns.validateRegularPatternRegistry().valid && Bazi.Patterns.REGULAR_PATTERN_REGISTRY.length === 10, 'UT-REGULAR-PATTERN-REGISTRY', JSON.stringify(Bazi.Patterns.validateRegularPatternRegistry()));
+  const regularTargets = {
+    direct_officer: '辛', seven_killings: '庚', direct_wealth: '己', indirect_wealth: '戊',
+    direct_resource: '癸', indirect_resource: '壬', eating_god: '丙', hurting_officer: '丁'
+  };
+  for (const [patternId, targetStem] of Object.entries(regularTargets)) {
+    const positive = Bazi.Patterns.calculateRegularPatterns({
+      pillars: { day: { stem: '甲' }, month: { stem: targetStem, branch: '子', ganzhi: `${targetStem}子` } },
+      monthCommander: { stem: targetStem }
+    });
+    const item = positive.regularPatternTest || positive.candidates.find((candidate) => candidate.id === patternId);
+    assert(item?.matched === true, `UT-REGULAR-PATTERN-POSITIVE-${patternId}`, JSON.stringify(item));
+  }
+  const luPositive = Bazi.Patterns.calculateRegularPatterns({
+    pillars: { day: { stem: '甲' }, month: { stem: '丙', branch: '寅', ganzhi: '丙寅' } },
+    monthCommander: { stem: '丙' }
+  });
+  assert(luPositive.candidates.find((candidate) => candidate.id === 'built_lu')?.matched === true && luPositive.candidates.find((candidate) => candidate.id === 'month_blade')?.matched === false, 'UT-REGULAR-PATTERN-LU-BOUNDARY', JSON.stringify(luPositive.candidates.filter((candidate) => ['built_lu', 'month_blade'].includes(candidate.id))));
+  const bladePositive = Bazi.Patterns.calculateRegularPatterns({
+    pillars: { day: { stem: '甲' }, month: { stem: '丙', branch: '卯', ganzhi: '丙卯' } },
+    monthCommander: { stem: '丙' }
+  });
+  assert(bladePositive.candidates.find((candidate) => candidate.id === 'month_blade')?.matched === true && bladePositive.candidates.find((candidate) => candidate.id === 'built_lu')?.matched === false, 'UT-REGULAR-PATTERN-BLADE-BOUNDARY', JSON.stringify(bladePositive.candidates.filter((candidate) => ['built_lu', 'month_blade'].includes(candidate.id))));
+  assert(d1.meta.regularPatternRuleVersion === '0.2.0' && Bazi.rules.patterns.regularVersion === '0.2.0', 'UT-REGULAR-PATTERN-VERSION', JSON.stringify(d1.meta));
+  assert(d1.transits.transitGraph && d1.transits.transitGraph.layers.includes('natal') && d1.transits.transitGraph.layers.includes('transit-year') && d1.transits.transitGraph.nodes.some((node) => node.layer === 'luck') && d1.transits.transitGraph.edges.some((edge) => edge.type === 'transit-time-containment') && Array.isArray(d1.transits.transitGraph.events) && d1.transits.transitGraph.evidence.matched, 'UT-TRANSIT-MULTI-LAYER-GRAPH', JSON.stringify(d1.transits.transitGraph));
+  assert(d1.meta.useGodResolverVersion === '0.1.0' && d1.meta.transitGraphVersion === '0.1.0', 'UT-ANALYSIS-TRANSIT-VERSIONS', JSON.stringify(d1.meta));
   const sanmingAnalysis = Bazi.calculate({ birthDate: '2020-08-31', birthTime: '20:06', gender: 'female' }, { profile: 'classical-sanming' });
   assert(sanmingAnalysis.analysis.selected.monthCommander.modelId === 'san-ming-volume-2' && sanmingAnalysis.analysis.models.monthCommander.status === 'comparison' && sanmingAnalysis.strength.monthCommander.ruleId === 'STR_MONTH_COMMANDER_SANMING_002', 'UT-ANALYSIS-SANMING-PROFILE', JSON.stringify(sanmingAnalysis.analysis.selected.monthCommander));
   assert(sanmingAnalysis.strength.monthCommander.researchNotes.conflict === true && sanmingAnalysis.strength.monthCommander.evidence.sourceTable === 'san-ming-tong-hui-volume-2', 'UT-ANALYSIS-SANMING-EVIDENCE', JSON.stringify(sanmingAnalysis.strength.monthCommander));
   const researchAnalysis = Bazi.calculate({ birthDate: '2020-08-31', birthTime: '20:06', gender: 'female' }, { profile: 'research-tiaohou' });
   assert(researchAnalysis.analysis.models.useGod.status === 'research-only' && researchAnalysis.analysis.models.useGod.finalDecision === false && researchAnalysis.strength.useGod.finalDecision === false, 'UT-ANALYSIS-RESEARCH-NO-OVERRIDE', JSON.stringify(researchAnalysis.analysis));
+  assert(researchAnalysis.analysis.useGodResolver.status === 'research-only' && researchAnalysis.analysis.useGodResolver.finalDecision === null && researchAnalysis.analysis.useGodResolver.conflicts[0]?.status === 'undetermined', 'UT-USE-GOD-RESOLVER-RESEARCH-NO-DECISION', JSON.stringify(researchAnalysis.analysis.useGodResolver));
   const customAnalysisProfile = Bazi.Rules.RuleRegistry.createProfile({ id: 'test-analysis-profile', base: 'canonical', overrides: { analysis: { monthCommander: 'san-ming-volume-2', patterns: 'patterns-research' } } });
   assert(customAnalysisProfile.rules.analysis.monthCommander.value === 'san-ming-volume-2' && customAnalysisProfile.diff.analysis.patterns.to === 'patterns-research', 'UT-ANALYSIS-CUSTOM-PROFILE', JSON.stringify(customAnalysisProfile.diff));
   assert(d1.classicalSummary && JSON.stringify(d1.classicalSummary.sections) === JSON.stringify(['fiveCategory', 'monthCommand', 'voids', 'auxiliary']), 'UT-CLASSICAL-SUMMARY-SECTIONS', JSON.stringify(d1.classicalSummary?.sections));
@@ -108,6 +144,12 @@ async function runUnit() {
   assert(d1.luckCycles.variants.length === 2 && d1.luckCycles.variants.some((variant) => variant.method === 'jieqi-whole-days-divide-3'), 'UT-LUCK-METHOD-VARIANTS', JSON.stringify(d1.luckCycles.variants));
   const wholeDayProfile = Bazi.calculate({ birthDate: '1983-05-11', birthTime: '16:19', gender: 'male' }, { profile: 'jieqi-whole-day' });
   assert(wholeDayProfile.luckCycles.startAge.method === 'jieqi-whole-days-divide-3' && wholeDayProfile.luckCycles.startAge.calculationDiffDays < wholeDayProfile.luckCycles.startAge.rawDiffDays, 'UT-LUCK-WHOLE-DAY-PROFILE', JSON.stringify(wholeDayProfile.luckCycles.startAge));
+
+  // 流年結構事件：畫面與 SVG 只應呈現真正存在的事件。
+  const eventChart = Bazi.calculate({ birthDate: '2024-03-01', birthTime: '12:00', gender: 'male' }, { transitDatetime: '2024-06-01T12:00:00+08:00' });
+  assert(eventChart.transits.transitGraph.events.some((event) => event.type === '伏吟'), 'UT-TRANSIT-STRUCTURAL-EVENT', JSON.stringify(eventChart.transits.transitGraph.events));
+  const eventSvg = Bazi.Renderer.render(eventChart, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
+  assert(eventSvg.includes('結構事件') && eventSvg.includes('伏吟'), 'UT-RENDER-TRANSIT-EVENT', 'SVG 應同步呈現存在的流年結構事件');
 
   // Renderer SVG 可產出
   const svg = Bazi.Renderer.render(d1, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
@@ -439,6 +481,8 @@ async function runDataContracts() {
   const independent = readJson('../validation/external/independent-ledger.json');
   const boundaryRound = readJson('../validation/external/round-03-boundary-samples.json');
   const secondEngineRound = readJson('../validation/external/round-04-second-engine.json');
+  const celebrityRound = readJson('../validation/external/round-05-celebrity-cases.json');
+  const interpretationBenchmark = readJson('../validation/interpretation/benchmark.json');
   const validationManifest = Bazi.Validation.getValidationManifest();
   const schemaFiles = [
     ['../schemas/source-catalog.schema.json', sourceCatalog],
@@ -450,6 +494,8 @@ async function runDataContracts() {
     ['../schemas/independent-validation.schema.json', independent],
     ['../schemas/independent-validation.schema.json', boundaryRound],
     ['../schemas/independent-validation.schema.json', secondEngineRound],
+    ['../schemas/celebrity-validation.schema.json', celebrityRound],
+    ['../schemas/interpretation-validation.schema.json', interpretationBenchmark],
     ['../schemas/validation-manifest.schema.json', validationManifest]
   ];
 
@@ -461,7 +507,7 @@ async function runDataContracts() {
 
   const profileSchema = readJson('../schemas/profile.schema.json');
   const ruleSchema = readJson('../schemas/rule.schema.json');
-  for (const rule of [...Bazi.SpecialRules.SPECIAL_RULE_REGISTRY, ...Bazi.Patterns.SPECIAL_PATTERN_REGISTRY]) {
+  for (const rule of [...Bazi.SpecialRules.SPECIAL_RULE_REGISTRY, ...Bazi.Patterns.SPECIAL_PATTERN_REGISTRY, ...Bazi.Patterns.REGULAR_PATTERN_REGISTRY]) {
     const errors = schemaErrors(serializableRuleMetadata(rule), ruleSchema);
     assert(errors.length === 0, `UT-RULE-SCHEMA-${rule.ruleId}`, errors.join('; '));
   }
@@ -581,7 +627,7 @@ async function runDataContracts() {
   const secondEngineSourceIds = new Set(secondEngineRound.sources.map((source) => source.sourceId));
   assert(secondEngineRound.cases.length === 16, 'UT-SECOND-ENGINE-ROUND-SIZE', String(secondEngineRound.cases.length));
   assert(boundaryRound.cases.length + secondEngineRound.cases.length === 50, 'UT-EXTERNAL-TOTAL-50', `${boundaryRound.cases.length}+${secondEngineRound.cases.length}`);
-  const validationSummary = Bazi.Validation.summarizeValidationDatasets([boundaryRound, secondEngineRound]);
+  const validationSummary = Bazi.Validation.summarizeValidationDatasets([boundaryRound, secondEngineRound, celebrityRound]);
   assert(validationSummary.totalCases === validationManifest.totals.cases && validationSummary.classifications.match === validationManifest.totals.classifications.match && validationSummary.classifications.difference === validationManifest.totals.classifications.difference && validationSummary.classifications.undetermined === validationManifest.totals.classifications.undetermined, 'UT-VALIDATION-MANIFEST-FIXTURES', JSON.stringify(validationSummary));
   assert(secondEngineRound.sources.every((source) => /^https:\/\//.test(source.url) && source.independence === 'external' && source.commit), 'UT-SECOND-ENGINE-SOURCE', JSON.stringify(secondEngineRound.sources));
   for (const sample of secondEngineRound.cases) {
@@ -599,6 +645,35 @@ async function runDataContracts() {
     ok = ok && sample.adjudication.classification === observation?.classification;
     assert(Boolean(ok), `${sample.caseId}-SECOND-ENGINE`, JSON.stringify({ actual, observed: observation?.observed?.pillars }));
   }
+
+  const celebritySourceIds = new Set(celebrityRound.sources.map((source) => source.sourceId));
+  const utc8Countries = new Set(['CN', 'HK', 'TW']);
+  assert(celebrityRound.cases.length === 5, 'UT-CELEBRITY-ROUND-SIZE', String(celebrityRound.cases.length));
+  assert(celebrityRound.sources.every((source) => /^https:\/\//.test(source.url) && source.independence === 'external'), 'UT-CELEBRITY-EXTERNAL-SOURCES', JSON.stringify(celebrityRound.sources));
+  for (const sample of celebrityRound.cases) {
+    const result = Bazi.calculate(sample.input);
+    const actual = pillarMap(result);
+    const observation = sample.externalObservation;
+    const observed = observation?.observed?.pillars;
+    const classification = sample.adjudication?.classification;
+    const sameSelectedPillars = observed && sample.comparisonFields.every((key) => actual[key] === observed[key]);
+    let ok = sample.input.timezone === '+08:00'
+      && sample.input.birthTimeMode === 'unknown'
+      && utc8Countries.has(sample.input.location?.country)
+      && !sample.comparisonFields.includes('hour')
+      && celebritySourceIds.has(observation?.sourceId)
+      && observation?.classification === classification
+      && sample.factSources.every((sourceId) => celebritySourceIds.has(sourceId));
+    if (classification === 'match') {
+      ok = ok && Boolean(sameSelectedPillars);
+    } else if (classification === 'difference') {
+      ok = ok && Boolean(observed) && !sameSelectedPillars;
+    } else {
+      ok = ok && observed === null && observation?.notes;
+    }
+    assert(Boolean(ok), `${sample.caseId}-CELEBRITY`, JSON.stringify({ actual, observed, classification }));
+  }
+  assert(interpretationBenchmark.status === 'protocol-only' && interpretationBenchmark.cases.length === 0, 'UT-INTERPRETATION-BENCHMARK-NO-FALSE-CLAIMS', JSON.stringify(interpretationBenchmark));
 }
 
 await runUnit();

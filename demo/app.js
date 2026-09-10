@@ -439,20 +439,19 @@ function formatBasedOn(basedOn) {
   return (basedOn || []).map((value) => BASE_LABELS[value] || value).join('、');
 }
 
-function formatShenSha(list, limit = 14, options = {}) {
+function formatShenSha(list, options = {}) {
   const showHitOn = options.showHitOn !== false;
-  const names = (list || []).slice(0, limit).map((item) => {
+  const names = (list || []).map((item) => {
     const hitOn = showHitOn && Array.isArray(item.hitOn) && item.hitOn.length ? `（${formatHitOn(item.hitOn)}）` : '';
     return `${item.displayName || item.name || ''}${hitOn}`;
   });
   if (!names.length) return '—';
-  const suffix = (list || []).length > limit ? `……（共${list.length}顆）` : '';
-  return `${names.join('、 ')}${suffix}`;
+  return names.join('、 ');
 }
 
-function renderShenShaInline(list, limit = 14, options = {}) {
+function renderShenShaInline(list, options = {}) {
   const showHitOn = options.showHitOn !== false;
-  const items = (list || []).slice(0, limit);
+  const items = list || [];
   if (!items.length) return '—';
   const rendered = items.map((item) => {
     const categoryClass = item.category === 'auspicious'
@@ -467,8 +466,7 @@ function renderShenShaInline(list, limit = 14, options = {}) {
       : '';
     return `<span class="responsive-inline-shensha ${categoryClass}">${renderShenShaInfo(item, categoryClass)}${hitOn ? `<small>${displayText(hitOn)}</small>` : ''}</span>`;
   });
-  const suffix = (list || []).length > limit ? `……（共${list.length}顆）` : '';
-  return `${rendered.join('、 ')}${displayText(suffix, '')}`;
+  return rendered.join('、 ');
 }
 
 function formatSpecialRulesInline(list) {
@@ -596,7 +594,7 @@ function renderResponsivePreview(result, options) {
   const currentTransitInteractions = result.transits && (result.transits.interactions || []).map((item) => item.description || item.name).filter(Boolean) || [];
   const beforeLuckDetails = [
     currentTransitInteractions.length ? `互動：${displayText(currentTransitInteractions.join('、'))}` : '',
-    currentTransitShenSha.length ? `神煞：${displayText(formatShenSha(currentTransitShenSha, 8))}` : ''
+    currentTransitShenSha.length ? `神煞：${displayText(formatShenSha(currentTransitShenSha))}` : ''
   ].filter(Boolean).join('<br>');
   const luckCycles = preset.includeLuckCycles && result.luckCycles
     ? `<section class="responsive-section">
@@ -609,13 +607,13 @@ function renderResponsivePreview(result, options) {
           <strong>${displayText(cycle.ganzhi)}</strong>
           <small>${displayText(cycle.tenGodStem && cycle.tenGodStem.short)}</small>
           <em>${displayText(cycle.fromYear)}-${displayText(cycle.toYear)}</em>
-          <small class="responsive-luck-shensha">神煞：${displayText(formatShenSha(cycle.shenSha, 5, { showHitOn: false }))}</small>
+          <small class="responsive-luck-shensha">神煞：${displayText(formatShenSha(cycle.shenSha, { showHitOn: false }))}</small>
           ${Array.isArray(cycle.annuals) ? `<details class="responsive-luck-annuals"${isCurrentCycle ? ' open' : ''}><summary>${isCurrentCycle ? `${currentYear}年所在大運 · ` : ''}展開逐年資料（${cycle.annuals.length} 年）</summary><div class="responsive-annual-list">${cycle.annuals.map((annual) => {
             const isCurrentYear = Number(annual.year) === currentYear;
             const interactionText = (annual.interactions || []).map((item) => item.description || item.name).filter(Boolean).join('、');
             const annualDetails = [
               interactionText ? `互動：${displayText(interactionText)}` : '',
-              `神煞：${displayText(formatShenSha(annual.shenSha, 8))}`
+              `神煞：${displayText(formatShenSha(annual.shenSha))}`
             ].filter(Boolean).join('<br>');
             return `<div class="responsive-annual-item${isCurrentYear ? ' is-current-year' : ''}"${isCurrentYear ? ` aria-label="${currentYear}年流年"` : ''}><div><strong>${displayText(annual.age)}歲 · ${displayText(annual.year)}年 · ${displayText(annual.ganzhi)}</strong>${isCurrentYear ? '<span class="responsive-current-badge">今年</span>' : ''}<span>${displayText(annual.tenGod && (annual.tenGod.full || annual.tenGod.short))} · ${displayText(annual.stage && annual.stage.name)} · ${displayText(annual.nayin)}</span></div><p>${annualDetails}</p></div>`;
           }).join('')}</div></details>` : ''}
@@ -626,6 +624,9 @@ function renderResponsivePreview(result, options) {
 
   const transitYear = result.transits && result.transits.year;
   const transitShenSha = result.transits && (result.transits.shenShaYear || (transitYear && transitYear.shenSha)) || [];
+  const transitEvents = [...new Set((result.transits && result.transits.transitGraph && result.transits.transitGraph.events || [])
+    .map((event) => event && event.type)
+    .filter(Boolean))];
   const transitSection = preset.includeShenSha && transitYear
     ? `<section class="responsive-section responsive-transit">
         <h4>流年詳細</h4>
@@ -635,7 +636,8 @@ function renderResponsivePreview(result, options) {
           <div><span>地勢</span><strong>${displayText(transitYear.stage && transitYear.stage.name)}</strong></div>
           <div><span>納音</span><strong>${displayText(transitYear.nayin)}</strong></div>
         </div>
-        <div class="responsive-transit-shensha"><strong>流年神煞（${transitShenSha.length}）</strong><p>${renderShenShaInline(transitShenSha, 20)}</p></div>
+        ${transitEvents.length ? `<div class="responsive-transit-events"><span>結構事件</span><strong>${displayText(transitEvents.join('、'))}</strong></div>` : ''}
+        <div class="responsive-transit-shensha"><strong>流年神煞（${transitShenSha.length}）</strong><p>${renderShenShaInline(transitShenSha)}</p></div>
       </section>`
     : '';
 
@@ -658,9 +660,9 @@ function renderResponsivePreview(result, options) {
     ? `<section class="responsive-section responsive-shensha">
         <h4>神煞吉凶與命宮身宮</h4>
         <div class="responsive-detail-list">
-          <div><strong>原局神煞</strong><p>${renderShenShaInline(result.shenSha, 14)}</p></div>
-          <div><strong>流年神煞</strong><p>${renderShenShaInline(result.transits && result.transits.shenShaYear, 10)}</p></div>
-          <div><strong>初運神煞</strong><p>${renderShenShaInline(result.luckCycles && result.luckCycles.cycles[0] && result.luckCycles.cycles[0].shenSha, 10, { showHitOn: false })}</p></div>
+          <div><strong>原局神煞</strong><p>${renderShenShaInline(result.shenSha)}</p></div>
+          <div><strong>流年神煞</strong><p>${renderShenShaInline(result.transits && result.transits.shenShaYear)}</p></div>
+          <div><strong>初運神煞</strong><p>${renderShenShaInline(result.luckCycles && result.luckCycles.cycles[0] && result.luckCycles.cycles[0].shenSha, { showHitOn: false })}</p></div>
           ${(result.specialRules || []).length ? `<div><strong>特殊條件</strong><p>${formatSpecialRulesInline(result.specialRules)}</p></div>` : ''}
           <div><strong>胎元命宮</strong><p>胎元：${displayText(result.auxiliary.taiYuan && result.auxiliary.taiYuan.ganzhi)} ｜ 胎息：${displayText(result.auxiliary.taiXi && result.auxiliary.taiXi.ganzhi)} ｜ 命宮：${displayText(result.auxiliary.mingGong && result.auxiliary.mingGong.ganzhi)} ｜ 身宮：${displayText(result.auxiliary.shenGong && result.auxiliary.shenGong.ganzhi)}</p></div>
         </div>

@@ -24,6 +24,53 @@ import {
   STEM_CLASHES
 } from '../core/constants/interactions-data.js';
 
+const TRANSFORMATION_TYPES = new Set([
+  'stem_combine',
+  'six_combination',
+  'triple_combination',
+  'triple_meeting',
+  'half_combination',
+  'arch_combination'
+]);
+
+function enrichInteraction(interaction) {
+  const isTransformationCandidate = TRANSFORMATION_TYPES.has(interaction.type);
+  const formationStatus = interaction.type === 'triple_combination' || interaction.type === 'triple_meeting'
+    ? 'complete'
+    : interaction.type === 'half_combination'
+      ? 'partial'
+      : interaction.type === 'arch_combination'
+        ? 'virtual'
+        : 'pair';
+  return {
+    ...interaction,
+    formation: {
+      type: interaction.type,
+      status: formationStatus,
+      complete: formationStatus === 'complete'
+    },
+    transformability: {
+      status: isTransformationCandidate ? 'candidate' : 'not-applicable',
+      applied: false,
+      targetElement: interaction.element || interaction.generates || null,
+      requires: isTransformationCandidate
+        ? ['seasonal-support', '透干／得用', '無阻隔或破壞', 'profile-transformation-policy']
+        : [],
+      reason: isTransformationCandidate
+        ? '結構已觀測，但成化仍須另行檢查季節、透干、阻隔與流派 Profile。'
+        : '此互動不是五行成化候選。'
+    },
+    evidence: {
+      matched: true,
+      basedOn: ['pillars', 'interaction-structure'],
+      chars: Array.isArray(interaction.chars) ? [...interaction.chars] : [],
+      pillars: Array.isArray(interaction.pillars) ? [...interaction.pillars] : [],
+      structuralType: interaction.type,
+      transformationCandidate: isTransformationCandidate
+    }
+  };
+}
+
 export function calculateInteractions(pillars) {
   const stemItems = [
     { pillar: 'year', char: pillars.year.stem },
@@ -238,7 +285,7 @@ export function calculateInteractions(pillars) {
   checkThreeXing(['丑', '戌', '未'], '恃勢之刑');
 
   return {
-    stems: stemsInteractions,
-    branches: branchesInteractions
+    stems: stemsInteractions.map(enrichInteraction),
+    branches: branchesInteractions.map(enrichInteraction)
   };
 }

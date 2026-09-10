@@ -154,10 +154,13 @@ export function toContext(result, options = {}) {
       shenshaPreset: result.meta.shenshaPreset || 'classical',
       shenShaRuleVersion: result.meta.shenShaRuleVersion || '2.1.0',
       specialRuleVersion: result.meta.specialRuleVersion || '1.0.0',
+      strengthQiLayerVersion: result.meta.strengthQiLayerVersion || '1.1.0',
       fiveCategoryRuleVersion: result.meta.fiveCategoryRuleVersion || '1.0.0',
       auxiliaryRuleVersion: result.meta.auxiliaryRuleVersion || '1.0.0',
       classicalSummaryRuleVersion: result.meta.classicalSummaryRuleVersion || '1.0.0',
       analysisRuleVersion: result.meta.analysisRuleVersion || '1.0.0',
+      useGodResolverVersion: result.meta.useGodResolverVersion || '0.1.0',
+      transitGraphVersion: result.meta.transitGraphVersion || '0.1.0',
       luckRuleVersion: result.meta.luckRuleVersion || '1.0.0'
     },
 
@@ -204,6 +207,11 @@ export function toContext(result, options = {}) {
       favorableElements: result.strength.favorableElements,
       unfavorableElements: result.strength.unfavorableElements,
       fiveCategory: result.strength.fiveCategory || null,
+      rawQi: result.strength.rawQi || null,
+      effectiveQi: result.strength.effectiveQi || null,
+      transformations: result.strength.transformations || null,
+      assessment: result.strength.assessment || null,
+      decision: result.strength.decision || null,
       ...(includeStrengthEvidence ? { strengthEvidence: result.strength.evidence } : {})
     },
 
@@ -225,6 +233,10 @@ export function toContext(result, options = {}) {
     classicalSummary: result.classicalSummary || null,
 
     analysis: result.analysis || null,
+
+    patterns: result.patterns || null,
+
+    transitGraph: result.transits?.transitGraph || null,
 
     rules: result.rules,
 

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bazi-js.github.io/bazi-js/schemas/interpretation-validation.schema.json",
+  "title": "BaziJS Interpretation Validation Dataset",
+  "type": "object",
+  "required": ["schemaVersion", "datasetId", "status", "purpose", "methodology", "cases"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "datasetId": {"type": "string"},
+    "capturedAt": {"type": "string"},
+    "status": {"type": "string", "enum": ["protocol-only", "active", "retired"]},
+    "purpose": {"type": "string"},
+    "methodology": {"type": "object", "required": ["independence", "requiredEvidence", "allowedClassifications"]},
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["caseId", "input", "comparison", "adjudication"],
+        "properties": {
+          "caseId": {"type": "string"},
+          "input": {"type": "object"},
+          "comparison": {"type": "object"},
+          "adjudication": {"type": "object", "required": ["classification", "independentSource"]}
+        }
+      }
+    }
+  }
+}

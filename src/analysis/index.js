@@ -4,6 +4,10 @@
 // 研究模型可以被 Profile 選取並出現在結果證據中，但在沒有可審核的全局
 // predicate 以前，不會假裝產生一個新的唯一用神或格局結論。
 
+import { buildUseGodResolver } from './use-god-resolver.js';
+
+export { buildUseGodResolver } from './use-god-resolver.js';
+
 export const ANALYSIS_RULE_VERSION = '1.0.0';
 export const ANALYSIS_SELECTION_RULE_ID = 'PROFILE_ANALYSIS_SELECTION_001';
 
@@ -238,7 +242,7 @@ function selectedRule(profile, dimension) {
  * 建立本次命盤實際採用的分析模型選擇與研究狀態。
  * @param {{profile: object, strength?: object}} options
  */
-export function buildAnalysisResult({ profile, strength = null, auxiliary = null } = {}) {
+export function buildAnalysisResult({ profile, strength = null, auxiliary = null, patterns = null } = {}) {
   const profileId = profile?.id || 'canonical';
   const selected = Object.fromEntries(ANALYSIS_DIMENSIONS.map((dimension) => {
     const rule = selectedRule(profile, dimension);
@@ -262,6 +266,7 @@ export function buildAnalysisResult({ profile, strength = null, auxiliary = null
         evidence: { matched: true, status: 'implemented', source: 'strength' }
       }
     : noDecisionModel(useGodModel, 'useGod', profileId);
+  const useGodResolver = buildUseGodResolver({ profile, strength, patterns });
 
   const monthCommander = MODEL_DEFINITIONS[selected.monthCommander.modelId]?.status === 'research-only'
     ? noDecisionModel(selected.monthCommander.modelId, 'monthCommander', profileId)
@@ -305,6 +310,7 @@ export function buildAnalysisResult({ profile, strength = null, auxiliary = null
     profileName: profile?.name || 'canonical',
     selected,
     models,
+    useGodResolver,
     ruleId: ANALYSIS_SELECTION_RULE_ID,
     version: ANALYSIS_RULE_VERSION,
     evidence: {
@@ -313,7 +319,7 @@ export function buildAnalysisResult({ profile, strength = null, auxiliary = null
       selectedModelIds: Object.fromEntries(Object.entries(selected).map(([key, value]) => [key, value.modelId])),
       nonCanonicalModels: Object.values(models).filter((model) => model.status === 'research-only').map((model) => model.id)
     },
-    description: 'Profile 只決定本次分析模型；研究模型若尚未完成全局判定，不會覆寫 canonical 結果。'
+    description: 'Profile 只決定本次分析模型；研究模型若尚未完成全局判定，不會覆寫 canonical 結果。resolver 會保留各模型 candidate、conflict 與 finalDecision。'
   };
 }
 

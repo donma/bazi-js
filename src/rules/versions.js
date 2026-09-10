@@ -9,11 +9,15 @@ export const CALENDAR_RULE_VERSION = '1.0.0';
 export const SHENSHA_RULE_VERSION = '2.1.0';
 export const SPECIAL_RULE_VERSION = '1.0.0';
 export const PATTERN_RULE_VERSION = '0.1.0';
+export const REGULAR_PATTERN_RULE_VERSION = '0.2.0';
 export const STRENGTH_RULE_VERSION = '1.0.0';
+export const STRENGTH_QI_LAYER_VERSION = '1.1.0';
 export const FIVE_CATEGORY_RULE_VERSION = '1.0.0';
 export const AUXILIARY_RULE_VERSION = '1.1.0';
 export const CLASSICAL_SUMMARY_RULE_VERSION = '1.0.0';
 export const ANALYSIS_RULE_VERSION = '1.0.0';
+export const USE_GOD_RESOLVER_VERSION = '0.1.0';
+export const TRANSIT_GRAPH_VERSION = '0.1.0';
 export const INTERACTION_RULE_VERSION = '1.0.0';
 export const LUCK_RULE_VERSION = '1.1.0';
 export const RESULT_SCHEMA_VERSION = '2.1.0';
@@ -28,11 +32,15 @@ export const VERSIONS = {
   shenShaRuleVersion: SHENSHA_RULE_VERSION,
   specialRuleVersion: SPECIAL_RULE_VERSION,
   patternRuleVersion: PATTERN_RULE_VERSION,
+  regularPatternRuleVersion: REGULAR_PATTERN_RULE_VERSION,
   strengthRuleVersion: STRENGTH_RULE_VERSION,
+  strengthQiLayerVersion: STRENGTH_QI_LAYER_VERSION,
   fiveCategoryRuleVersion: FIVE_CATEGORY_RULE_VERSION,
   auxiliaryRuleVersion: AUXILIARY_RULE_VERSION,
   classicalSummaryRuleVersion: CLASSICAL_SUMMARY_RULE_VERSION,
   analysisRuleVersion: ANALYSIS_RULE_VERSION,
+  useGodResolverVersion: USE_GOD_RESOLVER_VERSION,
+  transitGraphVersion: TRANSIT_GRAPH_VERSION,
   interactionRuleVersion: INTERACTION_RULE_VERSION,
   luckRuleVersion: LUCK_RULE_VERSION,
   resultSchemaVersion: RESULT_SCHEMA_VERSION

@@ -398,10 +398,14 @@ function renderTransit(result) {
   const nodes = [];
   const transit = result.transits && result.transits.year;
   if (!transit) return { height: 60, nodes: [textNode(0, 24, '— 無流年資料', 'muted')] };
+  const events = [...new Set((result.transits && result.transits.transitGraph && result.transits.transitGraph.events || [])
+    .map((event) => event && event.type)
+    .filter(Boolean))];
   let y = 0;
   y = addLabelValue(nodes, '流年', transit.ganzhi, { y, maxUnits: 45 });
   y = addLabelValue(nodes, '十神', transit.tenGod && (transit.tenGod.full || transit.tenGod.short), { y, maxUnits: 45 });
   y = addLabelValue(nodes, '地勢／納音', `${transit.stage && transit.stage.name || '—'} · ${transit.nayin || '—'}`, { y, maxUnits: 45 });
+  if (events.length) y = addLabelValue(nodes, '結構事件', events.join('、'), { y: y + 4, maxUnits: 37, lineHeight: 20 });
   const list = result.transits.shenShaYear || transit.shenSha || [];
   y = addLabelValue(nodes, `流年神煞（${list.length}）`, formatShenShaList(list), { y: y + 4, labelWidth: 108, maxUnits: 37, lineHeight: 20 });
   return { height: y + 10, nodes };

@@ -89,6 +89,8 @@ const independent = JSON.parse(fs.readFileSync(new URL('../validation/external/i
 const independentSourceIds = new Set(independent.sources.map((source) => source.sourceId));
 const pillarMap = (result) => Object.fromEntries(['year', 'month', 'day', 'hour'].map((key) => [key, result.pillars[key]?.ganzhi || null]));
 const samePillars = (actual, expected) => expected && ['year', 'month', 'day', 'hour'].every((key) => actual[key] === expected[key]);
+const sameSelectedPillars = (actual, expected, fields) => expected && Array.isArray(fields) && fields.length > 0
+  && fields.every((key) => actual[key] === expected[key]);
 for (const sample of independent.cases) {
   const result = Bazi.calculate(sample.input);
   const actual = pillarMap(result);
@@ -159,6 +161,41 @@ for (const sample of secondEngineRound.cases) {
   }
   ok = ok && sample.adjudication.classification === observation?.classification;
   console.log(`${ok ? 'PASS' : 'FAIL'} ${sample.caseId}（${sample.adjudication.classification}）`);
+  if (!ok) fail++;
+}
+
+// Round 05: 5 Chinese/Hua-ren public figures born in UTC+08 regions.
+// Birth facts and published chart observations remain separate. All five
+// have unknown birth times, so only year/month/day are compared.
+const celebrityRound = JSON.parse(fs.readFileSync(new URL('../validation/external/round-05-celebrity-cases.json', import.meta.url), 'utf8'));
+const celebritySourceIds = new Set(celebrityRound.sources.map((source) => source.sourceId));
+const allowedUtc8Countries = new Set(['CN', 'HK', 'TW']);
+if (celebrityRound.cases.length !== 5) fail++;
+for (const source of celebrityRound.sources) {
+  if (!/^https:\/\//.test(source.url) || source.independence !== 'external') fail++;
+}
+for (const sample of celebrityRound.cases) {
+  const result = Bazi.calculate(sample.input);
+  const actual = pillarMap(result);
+  const observation = sample.externalObservation;
+  const observed = observation?.observed?.pillars;
+  const classification = sample.adjudication?.classification;
+  let ok = sample.input.timezone === '+08:00'
+    && sample.input.birthTimeMode === 'unknown'
+    && allowedUtc8Countries.has(sample.input.location?.country)
+    && Array.isArray(sample.comparisonFields)
+    && !sample.comparisonFields.includes('hour')
+    && celebritySourceIds.has(observation?.sourceId)
+    && sample.factSources.every((sourceId) => celebritySourceIds.has(sourceId));
+  if (classification === 'match') {
+    ok = ok && sameSelectedPillars(actual, observed, sample.comparisonFields);
+  } else if (classification === 'difference') {
+    ok = ok && Boolean(observed) && !sameSelectedPillars(actual, observed, sample.comparisonFields);
+  } else {
+    ok = ok && observed === null && Boolean(observation?.notes);
+  }
+  ok = ok && classification === observation?.classification;
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${sample.caseId}（${classification}）`);
   if (!ok) fail++;
 }
 

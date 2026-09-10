@@ -18,7 +18,7 @@ import { calculateStrength } from '../strength/index.js';
 import { calculateShenSha, calculateShenShaOnPillar, calculateTransitShenSha } from '../shensha/index.js';
 import { calculateSpecialRules } from '../special-rules/index.js';
 import { calculateLuckCycles } from '../luck/index.js';
-import { calculateTransit } from '../transit/index.js';
+import { buildTransitGraph, calculateTransit } from '../transit/index.js';
 import { calculateTrueSolarTime } from '../calendar/true-solar-time.js';
 import { solarToLunar } from '../calendar/lunar.js';
 import { getWesternConstellation } from '../calendar/constellation.js';
@@ -31,6 +31,7 @@ import { VERSIONS } from '../rules/versions.js';
 import { BaziRuleError } from '../core/errors/index.js';
 import { buildClassicalSummary } from '../summary/index.js';
 import { buildAnalysisResult } from '../analysis/index.js';
+import { calculatePatterns } from '../patterns/index.js';
 import { VALIDATION_MANIFEST_VERSION } from '../validation/index.js';
 
 function formatTimezoneOffset(offsetHours) {
@@ -155,6 +156,7 @@ export function calculate(input, options = {}) {
   }
   const shenSha = calculateShenSha(pillars, { preset: shenshaPreset, gender: input.gender });
   const specialRules = calculateSpecialRules(pillars, { gender: input.gender, input });
+  const patterns = calculatePatterns({ pillars, monthCommander: strength.monthCommander });
 
   const appliedRule = (profileRule, value, overridden = false, ruleId = profileRule.ruleId) => ({
     ...profileRule,
@@ -211,6 +213,7 @@ export function calculate(input, options = {}) {
     transits.shenSha = transitShenSha;
     transits.year.shenSha = transitShenSha.shenSha;
   }
+  transits.transitGraph = buildTransitGraph({ pillars, luckCycles, transits });
 
   const result = {
     meta: {
@@ -370,7 +373,8 @@ export function calculate(input, options = {}) {
     auxiliary,
     interactions,
     strength,
-    analysis: buildAnalysisResult({ profile, strength, auxiliary }),
+    analysis: buildAnalysisResult({ profile, strength, auxiliary, patterns }),
+    patterns,
     shenSha,
     specialRules,
     luckCycles,

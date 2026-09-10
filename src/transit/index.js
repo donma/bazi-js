@@ -16,6 +16,7 @@ import { solarToLunar } from '../calendar/lunar.js';
 import { getTenGod } from '../core/constants/ten-gods-data.js';
 import { getNayin } from '../core/constants/nayin-data.js';
 import { getTwelveStage } from '../core/constants/twelve-stages-data.js';
+import { TRANSIT_GRAPH_VERSION as VERSIONED_TRANSIT_GRAPH_VERSION } from '../rules/versions.js';
 
 const PILLAR_LABELS = Object.freeze({
   year: '年',
@@ -23,6 +24,8 @@ const PILLAR_LABELS = Object.freeze({
   day: '日',
   hour: '時'
 });
+
+export const TRANSIT_GRAPH_VERSION = VERSIONED_TRANSIT_GRAPH_VERSION;
 
 function formatPillarLabel(pillar) {
   return PILLAR_LABELS[pillar] || pillar || '—';
@@ -177,5 +180,171 @@ export function calculateTransit(chartPillars, options = {}) {
     day: dayTransit,
     hour: hourTransit,
     interactions
+  };
+}
+
+/**
+ * 建立原局、 大運與流年／月／日／時的關係圖資料。
+ * 目前只把已觀測到的跨層互動寫成 edge；沒有互動不補上推測性吉凶。
+ */
+export function buildTransitGraph({ pillars = null, luckCycles = null, transits = null } = {}) {
+  const nodes = [];
+  const edges = [];
+  const events = [];
+  const addNode = (id, layer, value, extra = {}) => {
+    if (!value) return;
+    nodes.push({ id, layer, ...value, ...extra });
+  };
+
+  for (const key of ['year', 'month', 'day', 'hour']) {
+    const pillar = pillars?.[key];
+    if (pillar?.available === false || !pillar?.ganzhi) continue;
+    addNode(`natal-${key}`, 'natal', {
+      pillar: key,
+      ganzhi: pillar.ganzhi,
+      stem: pillar.stem,
+      branch: pillar.branch
+    });
+  }
+
+  const targetYear = Number(String(transits?.targetDatetime || '').slice(0, 4));
+  const activeLuck = Number.isInteger(targetYear)
+    ? (luckCycles?.cycles || []).find((cycle) => targetYear >= cycle.fromYear && targetYear <= cycle.toYear) || null
+    : null;
+  if (activeLuck) {
+    edges.push({
+      id: `edge-${edges.length + 1}`,
+      source: `luck-${activeLuck.step}`,
+      target: 'transit-year',
+      type: 'active-luck-cycle',
+      status: 'observed',
+      description: `目標年份 ${targetYear} 落在第 ${activeLuck.step} 步大運（${activeLuck.ganzhi}）`,
+      evidence: {
+        matched: true,
+        targetYear,
+        fromYear: activeLuck.fromYear,
+        toYear: activeLuck.toYear
+      }
+    });
+  }
+
+  const timelinePairs = [['year', 'month'], ['month', 'day'], ['day', 'hour']];
+  for (const [parent, child] of timelinePairs) {
+    if (!transits?.[parent]?.ganzhi || !transits?.[child]?.ganzhi) continue;
+    edges.push({
+      id: `edge-${edges.length + 1}`,
+      source: `transit-${parent}`,
+      target: `transit-${child}`,
+      type: 'transit-time-containment',
+      status: 'structural',
+      description: `${formatPillarLabel(parent)}運包含${formatPillarLabel(child)}運`,
+      evidence: { matched: true, targetDatetime: transits.targetDatetime }
+    });
+  }
+  for (const cycle of luckCycles?.cycles || []) {
+    addNode(`luck-${cycle.step}`, 'luck', {
+      step: cycle.step,
+      ganzhi: cycle.ganzhi,
+      stem: cycle.stem,
+      branch: cycle.branch,
+      fromYear: cycle.fromYear,
+      toYear: cycle.toYear
+    });
+  }
+  for (const key of ['year', 'month', 'day', 'hour']) {
+    const transit = transits?.[key];
+    if (!transit?.ganzhi) continue;
+    addNode(`transit-${key}`, key === 'year' ? 'transit-year' : `transit-${key}`, {
+      pillar: key,
+      ganzhi: transit.ganzhi,
+      stem: transit.stem,
+      branch: transit.branch
+    });
+  }
+
+  for (const interaction of transits?.interactions || []) {
+    const targetId = interaction.natalPillar ? `natal-${interaction.natalPillar}` : null;
+    const sourceId = interaction.target ? `transit-${interaction.target}` : null;
+    if (!sourceId || !targetId) continue;
+    edges.push({
+      id: `edge-${edges.length + 1}`,
+      source: sourceId,
+      target: targetId,
+      type: interaction.type,
+      status: 'observed',
+      description: interaction.description,
+      evidence: {
+        matched: true,
+        source: 'transits.interactions',
+        transitBranch: interaction.transitBranch,
+        natalBranch: interaction.natalBranch
+      }
+    });
+  }
+
+  const STEM_CLASH_MAP = {
+    甲: '庚', 乙: '辛', 丙: '壬', 丁: '癸',
+    庚: '甲', 辛: '乙', 壬: '丙', 癸: '丁'
+  };
+  const BRANCH_CLASH_MAP = {
+    子: '午', 午: '子', 丑: '未', 未: '丑', 寅: '申', 申: '寅',
+    卯: '酉', 酉: '卯', 辰: '戌', 戌: '辰', 巳: '亥', 亥: '巳'
+  };
+  const inspectStructuralEvents = (sourceId, targetId, source, target, scope) => {
+    if (!source || !target) return;
+    if (source.ganzhi === target.ganzhi) {
+      events.push({
+        id: `event-${events.length + 1}`,
+        type: scope === 'luck-transit-year' ? '歲運並臨' : '伏吟',
+        status: 'observed',
+        source: sourceId,
+        target: targetId,
+        evidence: {
+          matched: true,
+          sourceGanzhi: source.ganzhi,
+          targetGanzhi: target.ganzhi,
+          scope
+        }
+      });
+    }
+    if (STEM_CLASH_MAP[source.stem] === target.stem && BRANCH_CLASH_MAP[source.branch] === target.branch) {
+      events.push({
+        id: `event-${events.length + 1}`,
+        type: '天剋地沖',
+        status: 'observed',
+        source: sourceId,
+        target: targetId,
+        evidence: {
+          matched: true,
+          sourceStem: source.stem,
+          targetStem: target.stem,
+          sourceBranch: source.branch,
+          targetBranch: target.branch,
+          scope
+        }
+      });
+    }
+  };
+
+  for (const key of ['year', 'month', 'day', 'hour']) {
+    inspectStructuralEvents(`transit-${key}`, `natal-${key}`, transits?.[key], pillars?.[key], `transit-natal-${key}`);
+  }
+  if (activeLuck) inspectStructuralEvents(`luck-${activeLuck.step}`, 'transit-year', activeLuck, transits?.year, 'luck-transit-year');
+
+  return {
+    modelId: 'transit-multi-layer-graph',
+    version: TRANSIT_GRAPH_VERSION,
+    layers: ['natal', 'luck', 'transit-year', 'transit-month', 'transit-day', 'transit-hour'],
+    activeLuck: activeLuck ? { step: activeLuck.step, ganzhi: activeLuck.ganzhi, fromYear: activeLuck.fromYear, toYear: activeLuck.toYear } : null,
+    nodes,
+    edges,
+    events,
+    evidence: {
+      matched: true,
+      nodeCount: nodes.length,
+      edgeCount: edges.length,
+      eventCount: events.length,
+      note: '圖只收錄已計算的柱位、時間層連線與結構事件；未將事件自動解讀為吉凶。'
+    }
   };
 }

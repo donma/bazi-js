@@ -10,7 +10,7 @@
     "aliases": {"type": "array", "items": {"type": "string"}},
     "tradition": {"type": "string"},
     "conceptType": {"enum": ["shensha", "special-pillar", "seasonal-special", "special-pattern"]},
-    "ruleFamily": {"enum": ["day-pillar-special", "hour-pillar-special", "seasonal-day-special", "whole-chart-pattern"]},
+    "ruleFamily": {"enum": ["day-pillar-special", "hour-pillar-special", "seasonal-day-special", "whole-chart-pattern", "month-commander-pattern"]},
     "baseOn": {"type": "array", "items": {"type": "string"}, "minItems": 1},
     "scope": {"type": "string"},
     "category": {"enum": ["auspicious", "inauspicious", "neutral"]},

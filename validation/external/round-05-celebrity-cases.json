@@ -1,0 +1,278 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "bazi-js-public-figure-round-05",
+  "capturedAt": "2026-09-10",
+  "purpose": "以中國、台灣或香港出生的華人公開人物作為 UTC+08:00 樣板，先用官方、學術或專業機構資料核對出生日期與地點，再與專業命理網站公開的三柱 observation 比對；不對人物作命理斷語。",
+  "samplePolicy": {
+    "population": "華人／華語文化圈公開人物",
+    "timezone": "+08:00",
+    "birthplaces": ["中國", "台灣", "香港"],
+    "hourPolicy": "五案皆無可核實的公開出生時刻；只比較年、月、日，示意時柱一律排除。",
+    "datePolicy": "輸入公曆出生日期；出生地只作可追溯資料與未來真太陽時研究欄位，不用推定時刻。"
+  },
+  "sourcePolicy": {
+    "discovery": "Wikipedia／Wikidata 僅作人物索引與線索，不單獨作為 canonical 出生依據。",
+    "birthFacts": "出生日期、地點優先採 Nobel Prize、FIBA、香港電影資料館或台灣文化部等官方／專業機構資料。",
+    "chartObservation": "命理網站只作公開三柱 observation；網站自身的用神、格局、神煞與生平解讀不納入本驗證。",
+    "independence": "出生事實來源與命理網站來源分開記錄；這是外部公開資料交叉核對，不宣稱跨流派唯一正確。"
+  },
+  "sources": [
+    {
+      "sourceId": "deeporacle-gao-xingjian",
+      "name": "Deep Oracle · 高行健公開命盤頁",
+      "url": "https://www.deeporacle.ai/zh-TW/bazi/celebrities/gao-xingjian",
+      "sourceType": "professional-bazi-reference",
+      "scope": ["published-pillars", "birth-date-display"],
+      "independence": "external",
+      "authorityLevel": "secondary",
+      "notes": "頁面明示時辰未知；只擷取己卯、丙子、丙午三柱，不採用命理解讀。"
+    },
+    {
+      "sourceId": "deeporacle-yao-ming",
+      "name": "Deep Oracle · 姚明公開命盤頁",
+      "url": "https://www.deeporacle.ai/bazi/celebrities/yao-ming",
+      "sourceType": "professional-bazi-reference",
+      "scope": ["published-pillars", "birth-date-display"],
+      "independence": "external",
+      "authorityLevel": "secondary",
+      "notes": "頁面明示時辰不詳；只擷取庚申、乙酉、戊子三柱，不採用命理解讀。"
+    },
+    {
+      "sourceId": "deeporacle-jackie-chan",
+      "name": "Deep Oracle · 成龍公開命盤頁",
+      "url": "https://www.deeporacle.ai/zh-TW/bazi/celebrities/jackie-chan",
+      "sourceType": "professional-bazi-reference",
+      "scope": ["published-pillars", "birth-date-display"],
+      "independence": "external",
+      "authorityLevel": "secondary",
+      "notes": "頁面將時柱標成示意；只擷取甲午、戊辰、癸巳三柱。"
+    },
+    {
+      "sourceId": "deeporacle-yuen-biao",
+      "name": "Deep Oracle · 元彪公開命盤頁",
+      "url": "https://www.deeporacle.ai/bazi/celebrities/yuen-biao",
+      "sourceType": "professional-bazi-reference",
+      "scope": ["published-pillars", "birth-date-display"],
+      "independence": "external",
+      "authorityLevel": "secondary",
+      "notes": "頁面明示時辰未知；只擷取丁酉、丁未、己亥三柱，不採用命理解讀。"
+    },
+    {
+      "sourceId": "deeporacle-brigitte-lin",
+      "name": "Deep Oracle · 林青霞公開命盤頁",
+      "url": "https://www.deeporacle.ai/zh-TW/bazi/celebrities/brigitte-lin",
+      "sourceType": "professional-bazi-reference",
+      "scope": ["published-pillars", "birth-date-display"],
+      "independence": "external",
+      "authorityLevel": "secondary",
+      "notes": "頁面將時柱標成示意；只擷取甲午、甲戌、癸亥三柱。"
+    },
+    {
+      "sourceId": "nobel-gao-xingjian",
+      "name": "Nobel Prize · Gao Xingjian Facts",
+      "url": "https://www.nobelprize.org/prizes/literature/2000/gao/facts/",
+      "sourceType": "official-biography",
+      "scope": ["birth-date", "birth-place"],
+      "independence": "external",
+      "authorityLevel": "official",
+      "notes": "Nobel Foundation 記載 1940-01-04、Ganzhou, China。"
+    },
+    {
+      "sourceId": "fiba-yao-ming",
+      "name": "FIBA Basketball · China - YAO Ming",
+      "url": "https://www.fiba.basketball/en/news/china-yao-ming",
+      "sourceType": "international-sports-organization",
+      "scope": ["birth-date", "birth-place"],
+      "independence": "external",
+      "authorityLevel": "official",
+      "notes": "FIBA 記載 1980-09-12、Shanghai。"
+    },
+    {
+      "sourceId": "hkfa-jackie-chan",
+      "name": "香港電影資料館 · 香港影人小傳：成龍",
+      "url": "https://www.filmarchive.gov.hk/documents/6.-Research-and-Publication/06-02-Filmmakers-Search/Chinese/Jackie-Chan_c.pdf",
+      "sourceType": "national-film-archive-biography",
+      "scope": ["birth-date", "birth-place"],
+      "independence": "external",
+      "authorityLevel": "official",
+      "notes": "香港電影資料館記載成龍生於 1954-04-07、香港。"
+    },
+    {
+      "sourceId": "hkfa-yuen-biao",
+      "name": "香港電影資料館 · 香港影人小傳：元彪",
+      "url": "https://www.filmarchive.gov.hk/documents/6.-Research-and-Publication/06-02-Filmmakers-Search/Chinese/YUEN-Biao_c.pdf",
+      "sourceType": "national-film-archive-biography",
+      "scope": ["birth-date", "birth-place"],
+      "independence": "external",
+      "authorityLevel": "official",
+      "notes": "香港電影資料館記載元彪生於 1957-07-26、香港。"
+    },
+    {
+      "sourceId": "moc-brigitte-lin",
+      "name": "中華民國文化部 · Actress Brigitte Lin",
+      "url": "https://www.moc.gov.tw/en/News_Content2.aspx?n=488&s=17767",
+      "sourceType": "government-cultural-biography",
+      "scope": ["birth-date", "birth-place"],
+      "independence": "external",
+      "authorityLevel": "official",
+      "notes": "文化部記載林青霞生於 1954-11-03、Chiayi, Taiwan。"
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "CELEB-GAO-XINGJIAN-1940",
+      "group": "utc+08-chinese-public-figure",
+      "person": {"name": "高行健", "aliases": ["Gao Xingjian"]},
+      "input": {
+        "birthDate": "1940-01-04",
+        "birthTimeMode": "unknown",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {"country": "CN", "city": "Ganzhou", "longitude": 114.94, "latitude": 25.86}
+      },
+      "discoverySources": ["https://www.wikidata.org/wiki/Q18143", "https://zh.wikipedia.org/wiki/%E9%AB%98%E8%A1%8C%E5%81%A5"],
+      "factSources": ["nobel-gao-xingjian"],
+      "externalObservation": {
+        "sourceId": "deeporacle-gao-xingjian",
+        "classification": "match",
+        "sourceUrl": "https://www.deeporacle.ai/zh-TW/bazi/celebrities/gao-xingjian",
+        "scope": ["year", "month", "day"],
+        "observed": {"pillars": {"year": "己卯", "month": "丙子", "day": "丙午", "hour": null}},
+        "timeEvidence": "公開命理頁明示出生時辰未知，只作三柱分析。",
+        "notes": "Nobel Prize 核對出生日期與地點；外部頁公開己卯、丙子、丙午三柱。"
+      },
+      "comparisonFields": ["year", "month", "day"],
+      "adjudication": {
+        "classification": "match",
+        "canonicalChangeRequired": false,
+        "reason": "官方出生事實與公開三柱 observation 對應後，BaziJS canonical 的年、月、日柱一致；時辰未知，不推定時柱。"
+      }
+    },
+    {
+      "caseId": "CELEB-YAO-MING-1980",
+      "group": "utc+08-chinese-public-figure",
+      "person": {"name": "姚明", "aliases": ["Yao Ming"]},
+      "input": {
+        "birthDate": "1980-09-12",
+        "birthTimeMode": "unknown",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {"country": "CN", "city": "Shanghai", "longitude": 121.47, "latitude": 31.23}
+      },
+      "discoverySources": ["https://www.wikidata.org/wiki/Q161490", "https://zh.wikipedia.org/wiki/%E5%A7%9A%E6%98%8E"],
+      "factSources": ["fiba-yao-ming"],
+      "externalObservation": {
+        "sourceId": "deeporacle-yao-ming",
+        "classification": "match",
+        "sourceUrl": "https://www.deeporacle.ai/bazi/celebrities/yao-ming",
+        "scope": ["year", "month", "day"],
+        "observed": {"pillars": {"year": "庚申", "month": "乙酉", "day": "戊子", "hour": null}},
+        "timeEvidence": "公開命理頁明示時辰不詳，只作三柱分析。",
+        "notes": "FIBA 核對出生日期與上海出生地；外部頁公開庚申、乙酉、戊子三柱。"
+      },
+      "comparisonFields": ["year", "month", "day"],
+      "adjudication": {
+        "classification": "match",
+        "canonicalChangeRequired": false,
+        "reason": "FIBA 出生資料與公開三柱 observation 對應後，BaziJS canonical 的年、月、日柱一致；時辰未知，不推定時柱。"
+      }
+    },
+    {
+      "caseId": "CELEB-JACKIE-CHAN-1954",
+      "group": "utc+08-chinese-public-figure",
+      "person": {"name": "成龍", "aliases": ["陳港生", "Jackie Chan"]},
+      "input": {
+        "birthDate": "1954-04-07",
+        "birthTimeMode": "unknown",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {"country": "HK", "city": "Hong Kong", "longitude": 114.17, "latitude": 22.28}
+      },
+      "discoverySources": ["https://www.wikidata.org/wiki/Q17299", "https://zh.wikipedia.org/wiki/%E6%88%90%E9%BE%8D"],
+      "factSources": ["hkfa-jackie-chan"],
+      "externalObservation": {
+        "sourceId": "deeporacle-jackie-chan",
+        "classification": "match",
+        "sourceUrl": "https://www.deeporacle.ai/zh-TW/bazi/celebrities/jackie-chan",
+        "scope": ["year", "month", "day"],
+        "observed": {"pillars": {"year": "甲午", "month": "戊辰", "day": "癸巳", "hour": null}},
+        "timeEvidence": "香港電影資料館未提供出生時刻；外部頁列出的午時為示意，本案排除時柱。",
+        "notes": "香港電影資料館核對出生日期與香港出生地；外部頁公開甲午、戊辰、癸巳三柱。"
+      },
+      "comparisonFields": ["year", "month", "day"],
+      "adjudication": {
+        "classification": "match",
+        "canonicalChangeRequired": false,
+        "reason": "香港電影資料館出生資料與公開三柱 observation 對應後，BaziJS canonical 的年、月、日柱一致；示意時柱不納入。"
+      }
+    },
+    {
+      "caseId": "CELEB-YUEN-BIAO-1957",
+      "group": "utc+08-chinese-public-figure",
+      "person": {"name": "元彪", "aliases": ["夏令震", "Yuen Biao"]},
+      "input": {
+        "birthDate": "1957-07-26",
+        "birthTimeMode": "unknown",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {"country": "HK", "city": "Hong Kong", "longitude": 114.17, "latitude": 22.28}
+      },
+      "discoverySources": ["https://www.wikidata.org/wiki/Q319364", "https://zh.wikipedia.org/wiki/%E5%85%83%E5%BD%AA"],
+      "factSources": ["hkfa-yuen-biao"],
+      "externalObservation": {
+        "sourceId": "deeporacle-yuen-biao",
+        "classification": "match",
+        "sourceUrl": "https://www.deeporacle.ai/bazi/celebrities/yuen-biao",
+        "scope": ["year", "month", "day"],
+        "observed": {"pillars": {"year": "丁酉", "month": "丁未", "day": "己亥", "hour": null}},
+        "timeEvidence": "公開命理頁明示出生時辰未知，只作三柱分析。",
+        "notes": "香港電影資料館核對出生日期與香港出生地；外部頁公開丁酉、丁未、己亥三柱。"
+      },
+      "comparisonFields": ["year", "month", "day"],
+      "adjudication": {
+        "classification": "match",
+        "canonicalChangeRequired": false,
+        "reason": "香港電影資料館出生資料與公開三柱 observation 對應後，BaziJS canonical 的年、月、日柱一致；時辰未知，不推定時柱。"
+      }
+    },
+    {
+      "caseId": "CELEB-BRIGITTE-LIN-1954",
+      "group": "utc+08-chinese-public-figure",
+      "person": {"name": "林青霞", "aliases": ["Brigitte Lin"]},
+      "input": {
+        "birthDate": "1954-11-03",
+        "birthTimeMode": "unknown",
+        "gender": "female",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {"country": "TW", "city": "Chiayi", "longitude": 120.45, "latitude": 23.48}
+      },
+      "discoverySources": ["https://www.wikidata.org/wiki/Q234188", "https://zh.wikipedia.org/wiki/%E6%9E%97%E9%9D%92%E9%9C%9E"],
+      "factSources": ["moc-brigitte-lin"],
+      "externalObservation": {
+        "sourceId": "deeporacle-brigitte-lin",
+        "classification": "match",
+        "sourceUrl": "https://www.deeporacle.ai/zh-TW/bazi/celebrities/brigitte-lin",
+        "scope": ["year", "month", "day"],
+        "observed": {"pillars": {"year": "甲午", "month": "甲戌", "day": "癸亥", "hour": null}},
+        "timeEvidence": "台灣文化部未提供出生時刻；外部頁列出的午時為示意，本案排除時柱。",
+        "notes": "台灣文化部核對出生日期與嘉義出生地；外部頁公開甲午、甲戌、癸亥三柱。"
+      },
+      "comparisonFields": ["year", "month", "day"],
+      "adjudication": {
+        "classification": "match",
+        "canonicalChangeRequired": false,
+        "reason": "台灣文化部出生資料與公開三柱 observation 對應後，BaziJS canonical 的年、月、日柱一致；示意時柱不納入。"
+      }
+    }
+  ]
+}

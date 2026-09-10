@@ -1,6 +1,12 @@
 # CHANGELOG
 
-# [Unreleased] - 2026-09-08
+# [Unreleased] - 2026-09-10
+- 版本契約對齊：`package.json`／`package-lock.json` 統一為 `bazijs@1.0.2`、Apache-2.0 與 `esbuild ^0.28.2`；新增 [`VERSIONS.md`](VERSIONS.md) 說明 package、engine、API 與規則版本的責任邊界。
+- 強弱引擎新增可追溯氣數層：`rawQi`、`effectiveQi`、`transformations`、`assessment`、`decision` 與 `layers`；既有 `score`、`level`、`distribution` 與喜忌結果維持不變。合局／會局先列為轉化候選，不在 canonical 中自動化氣。
+- 新增多模型用神 resolver 與流年多層 graph：`result.analysis.useGodResolver` 保留扶抑、格局、調候、通關與從化研究 candidate／conflict；`result.transits.transitGraph` 保留原局／大運／流年／流月／流日／流時節點、時間層連線與可機器核對的歲運事件，兩者都不新增未驗證斷語。
+- 新增強弱氣數層 unit test；完整驗證仍以 `npm test`、`npm run validate`、`npm run build` 與 `npm run check:demo` 為準。
+- 新增十個正格的保守結構候選引擎與 `result.patterns`；它只依月令司令／建祿／月刃辨識候選，不宣告完整成格或破格，特殊格仍獨立留在 research registry。
+- 新增解讀驗證資料契約 `validation/interpretation/`；目前為 `protocol-only`，不把 BaziJS 自己的輸出當成命理解讀的外部真值。
 - 全系統輸入契約強化：實際日期、時區、經緯度、規則值與時辰地支均在計算前驗證。
 - 真正支援 `lunar_new_year` 年界與 `lunar_month` 月界，並將實際 ruleId 寫入 `result.rules.applied`。
 - 流年解析支援 UTC、負時區、半時區與明確 invalid Date 錯誤。

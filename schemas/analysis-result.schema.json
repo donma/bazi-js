@@ -10,6 +10,7 @@
     "profileName": {"type": "string"},
     "selected": {"type": "object"},
     "models": {"type": "object"},
+    "useGodResolver": {"type": "object"},
     "ruleId": {"type": "string"},
     "version": {"type": "string"},
     "description": {"type": "string"},
