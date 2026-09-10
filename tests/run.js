@@ -423,6 +423,8 @@ async function runDataContracts() {
   const specialSystems = readJson('../validation/external/round-02-special-systems.json');
   const evidenceLedger = readJson('../sources/evidence-ledger.json');
   const independent = readJson('../validation/external/independent-ledger.json');
+  const boundaryRound = readJson('../validation/external/round-03-boundary-samples.json');
+  const secondEngineRound = readJson('../validation/external/round-04-second-engine.json');
   const schemaFiles = [
     ['../schemas/source-catalog.schema.json', sourceCatalog],
     ['../schemas/profile.schema.json', profileCatalog.profiles[0]],
@@ -430,7 +432,9 @@ async function runDataContracts() {
     ['../schemas/external-validation.schema.json', external],
     ['../schemas/external-validation.schema.json', specialSystems],
     ['../schemas/evidence-ledger.schema.json', evidenceLedger],
-    ['../schemas/independent-validation.schema.json', independent]
+    ['../schemas/independent-validation.schema.json', independent],
+    ['../schemas/independent-validation.schema.json', boundaryRound],
+    ['../schemas/independent-validation.schema.json', secondEngineRound]
   ];
 
   for (const [file, sample] of schemaFiles) {
@@ -537,6 +541,45 @@ async function runDataContracts() {
         assert(observation.observed === null && observation.notes.length > 0, `${sample.caseId}-UNDETERMINED`, JSON.stringify(observation));
       }
     }
+  }
+
+  const boundarySourceIds = new Set(boundaryRound.sources.map((source) => source.sourceId));
+  assert(boundaryRound.cases.length >= 20 && boundaryRound.cases.length <= 50, 'UT-BOUNDARY-ROUND-SIZE', String(boundaryRound.cases.length));
+  assert(boundaryRound.sources.every((source) => /^https:\/\//.test(source.url) && source.independence === 'external'), 'UT-BOUNDARY-EXTERNAL-SOURCES', JSON.stringify(boundaryRound.sources));
+  for (const sample of boundaryRound.cases) {
+    const result = Bazi.calculate(sample.input);
+    const actual = pillarMap(result);
+    const observation = sample.observations[0];
+    let ok = boundarySourceIds.has(observation?.sourceId);
+    if (observation?.classification === 'match') {
+      ok = ok && JSON.stringify(actual) === JSON.stringify(observation.observed.pillars);
+    } else if (observation?.classification === 'difference') {
+      ok = ok && JSON.stringify(actual) !== JSON.stringify(observation.observed.pillars);
+    } else {
+      ok = ok && observation?.observed === null && observation?.notes;
+    }
+    ok = ok && sample.adjudication.classification === observation?.classification;
+    assert(Boolean(ok), `${sample.caseId}-EXTERNAL-BOUNDARY`, JSON.stringify({ actual, observed: observation?.observed?.pillars }));
+  }
+
+  const secondEngineSourceIds = new Set(secondEngineRound.sources.map((source) => source.sourceId));
+  assert(secondEngineRound.cases.length === 16, 'UT-SECOND-ENGINE-ROUND-SIZE', String(secondEngineRound.cases.length));
+  assert(boundaryRound.cases.length + secondEngineRound.cases.length === 50, 'UT-EXTERNAL-TOTAL-50', `${boundaryRound.cases.length}+${secondEngineRound.cases.length}`);
+  assert(secondEngineRound.sources.every((source) => /^https:\/\//.test(source.url) && source.independence === 'external' && source.commit), 'UT-SECOND-ENGINE-SOURCE', JSON.stringify(secondEngineRound.sources));
+  for (const sample of secondEngineRound.cases) {
+    const result = Bazi.calculate(sample.input);
+    const actual = pillarMap(result);
+    const observation = sample.observations[0];
+    let ok = secondEngineSourceIds.has(observation?.sourceId);
+    if (observation?.classification === 'match') {
+      ok = ok && JSON.stringify(actual) === JSON.stringify(observation.observed.pillars);
+    } else if (observation?.classification === 'difference') {
+      ok = ok && JSON.stringify(actual) !== JSON.stringify(observation.observed.pillars);
+    } else {
+      ok = ok && observation?.observed === null && observation?.notes;
+    }
+    ok = ok && sample.adjudication.classification === observation?.classification;
+    assert(Boolean(ok), `${sample.caseId}-SECOND-ENGINE`, JSON.stringify({ actual, observed: observation?.observed?.pillars }));
   }
 }
 

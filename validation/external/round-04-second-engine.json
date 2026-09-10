@@ -1,0 +1,1160 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "bazi-js-independent-second-engine-round-04",
+  "capturedAt": "2026-09-10",
+  "purpose": "以第二個獨立開源排盤引擎固定 16 組民用日期與真太陽時抽樣；與 round-03 合計 50 組，不把外部輸出宣稱為跨流派唯一答案。",
+  "sources": [
+    {
+      "sourceId": "baziflow-core",
+      "name": "baziflow-core",
+      "url": "https://github.com/Eastern-Sunrise/bazi-core",
+      "sourceType": "independent-open-source-engine",
+      "scope": [
+        "pillars",
+        "true-solar-time"
+      ],
+      "independence": "external",
+      "version": "0.1.0",
+      "commit": "ede8eb34620dbe31f072c34659be4077178e6cda",
+      "notes": "固定 source commit；本輪只使用其四柱與真太陽時 API。該引擎沒有 timezone／day-boundary API，因此不把這些維度的結果冒充為已驗證。外部引擎未納入 BaziJS runtime。"
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "R04-NORMAL-1988-0229",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1988-02-29",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 1988,
+        "month": 2,
+        "day": 29,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "戊辰",
+              "month": "甲寅",
+              "day": "甲寅",
+              "hour": "庚午"
+            },
+            "solarDate": "1988-02-29",
+            "solarTime": "12:00",
+            "trueSolarTime": "12:00",
+            "dayMaster": "甲",
+            "dayMasterElement": "wood"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "戊辰",
+          "month": "甲寅",
+          "day": "甲寅",
+          "hour": "庚午"
+        },
+        "externalPillars": {
+          "year": "戊辰",
+          "month": "甲寅",
+          "day": "甲寅",
+          "hour": "庚午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "戊辰",
+          "month": "甲寅",
+          "day": "甲寅",
+          "hour": "庚午"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-1966-1001",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1966-10-01",
+        "birthTime": "08:30",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 1966,
+        "month": 10,
+        "day": 1,
+        "hour": 8,
+        "minute": 30,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "丙午",
+              "month": "丁酉",
+              "day": "癸巳",
+              "hour": "丙辰"
+            },
+            "solarDate": "1966-10-01",
+            "solarTime": "08:30",
+            "trueSolarTime": "08:30",
+            "dayMaster": "癸",
+            "dayMasterElement": "water"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "丙午",
+          "month": "丁酉",
+          "day": "癸巳",
+          "hour": "丙辰"
+        },
+        "externalPillars": {
+          "year": "丙午",
+          "month": "丁酉",
+          "day": "癸巳",
+          "hour": "丙辰"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "丙午",
+          "month": "丁酉",
+          "day": "癸巳",
+          "hour": "丙辰"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-2001-0909",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2001-09-09",
+        "birthTime": "18:45",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2001,
+        "month": 9,
+        "day": 9,
+        "hour": 18,
+        "minute": 45,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "辛巳",
+              "month": "丁酉",
+              "day": "乙亥",
+              "hour": "乙酉"
+            },
+            "solarDate": "2001-09-09",
+            "solarTime": "18:45",
+            "trueSolarTime": "18:45",
+            "dayMaster": "乙",
+            "dayMasterElement": "wood"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "辛巳",
+          "month": "丁酉",
+          "day": "乙亥",
+          "hour": "乙酉"
+        },
+        "externalPillars": {
+          "year": "辛巳",
+          "month": "丁酉",
+          "day": "乙亥",
+          "hour": "乙酉"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "辛巳",
+          "month": "丁酉",
+          "day": "乙亥",
+          "hour": "乙酉"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-2024-0601",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2024-06-01",
+        "birthTime": "11:10",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 6,
+        "day": 1,
+        "hour": 11,
+        "minute": 10,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "己巳",
+              "day": "丙申",
+              "hour": "甲午"
+            },
+            "solarDate": "2024-06-01",
+            "solarTime": "11:10",
+            "trueSolarTime": "11:10",
+            "dayMaster": "丙",
+            "dayMasterElement": "fire"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "丙申",
+          "hour": "甲午"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "丙申",
+          "hour": "甲午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "丙申",
+          "hour": "甲午"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-2026-0910",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2026-09-10",
+        "birthTime": "09:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2026,
+        "month": 9,
+        "day": 10,
+        "hour": 9,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "丙午",
+              "month": "丁酉",
+              "day": "丁亥",
+              "hour": "乙巳"
+            },
+            "solarDate": "2026-09-10",
+            "solarTime": "09:00",
+            "trueSolarTime": "09:00",
+            "dayMaster": "丁",
+            "dayMasterElement": "fire"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "丙午",
+          "month": "丁酉",
+          "day": "丁亥",
+          "hour": "乙巳"
+        },
+        "externalPillars": {
+          "year": "丙午",
+          "month": "丁酉",
+          "day": "丁亥",
+          "hour": "乙巳"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "丙午",
+          "month": "丁酉",
+          "day": "丁亥",
+          "hour": "乙巳"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-1976-0101",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1976-01-01",
+        "birthTime": "22:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 1976,
+        "month": 1,
+        "day": 1,
+        "hour": 22,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "乙卯",
+              "month": "戊子",
+              "day": "壬子",
+              "hour": "辛亥"
+            },
+            "solarDate": "1976-01-01",
+            "solarTime": "22:00",
+            "trueSolarTime": "22:00",
+            "dayMaster": "壬",
+            "dayMasterElement": "water"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "乙卯",
+          "month": "戊子",
+          "day": "壬子",
+          "hour": "辛亥"
+        },
+        "externalPillars": {
+          "year": "乙卯",
+          "month": "戊子",
+          "day": "壬子",
+          "hour": "辛亥"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "乙卯",
+          "month": "戊子",
+          "day": "壬子",
+          "hour": "辛亥"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-2012-1212",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2012-12-12",
+        "birthTime": "06:15",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 116.39
+        }
+      },
+      "externalInput": {
+        "year": 2012,
+        "month": 12,
+        "day": 12,
+        "hour": 6,
+        "minute": 15,
+        "gender": "male",
+        "longitude": 116.39,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "壬辰",
+              "month": "壬子",
+              "day": "丁未",
+              "hour": "癸卯"
+            },
+            "solarDate": "2012-12-12",
+            "solarTime": "06:15",
+            "trueSolarTime": "06:15",
+            "dayMaster": "丁",
+            "dayMasterElement": "fire"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "壬辰",
+          "month": "壬子",
+          "day": "丁未",
+          "hour": "癸卯"
+        },
+        "externalPillars": {
+          "year": "壬辰",
+          "month": "壬子",
+          "day": "丁未",
+          "hour": "癸卯"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "壬辰",
+          "month": "壬子",
+          "day": "丁未",
+          "hour": "癸卯"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-2030-0715",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2030-07-15",
+        "birthTime": "14:20",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 103.82
+        }
+      },
+      "externalInput": {
+        "year": 2030,
+        "month": 7,
+        "day": 15,
+        "hour": 14,
+        "minute": 20,
+        "gender": "male",
+        "longitude": 103.82,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "庚戌",
+              "month": "癸未",
+              "day": "辛亥",
+              "hour": "乙未"
+            },
+            "solarDate": "2030-07-15",
+            "solarTime": "14:20",
+            "trueSolarTime": "14:20",
+            "dayMaster": "辛",
+            "dayMasterElement": "metal"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "庚戌",
+          "month": "癸未",
+          "day": "辛亥",
+          "hour": "乙未"
+        },
+        "externalPillars": {
+          "year": "庚戌",
+          "month": "癸未",
+          "day": "辛亥",
+          "hour": "乙未"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "庚戌",
+          "month": "癸未",
+          "day": "辛亥",
+          "hour": "乙未"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-TST-KASHGAR-MIDDAY",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "2024-02-11",
+        "birthTime": "13:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 76
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 2,
+        "day": 11,
+        "hour": 13,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 76,
+        "standardLongitude": 120,
+        "useTrueSolarTime": true
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丙寅",
+              "day": "乙巳",
+              "hour": "辛巳"
+            },
+            "solarDate": "2024-02-11",
+            "solarTime": "13:00",
+            "trueSolarTime": "10:04",
+            "dayMaster": "乙",
+            "dayMasterElement": "wood"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "辛巳"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "辛巳"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "辛巳"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-TST-SINGAPORE-MIDDAY",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "1985-10-08",
+        "birthTime": "15:20",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 103.82
+        }
+      },
+      "externalInput": {
+        "year": 1985,
+        "month": 10,
+        "day": 8,
+        "hour": 15,
+        "minute": 20,
+        "gender": "male",
+        "longitude": 103.82,
+        "standardLongitude": 120,
+        "useTrueSolarTime": true
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "乙丑",
+              "month": "乙酉",
+              "day": "庚辰",
+              "hour": "癸未"
+            },
+            "solarDate": "1985-10-08",
+            "solarTime": "15:20",
+            "trueSolarTime": "14:15",
+            "dayMaster": "庚",
+            "dayMasterElement": "metal"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "乙丑",
+          "month": "乙酉",
+          "day": "庚辰",
+          "hour": "癸未"
+        },
+        "externalPillars": {
+          "year": "乙丑",
+          "month": "乙酉",
+          "day": "庚辰",
+          "hour": "癸未"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "乙丑",
+          "month": "乙酉",
+          "day": "庚辰",
+          "hour": "癸未"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-TST-FUYUAN-MIDDAY",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "2024-11-03",
+        "birthTime": "10:50",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 134
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 11,
+        "day": 3,
+        "hour": 10,
+        "minute": 50,
+        "gender": "male",
+        "longitude": 134,
+        "standardLongitude": 120,
+        "useTrueSolarTime": true
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "甲戌",
+              "day": "辛未",
+              "hour": "甲午"
+            },
+            "solarDate": "2024-11-03",
+            "solarTime": "10:50",
+            "trueSolarTime": "11:46",
+            "dayMaster": "辛",
+            "dayMasterElement": "metal"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-TST-LISBON-MIDDAY",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "2022-05-06",
+        "birthTime": "15:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": -9.14
+        }
+      },
+      "externalInput": {
+        "year": 2022,
+        "month": 5,
+        "day": 6,
+        "hour": 15,
+        "minute": 0,
+        "gender": "male",
+        "longitude": -9.14,
+        "standardLongitude": 120,
+        "useTrueSolarTime": true
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "壬寅",
+              "month": "乙巳",
+              "day": "己未",
+              "hour": "丁卯"
+            },
+            "solarDate": "2022-05-06",
+            "solarTime": "15:00",
+            "trueSolarTime": "06:23",
+            "dayMaster": "己",
+            "dayMasterElement": "earth"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "壬寅",
+          "month": "乙巳",
+          "day": "己未",
+          "hour": "丁卯"
+        },
+        "externalPillars": {
+          "year": "壬寅",
+          "month": "乙巳",
+          "day": "己未",
+          "hour": "丁卯"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "壬寅",
+          "month": "乙巳",
+          "day": "己未",
+          "hour": "丁卯"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-1945-0815",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1945-08-15",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 1945,
+        "month": 8,
+        "day": 15,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "乙酉",
+              "month": "甲申",
+              "day": "丙辰",
+              "hour": "甲午"
+            },
+            "solarDate": "1945-08-15",
+            "solarTime": "12:00",
+            "trueSolarTime": "12:00",
+            "dayMaster": "丙",
+            "dayMasterElement": "fire"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "乙酉",
+          "month": "甲申",
+          "day": "丙辰",
+          "hour": "甲午"
+        },
+        "externalPillars": {
+          "year": "乙酉",
+          "month": "甲申",
+          "day": "丙辰",
+          "hour": "甲午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "乙酉",
+          "month": "甲申",
+          "day": "丙辰",
+          "hour": "甲午"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-2019-0131",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2019-01-31",
+        "birthTime": "17:30",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2019,
+        "month": 1,
+        "day": 31,
+        "hour": 17,
+        "minute": 30,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "戊戌",
+              "month": "乙丑",
+              "day": "戊辰",
+              "hour": "辛酉"
+            },
+            "solarDate": "2019-01-31",
+            "solarTime": "17:30",
+            "trueSolarTime": "17:30",
+            "dayMaster": "戊",
+            "dayMasterElement": "earth"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "戊戌",
+          "month": "乙丑",
+          "day": "戊辰",
+          "hour": "辛酉"
+        },
+        "externalPillars": {
+          "year": "戊戌",
+          "month": "乙丑",
+          "day": "戊辰",
+          "hour": "辛酉"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "戊戌",
+          "month": "乙丑",
+          "day": "戊辰",
+          "hour": "辛酉"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-NORMAL-1990-0515",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1990-05-15",
+        "birthTime": "08:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 1990,
+        "month": 5,
+        "day": 15,
+        "hour": 8,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "standardLongitude": 120,
+        "useTrueSolarTime": false
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "庚午",
+              "month": "辛巳",
+              "day": "庚辰",
+              "hour": "庚辰"
+            },
+            "solarDate": "1990-05-15",
+            "solarTime": "08:00",
+            "trueSolarTime": "08:00",
+            "dayMaster": "庚",
+            "dayMasterElement": "metal"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "庚午",
+          "month": "辛巳",
+          "day": "庚辰",
+          "hour": "庚辰"
+        },
+        "externalPillars": {
+          "year": "庚午",
+          "month": "辛巳",
+          "day": "庚辰",
+          "hour": "庚辰"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "庚午",
+          "month": "辛巳",
+          "day": "庚辰",
+          "hour": "庚辰"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    },
+    {
+      "caseId": "R04-TST-WINNIPEG-MIDDAY",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "2020-07-20",
+        "birthTime": "16:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": -97.14
+        }
+      },
+      "externalInput": {
+        "year": 2020,
+        "month": 7,
+        "day": 20,
+        "hour": 16,
+        "minute": 0,
+        "gender": "male",
+        "longitude": -97.14,
+        "standardLongitude": 120,
+        "useTrueSolarTime": true
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "baziflow-core",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "庚子",
+              "month": "癸未",
+              "day": "甲子",
+              "hour": "乙丑"
+            },
+            "solarDate": "2020-07-20",
+            "solarTime": "16:00",
+            "trueSolarTime": "01:31",
+            "dayMaster": "甲",
+            "dayMasterElement": "wood"
+          },
+          "notes": "外部引擎 baziflow-core ede8eb34620dbe31f072c34659be4077178e6cda 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "庚子",
+          "month": "癸未",
+          "day": "甲子",
+          "hour": "乙丑"
+        },
+        "externalPillars": {
+          "year": "庚子",
+          "month": "癸未",
+          "day": "甲子",
+          "hour": "乙丑"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "庚子",
+          "month": "癸未",
+          "day": "甲子",
+          "hour": "乙丑"
+        },
+        "reason": "同一輸入與相同真太陽時設定下，兩個獨立引擎四柱一致。"
+      }
+    }
+  ]
+}

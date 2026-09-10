@@ -1,0 +1,2577 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "bazi-js-independent-boundary-round-03",
+  "capturedAt": "2026-09-10",
+  "purpose": "以獨立開源排盤引擎固定 34 組跨日期、時區、子時、節氣與真太陽時邊界觀察；不把外部輸出宣稱為跨流派唯一答案。",
+  "sources": [
+    {
+      "sourceId": "openfate-bazi-engine",
+      "name": "@openfate/bazi-engine",
+      "url": "https://github.com/openfate-ai/bazi-engine",
+      "sourceType": "independent-open-source-engine",
+      "scope": [
+        "pillars",
+        "solar-term-boundary",
+        "timezone",
+        "zi-hour",
+        "true-solar-time"
+      ],
+      "independence": "external",
+      "version": "1.1.2",
+      "commit": "c6e21ac4fd07ca6762de9e84d45c68339cb84c02",
+      "notes": "固定 source commit；支援 dayBoundaryMode、timezone、DST 與 True Solar Time。外部引擎使用其自身依賴與算法，未納入 BaziJS runtime。"
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "R03-NORMAL-1998-1213",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1998-12-13",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 116.39
+        }
+      },
+      "externalInput": {
+        "year": 1998,
+        "month": 12,
+        "day": 13,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 116.39,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "戊寅",
+              "month": "甲子",
+              "day": "甲午",
+              "hour": "庚午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 116.39,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "戊寅",
+          "month": "甲子",
+          "day": "甲午",
+          "hour": "庚午"
+        },
+        "externalPillars": {
+          "year": "戊寅",
+          "month": "甲子",
+          "day": "甲午",
+          "hour": "庚午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "戊寅",
+          "month": "甲子",
+          "day": "甲午",
+          "hour": "庚午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-2000-0101",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2000-01-01",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2000,
+        "month": 1,
+        "day": 1,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "己卯",
+              "month": "丙子",
+              "day": "戊午",
+              "hour": "戊午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "己卯",
+          "month": "丙子",
+          "day": "戊午",
+          "hour": "戊午"
+        },
+        "externalPillars": {
+          "year": "己卯",
+          "month": "丙子",
+          "day": "戊午",
+          "hour": "戊午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "己卯",
+          "month": "丙子",
+          "day": "戊午",
+          "hour": "戊午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-1900-0101",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1900-01-01",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 1900,
+        "month": 1,
+        "day": 1,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "己亥",
+              "month": "丙子",
+              "day": "甲戌",
+              "hour": "庚午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "己亥",
+          "month": "丙子",
+          "day": "甲戌",
+          "hour": "庚午"
+        },
+        "externalPillars": {
+          "year": "己亥",
+          "month": "丙子",
+          "day": "甲戌",
+          "hour": "庚午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "己亥",
+          "month": "丙子",
+          "day": "甲戌",
+          "hour": "庚午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-2024-0101",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2024-01-01",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 1,
+        "day": 1,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "癸卯",
+              "month": "甲子",
+              "day": "甲子",
+              "hour": "庚午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        },
+        "externalPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-2026-0615",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2026-06-15",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 116.39
+        }
+      },
+      "externalInput": {
+        "year": 2026,
+        "month": 6,
+        "day": 15,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 116.39,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "丙午",
+              "month": "甲午",
+              "day": "庚申",
+              "hour": "壬午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 116.39,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "丙午",
+          "month": "甲午",
+          "day": "庚申",
+          "hour": "壬午"
+        },
+        "externalPillars": {
+          "year": "丙午",
+          "month": "甲午",
+          "day": "庚申",
+          "hour": "壬午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "丙午",
+          "month": "甲午",
+          "day": "庚申",
+          "hour": "壬午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-1970-0101",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1970-01-01",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 1970,
+        "month": 1,
+        "day": 1,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "己酉",
+              "month": "丙子",
+              "day": "辛巳",
+              "hour": "甲午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "己酉",
+          "month": "丙子",
+          "day": "辛巳",
+          "hour": "甲午"
+        },
+        "externalPillars": {
+          "year": "己酉",
+          "month": "丙子",
+          "day": "辛巳",
+          "hour": "甲午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "己酉",
+          "month": "丙子",
+          "day": "辛巳",
+          "hour": "甲午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-2002-0808",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2002-08-08",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 114.29
+        }
+      },
+      "externalInput": {
+        "year": 2002,
+        "month": 8,
+        "day": 8,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 114.29,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "壬午",
+              "month": "戊申",
+              "day": "戊申",
+              "hour": "戊午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 114.29,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "壬午",
+          "month": "戊申",
+          "day": "戊申",
+          "hour": "戊午"
+        },
+        "externalPillars": {
+          "year": "壬午",
+          "month": "戊申",
+          "day": "戊申",
+          "hour": "戊午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "壬午",
+          "month": "戊申",
+          "day": "戊申",
+          "hour": "戊午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-1949-1001",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1949-10-01",
+        "birthTime": "15:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 116.39
+        }
+      },
+      "externalInput": {
+        "year": 1949,
+        "month": 10,
+        "day": 1,
+        "hour": 15,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 116.39,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "己丑",
+              "month": "癸酉",
+              "day": "甲子",
+              "hour": "壬申"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 116.39,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "己丑",
+          "month": "癸酉",
+          "day": "甲子",
+          "hour": "壬申"
+        },
+        "externalPillars": {
+          "year": "己丑",
+          "month": "癸酉",
+          "day": "甲子",
+          "hour": "壬申"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "己丑",
+          "month": "癸酉",
+          "day": "甲子",
+          "hour": "壬申"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-2000-0229",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "2000-02-29",
+        "birthTime": "10:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2000,
+        "month": 2,
+        "day": 29,
+        "hour": 10,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "庚辰",
+              "month": "戊寅",
+              "day": "丁巳",
+              "hour": "乙巳"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "庚辰",
+          "month": "戊寅",
+          "day": "丁巳",
+          "hour": "乙巳"
+        },
+        "externalPillars": {
+          "year": "庚辰",
+          "month": "戊寅",
+          "day": "丁巳",
+          "hour": "乙巳"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "庚辰",
+          "month": "戊寅",
+          "day": "丁巳",
+          "hour": "乙巳"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-NORMAL-1911-1010",
+      "group": "ordinary-date",
+      "input": {
+        "birthDate": "1911-10-10",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 114.3
+        }
+      },
+      "externalInput": {
+        "year": 1911,
+        "month": 10,
+        "day": 10,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 114.3,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "辛亥",
+              "month": "戊戌",
+              "day": "癸丑",
+              "hour": "戊午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 114.3,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "辛亥",
+          "month": "戊戌",
+          "day": "癸丑",
+          "hour": "戊午"
+        },
+        "externalPillars": {
+          "year": "辛亥",
+          "month": "戊戌",
+          "day": "癸丑",
+          "hour": "戊午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "辛亥",
+          "month": "戊戌",
+          "day": "癸丑",
+          "hour": "戊午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TZ-INDIA-0530",
+      "group": "timezone",
+      "input": {
+        "birthDate": "2024-01-01",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+05:30",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 77.2
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 1,
+        "day": 1,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 77.2,
+        "timezone": 5.5,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "癸卯",
+              "month": "甲子",
+              "day": "甲子",
+              "hour": "庚午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 77.2,
+              "timezoneBasis": 5.5,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        },
+        "externalPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TZ-NEPAL-0575",
+      "group": "timezone",
+      "input": {
+        "birthDate": "2024-01-01",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+05:45",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 85.3
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 1,
+        "day": 1,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 85.3,
+        "timezone": 5.75,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "癸卯",
+              "month": "甲子",
+              "day": "甲子",
+              "hour": "庚午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 85.3,
+              "timezoneBasis": 5.75,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        },
+        "externalPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "庚午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TZ-TEHRAN-0330",
+      "group": "timezone",
+      "input": {
+        "birthDate": "2024-11-03",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+03:30",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 51.4
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 11,
+        "day": 3,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 51.4,
+        "timezone": 3.5,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "甲戌",
+              "day": "辛未",
+              "hour": "甲午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 51.4,
+              "timezoneBasis": 3.5,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TZ-REYKJAVIK-0000",
+      "group": "timezone",
+      "input": {
+        "birthDate": "2024-02-11",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+00:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": -21.9
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 2,
+        "day": 11,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": -21.9,
+        "timezone": 0,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丙寅",
+              "day": "乙巳",
+              "hour": "壬午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": -21.9,
+              "timezoneBasis": 0,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "壬午"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "壬午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "壬午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TZ-SYDNEY-DST",
+      "group": "timezone",
+      "input": {
+        "birthDate": "2008-10-05",
+        "birthTime": "12:00",
+        "gender": "male",
+        "timezone": "+10:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "dstOffset": 1,
+        "location": {
+          "longitude": 151.2
+        }
+      },
+      "externalInput": {
+        "year": 2008,
+        "month": 10,
+        "day": 5,
+        "hour": 12,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 151.2,
+        "timezone": 10,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00",
+        "dstOffset": 1
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "戊子",
+              "month": "辛酉",
+              "day": "戊寅",
+              "hour": "戊午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 151.2,
+              "timezoneBasis": 10,
+              "dstOffset": 1
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "戊子",
+          "month": "辛酉",
+          "day": "戊寅",
+          "hour": "戊午"
+        },
+        "externalPillars": {
+          "year": "戊子",
+          "month": "辛酉",
+          "day": "戊寅",
+          "hour": "戊午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "戊子",
+          "month": "辛酉",
+          "day": "戊寅",
+          "hour": "戊午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TZ-NEWYORK-DST",
+      "group": "timezone",
+      "input": {
+        "birthDate": "2023-11-05",
+        "birthTime": "01:30",
+        "gender": "male",
+        "timezone": "-05:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "dstOffset": 1,
+        "location": {
+          "longitude": -74
+        }
+      },
+      "externalInput": {
+        "year": 2023,
+        "month": 11,
+        "day": 5,
+        "hour": 1,
+        "minute": 30,
+        "gender": "male",
+        "longitude": -74,
+        "timezone": -5,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00",
+        "dstOffset": 1
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "difference",
+          "observed": {
+            "pillars": {
+              "year": "癸卯",
+              "month": "壬戌",
+              "day": "丁卯",
+              "hour": "庚子"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": -74,
+              "timezoneBasis": -5,
+              "dstOffset": 1
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "癸卯",
+          "month": "壬戌",
+          "day": "丁卯",
+          "hour": "辛丑"
+        },
+        "externalPillars": {
+          "year": "癸卯",
+          "month": "壬戌",
+          "day": "丁卯",
+          "hour": "庚子"
+        }
+      },
+      "adjudication": {
+        "classification": "difference",
+        "reason": "歷史／夏令時間的民用時刻正規化不同；保存差異，不自行判定哪個唯一正確。"
+      }
+    },
+    {
+      "caseId": "R03-ZI-2359-2300",
+      "group": "zi-hour",
+      "input": {
+        "birthDate": "2024-05-20",
+        "birthTime": "23:59",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 5,
+        "day": 20,
+        "hour": 23,
+        "minute": 59,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "ZI_HOUR_23"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "己巳",
+              "day": "乙酉",
+              "hour": "丙子"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "ZI_HOUR_23",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-ZI-2359-0000",
+      "group": "zi-hour",
+      "input": {
+        "birthDate": "2024-05-20",
+        "birthTime": "23:59",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "00:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 5,
+        "day": 20,
+        "hour": 23,
+        "minute": 59,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "difference",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "己巳",
+              "day": "甲申",
+              "hour": "丙子"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "甲申",
+          "hour": "甲子"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "甲申",
+          "hour": "丙子"
+        }
+      },
+      "adjudication": {
+        "classification": "difference",
+        "reason": "晚子時在午夜換日模式下的時干取法不同；保存差異，待 Profile 明確指定夜子／早子規範。"
+      }
+    },
+    {
+      "caseId": "R03-ZI-0000-2300",
+      "group": "zi-hour",
+      "input": {
+        "birthDate": "2024-05-21",
+        "birthTime": "00:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 5,
+        "day": 21,
+        "hour": 0,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "ZI_HOUR_23"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "己巳",
+              "day": "乙酉",
+              "hour": "丙子"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "ZI_HOUR_23",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-ZI-0000-0000",
+      "group": "zi-hour",
+      "input": {
+        "birthDate": "2024-05-21",
+        "birthTime": "00:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "00:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 5,
+        "day": 21,
+        "hour": 0,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "己巳",
+              "day": "乙酉",
+              "hour": "丙子"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "己巳",
+          "day": "乙酉",
+          "hour": "丙子"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-ZI-2000-2330",
+      "group": "zi-hour",
+      "input": {
+        "birthDate": "2000-06-15",
+        "birthTime": "23:30",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 116.39
+        }
+      },
+      "externalInput": {
+        "year": 2000,
+        "month": 6,
+        "day": 15,
+        "hour": 23,
+        "minute": 30,
+        "gender": "male",
+        "longitude": 116.39,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "ZI_HOUR_23"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "庚辰",
+              "month": "壬午",
+              "day": "乙巳",
+              "hour": "丙子"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "ZI_HOUR_23",
+              "longitude": 116.39,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "庚辰",
+          "month": "壬午",
+          "day": "乙巳",
+          "hour": "丙子"
+        },
+        "externalPillars": {
+          "year": "庚辰",
+          "month": "壬午",
+          "day": "乙巳",
+          "hour": "丙子"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "庚辰",
+          "month": "壬午",
+          "day": "乙巳",
+          "hour": "丙子"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-ZI-2024-0101",
+      "group": "zi-hour",
+      "input": {
+        "birthDate": "2024-01-01",
+        "birthTime": "00:30",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 1,
+        "day": 1,
+        "hour": 0,
+        "minute": 30,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "ZI_HOUR_23"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "癸卯",
+              "month": "甲子",
+              "day": "甲子",
+              "hour": "甲子"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "ZI_HOUR_23",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "甲子"
+        },
+        "externalPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "甲子"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "癸卯",
+          "month": "甲子",
+          "day": "甲子",
+          "hour": "甲子"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-LICHUN-2024-BEFORE",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2024-02-04",
+        "birthTime": "16:26",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 2,
+        "day": 4,
+        "hour": 16,
+        "minute": 26,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "difference",
+          "observed": {
+            "pillars": {
+              "year": "癸卯",
+              "month": "乙丑",
+              "day": "戊戌",
+              "hour": "庚申"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "戊戌",
+          "hour": "庚申"
+        },
+        "externalPillars": {
+          "year": "癸卯",
+          "month": "乙丑",
+          "day": "戊戌",
+          "hour": "庚申"
+        }
+      },
+      "adjudication": {
+        "classification": "difference",
+        "reason": "節氣切界在分鐘邊界出現算法或精度差異；BaziJS 與外部引擎的輸出均保留供追查。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-LICHUN-2024-AFTER",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2024-02-04",
+        "birthTime": "16:28",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 2,
+        "day": 4,
+        "hour": 16,
+        "minute": 28,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丙寅",
+              "day": "戊戌",
+              "hour": "庚申"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "戊戌",
+          "hour": "庚申"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "戊戌",
+          "hour": "庚申"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "戊戌",
+          "hour": "庚申"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-LICHUN-2025-BEFORE",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2025-02-03",
+        "birthTime": "22:09",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2025,
+        "month": 2,
+        "day": 3,
+        "hour": 22,
+        "minute": 9,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "difference",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丁丑",
+              "day": "癸卯",
+              "hour": "癸亥"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "乙巳",
+          "month": "戊寅",
+          "day": "癸卯",
+          "hour": "癸亥"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丁丑",
+          "day": "癸卯",
+          "hour": "癸亥"
+        }
+      },
+      "adjudication": {
+        "classification": "difference",
+        "reason": "節氣切界在分鐘邊界出現算法或精度差異；BaziJS 與外部引擎的輸出均保留供追查。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-LICHUN-2025-AFTER",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2025-02-03",
+        "birthTime": "22:12",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2025,
+        "month": 2,
+        "day": 3,
+        "hour": 22,
+        "minute": 12,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "乙巳",
+              "month": "戊寅",
+              "day": "癸卯",
+              "hour": "癸亥"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "乙巳",
+          "month": "戊寅",
+          "day": "癸卯",
+          "hour": "癸亥"
+        },
+        "externalPillars": {
+          "year": "乙巳",
+          "month": "戊寅",
+          "day": "癸卯",
+          "hour": "癸亥"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "乙巳",
+          "month": "戊寅",
+          "day": "癸卯",
+          "hour": "癸亥"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-JINGZHE-2024-BEFORE",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2024-03-05",
+        "birthTime": "10:21",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 3,
+        "day": 5,
+        "hour": 10,
+        "minute": 21,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "difference",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丙寅",
+              "day": "戊辰",
+              "hour": "丁巳"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丁卯",
+          "day": "戊辰",
+          "hour": "丁巳"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "戊辰",
+          "hour": "丁巳"
+        }
+      },
+      "adjudication": {
+        "classification": "difference",
+        "reason": "節氣切界在分鐘邊界出現算法或精度差異；BaziJS 與外部引擎的輸出均保留供追查。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-JINGZHE-2024-AFTER",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2024-03-05",
+        "birthTime": "10:24",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 3,
+        "day": 5,
+        "hour": 10,
+        "minute": 24,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丁卯",
+              "day": "戊辰",
+              "hour": "丁巳"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丁卯",
+          "day": "戊辰",
+          "hour": "丁巳"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丁卯",
+          "day": "戊辰",
+          "hour": "丁巳"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "丁卯",
+          "day": "戊辰",
+          "hour": "丁巳"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-QINGMING-2024-BEFORE",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2024-04-04",
+        "birthTime": "15:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 4,
+        "day": 4,
+        "hour": 15,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "difference",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丁卯",
+              "day": "戊戌",
+              "hour": "庚申"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "戊辰",
+          "day": "戊戌",
+          "hour": "庚申"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丁卯",
+          "day": "戊戌",
+          "hour": "庚申"
+        }
+      },
+      "adjudication": {
+        "classification": "difference",
+        "reason": "節氣切界在分鐘邊界出現算法或精度差異；BaziJS 與外部引擎的輸出均保留供追查。"
+      }
+    },
+    {
+      "caseId": "R03-JIE-QINGMING-2024-AFTER",
+      "group": "solar-term",
+      "input": {
+        "birthDate": "2024-04-04",
+        "birthTime": "15:05",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": false,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 120
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 4,
+        "day": 4,
+        "hour": 15,
+        "minute": 5,
+        "gender": "male",
+        "longitude": 120,
+        "timezone": 8,
+        "enableTrueSolarTime": false,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "戊辰",
+              "day": "戊戌",
+              "hour": "庚申"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": false,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 120,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": null
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "戊辰",
+          "day": "戊戌",
+          "hour": "庚申"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "戊辰",
+          "day": "戊戌",
+          "hour": "庚申"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "戊辰",
+          "day": "戊戌",
+          "hour": "庚申"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TST-KASHGAR",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "2024-02-11",
+        "birthTime": "13:00",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 76
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 2,
+        "day": 11,
+        "hour": 13,
+        "minute": 0,
+        "gender": "male",
+        "longitude": 76,
+        "timezone": 8,
+        "enableTrueSolarTime": true,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丙寅",
+              "day": "乙巳",
+              "hour": "辛巳"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": true,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 76,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": {
+              "trueSolarTime": "09:49",
+              "trueSolarDateTime": "2024-02-11 09:49:46",
+              "solarDate": "2024-02-11",
+              "standardMeridian": 120,
+              "longitudeCorrectionMinutes": -176,
+              "equationOfTimeMinutes": -14.227482913140824,
+              "algorithm": "meeus"
+            }
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "辛巳"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "辛巳"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "辛巳"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TST-FUYUAN",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "2024-11-03",
+        "birthTime": "10:50",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 134
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 11,
+        "day": 3,
+        "hour": 10,
+        "minute": 50,
+        "gender": "male",
+        "longitude": 134,
+        "timezone": 8,
+        "enableTrueSolarTime": true,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "甲戌",
+              "day": "辛未",
+              "hour": "甲午"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": true,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 134,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": {
+              "trueSolarTime": "12:02",
+              "trueSolarDateTime": "2024-11-03 12:02:29",
+              "solarDate": "2024-11-03",
+              "standardMeridian": 120,
+              "longitudeCorrectionMinutes": 56,
+              "equationOfTimeMinutes": 16.49065292283889,
+              "algorithm": "meeus"
+            }
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "甲戌",
+          "day": "辛未",
+          "hour": "甲午"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TST-SINGAPORE",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "1985-10-08",
+        "birthTime": "15:20",
+        "gender": "male",
+        "timezone": "+08:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": 103.82
+        }
+      },
+      "externalInput": {
+        "year": 1985,
+        "month": 10,
+        "day": 8,
+        "hour": 15,
+        "minute": 20,
+        "gender": "male",
+        "longitude": 103.82,
+        "timezone": 8,
+        "enableTrueSolarTime": true,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "乙丑",
+              "month": "乙酉",
+              "day": "庚辰",
+              "hour": "癸未"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": true,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": 103.82,
+              "timezoneBasis": 8,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": {
+              "trueSolarTime": "14:27",
+              "trueSolarDateTime": "1985-10-08 14:27:40",
+              "solarDate": "1985-10-08",
+              "standardMeridian": 120,
+              "longitudeCorrectionMinutes": -64.72000000000003,
+              "equationOfTimeMinutes": 12.392144246059301,
+              "algorithm": "meeus"
+            }
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "乙丑",
+          "month": "乙酉",
+          "day": "庚辰",
+          "hour": "癸未"
+        },
+        "externalPillars": {
+          "year": "乙丑",
+          "month": "乙酉",
+          "day": "庚辰",
+          "hour": "癸未"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "乙丑",
+          "month": "乙酉",
+          "day": "庚辰",
+          "hour": "癸未"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    },
+    {
+      "caseId": "R03-TST-REYKJAVIK",
+      "group": "true-solar-time",
+      "input": {
+        "birthDate": "2024-02-11",
+        "birthTime": "15:00",
+        "gender": "male",
+        "timezone": "+00:00",
+        "trueSolarTime": true,
+        "dayBoundary": "23:00",
+        "location": {
+          "longitude": -21.9
+        }
+      },
+      "externalInput": {
+        "year": 2024,
+        "month": 2,
+        "day": 11,
+        "hour": 15,
+        "minute": 0,
+        "gender": "male",
+        "longitude": -21.9,
+        "timezone": 0,
+        "enableTrueSolarTime": true,
+        "dayBoundaryMode": "MIDNIGHT_00"
+      },
+      "scope": "pillars",
+      "observations": [
+        {
+          "sourceId": "openfate-bazi-engine",
+          "classification": "match",
+          "observed": {
+            "pillars": {
+              "year": "甲辰",
+              "month": "丙寅",
+              "day": "乙巳",
+              "hour": "癸未"
+            },
+            "metadata": {
+              "trueSolarTimeApplied": true,
+              "dayBoundaryMode": "MIDNIGHT_00",
+              "longitude": -21.9,
+              "timezoneBasis": 0,
+              "dstOffset": 0
+            },
+            "solarTimeInfo": {
+              "trueSolarTime": "13:18",
+              "trueSolarDateTime": "2024-02-11 13:18:10",
+              "solarDate": "2024-02-11",
+              "standardMeridian": 0,
+              "longitudeCorrectionMinutes": -87.6,
+              "equationOfTimeMinutes": -14.229945277045186,
+              "algorithm": "meeus"
+            }
+          },
+          "notes": "外部引擎 @openfate/bazi-engine c6e21ac4fd07ca6762de9e84d45c68339cb84c02 的固定執行輸出。"
+        }
+      ],
+      "comparison": {
+        "baziJsPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "癸未"
+        },
+        "externalPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "癸未"
+        }
+      },
+      "adjudication": {
+        "classification": "match",
+        "expectedPillars": {
+          "year": "甲辰",
+          "month": "丙寅",
+          "day": "乙巳",
+          "hour": "癸未"
+        },
+        "reason": "同一輸入、相同換日與真太陽時設定下，四柱一致。"
+      }
+    }
+  ]
+}

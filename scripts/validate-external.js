@@ -110,4 +110,56 @@ for (const sample of independent.cases) {
   if (!ok) fail++;
 }
 
+// Round 03: 34 pinned observations from an independent open-source engine.
+// This is intentionally offline: CI verifies the captured observation against
+// the current SDK, while the capture script records the external commit and
+// the exact input needed to reproduce the observation.
+const boundaryRound = JSON.parse(fs.readFileSync(new URL('../validation/external/round-03-boundary-samples.json', import.meta.url), 'utf8'));
+const boundarySourceIds = new Set(boundaryRound.sources.map((source) => source.sourceId));
+for (const source of boundaryRound.sources) {
+  if (!/^https:\/\//.test(source.url) || source.independence !== 'external') fail++;
+}
+for (const sample of boundaryRound.cases) {
+  const result = Bazi.calculate(sample.input);
+  const actual = pillarMap(result);
+  let ok = boundarySourceIds.has(sample.observations[0]?.sourceId);
+  const observation = sample.observations[0];
+  if (observation.classification === 'match') {
+    ok = ok && samePillars(actual, observation.observed?.pillars);
+  } else if (observation.classification === 'difference') {
+    ok = ok && Boolean(observation.observed?.pillars) && !samePillars(actual, observation.observed.pillars);
+  } else {
+    ok = ok && observation.observed === null && Boolean(observation.notes);
+  }
+  if (sample.adjudication.classification !== observation.classification) ok = false;
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${sample.caseId}（${sample.adjudication.classification}）`);
+  if (!ok) fail++;
+}
+
+// Round 04: 16 pinned observations from a second independent open-source
+// engine. Its scope is deliberately limited to ordinary pillars and true
+// solar time because it does not expose timezone or day-boundary controls.
+const secondEngineRound = JSON.parse(fs.readFileSync(new URL('../validation/external/round-04-second-engine.json', import.meta.url), 'utf8'));
+const secondEngineSourceIds = new Set(secondEngineRound.sources.map((source) => source.sourceId));
+if (secondEngineRound.cases.length !== 16) fail++;
+for (const source of secondEngineRound.sources) {
+  if (!/^https:\/\//.test(source.url) || source.independence !== 'external' || !source.commit) fail++;
+}
+for (const sample of secondEngineRound.cases) {
+  const result = Bazi.calculate(sample.input);
+  const actual = pillarMap(result);
+  const observation = sample.observations[0];
+  let ok = secondEngineSourceIds.has(observation?.sourceId);
+  if (observation?.classification === 'match') {
+    ok = ok && samePillars(actual, observation.observed?.pillars);
+  } else if (observation?.classification === 'difference') {
+    ok = ok && Boolean(observation.observed?.pillars) && !samePillars(actual, observation.observed.pillars);
+  } else {
+    ok = ok && observation?.observed === null && Boolean(observation?.notes);
+  }
+  ok = ok && sample.adjudication.classification === observation?.classification;
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${sample.caseId}（${sample.adjudication.classification}）`);
+  if (!ok) fail++;
+}
+
 process.exit(fail ? 1 : 0);

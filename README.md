@@ -443,7 +443,7 @@ console.log(evidence.evidenceRecords);
 
 Schema 是資料格式契約；它不替古籍裁決流派。遇到異文，請讀 `variants` 與 `researchNotes`；`SpecialPatterns` 目前只在 `Bazi.Patterns` 登錄研究架構，不會混進一般 `result.shenSha`。
 
-`validation/external/round-01-samples.json` 保存曆法抽樣；`round-02-special-systems.json` 保存命卦、五分類與起運方法的網路抽樣，包含來源網址、擷取日期與衝突註記。驗證是把當時公開資料固定下來再重跑，避免網站改版、廣告或即時內容讓結果無法重現；它能保證「在指定 Profile、版本與證據範圍內可重現」，不能宣稱傳統命理存在跨流派的絕對唯一答案。
+`validation/external/round-01-samples.json` 保存曆法抽樣；`round-02-special-systems.json` 保存命卦、五分類與起運方法的網路抽樣；`round-03-boundary-samples.json` 保存 34 組獨立引擎的跨日期、時區、子時、節氣與真太陽時邊界觀察；`round-04-second-engine.json` 再以第二個獨立引擎保存 16 組民用日期／真太陽時抽樣，兩輪合計 50 組。每輪資料都包含來源、擷取日期、輸入與分類。驗證是把當時公開資料固定下來再重跑，避免網站改版、廣告或即時內容讓結果無法重現；它能保證「在指定 Profile、版本與證據範圍內可重現」，不能宣稱傳統命理存在跨流派的絕對唯一答案。
 
 `sources/evidence-ledger.json` 另保存古籍版本狀態、原文摘錄、定位 URL、頁碼（未知時為 `null`）、OCR／校勘註記。`validation/external/independent-ledger.json` 專門保存獨立引擎的觀察，並分成 `match`、`difference`、`undetermined`；沒有外部輸出的案例不會被 SDK 自己的結果填補。治理規則見 [`docs/governance/authority-model.md`](/D:/AI_PROJECTS/BaZi/docs/governance/authority-model.md) 與 [`docs/governance/rule-addition-protocol.md`](/D:/AI_PROJECTS/BaZi/docs/governance/rule-addition-protocol.md)。
 
@@ -550,6 +550,12 @@ console.log(result.accuracy.trueSolarTimeUsed);
 
 ## 更新紀錄
 
+### 2026-09-10
+
+- 完成第二個獨立引擎交叉驗證：新增 `baziflow-core@0.1.0` 固定 source commit、16 組外部 observation 與可重現擷取腳本；12 組民用日期、4 組真太陽時全部一致。
+- round-03 的 34 組邊界資料與 round-04 的 16 組第二引擎資料合計 50 組；測試會檢查兩批來源、分類、差異與總數，不會把 BaziJS 自己的輸出當成外部 expected。
+- `npm run ci` 驗證結果：`npm test` 515/515、`npm run validate` 全部通過、`npm run build` 與 `npm run check:demo` 全部通過。
+
 ### 2026-09-09
 
 - Demo 新增低資訊量的「古典資料摘要」收合卡：預設只顯示五分類、人元司令、日空／年空與輔助宮位數量；展開後才顯示 2／3／4 的精簡資料，完整 evidence 仍留在 JSON／AI Context。
@@ -575,6 +581,11 @@ console.log(result.accuracy.trueSolarTimeUsed);
 - 公開 Demo 與 SVG 已移除內部比對檔名 `sample1`；該名稱只保留在內部 audit／測試追溯，並新增公開輸出防護測試。
 - 四柱主盤的視覺順序改為傳統由左至右「時柱、日柱、月柱、年柱」；SDK 結果欄位與 JSON／AI Context 仍維持 `year/month/day/hour`。
 - 驗證結果：`npm run ci` 全部通過；`npm test` 為 450/450，`npm run validate` 通過 3 組日柱、2 組節氣、8 組既有特殊系統與 4 組獨立 ledger，`npm run build` 產出三種瀏覽器 bundle，`npm run check:demo` 的 8 項靜態檢查全數通過。
+- 新增 `validation/external/round-03-boundary-samples.json` 與 [`round-03-boundary-cross-validation.md`](validation/reports/round-03-boundary-cross-validation.md)：以固定 commit 的獨立開源引擎抽樣 34 組邊界案例，28 組一致、6 組保留為已解釋的差異；`npm test` 與 `npm run validate` 會離線重跑這批 observation。
+- 新增 `round-03-difference-adjudication.md`：逐項裁決 6 組差異，確認 1 組為尚未支援的 DST 輸入、1 組為午夜晚子時 Profile 變體、4 組為低精度節氣模型在分鐘邊界提前切界；未把差異誤標成 canonical 錯誤或刪除資料。
+- 新增 `scripts/capture-external-round-04.mjs` 與 `validation/external/round-04-second-engine.json`：以固定 commit 的第二個獨立開源引擎 `baziflow-core` 抽樣 16 組，12 組民用日期與 4 組真太陽時全部 `match`；明確記錄該引擎沒有 timezone／DST／子時換日 API。
+- 新增 `round-04-second-engine.md`：保存第二引擎的版本、source commit、抽樣範圍、限制與可重現命令；round-03 + round-04 合計 50 組，`npm test`／`npm run validate` 離線重跑兩批 observation。
+- 驗證結果：第二引擎 round-04 為 16/16 一致；資料契約檢查要求兩輪合計正好 50 組，並保留 `match`、`difference`、`undetermined` 的分類語義。
 
 ## License
 

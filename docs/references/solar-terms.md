@@ -7,9 +7,13 @@
 - 公式：`src/calendar/solar.js`（solarLongitude / findSolarLongitudeTime）。
 - 範例：2024 立春 = 2/4 16:20 CST（官方 16:26:53，差 −6 分）；2024 冬至 = 12/21 17:13 CST（官方 17:20:20，差 −7 分）。
 - 已知流派差異：無（天文事實）；但各命理軟體內建節氣表互差數分鐘，屬曆算精度而非流派。
-- canonical 選擇理由：唯一天文事實。
+- canonical 選擇理由：節氣本身是天文瞬間；目前 SDK 以可在瀏覽器執行的 Meeus 低精度太陽黃經模型重現，並明示其分鐘級限制。
 - 參考文獻：Meeus 2nd ed. ch.22/25；紫金山天文台年曆（經 365zyg、五行查詢網、24節氣網三源交叉）。
 - 測試案例：scripts/validate-external.js（15 分鐘門檻）；BD-LICHUN-01/02。
+
+## Round 03 邊界追查
+
+`validation/reports/round-03-difference-adjudication.md` 顯示 2024 立春、驚蟄、清明與 2025 立春的分鐘邊界，低精度模型可能比公開曆算參考提前約 7～8 分鐘，導致出生時間落在邊界前幾分鐘時先切換年柱或月柱。這是待升級的曆算精度，不是流派變體；在模型升級前，結果應保留精度限制並提供前後節氣 evidence。
 - 最後驗證日期：2026-09-08。
 
 ## 已知限制（重要）
