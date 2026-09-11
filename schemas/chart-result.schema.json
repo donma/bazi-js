@@ -75,7 +75,28 @@
     "rules": {"type": "object", "required": ["applied"]}
   },
   "$defs": {
-    "pillar": {"type": "object", "required": ["ganzhi", "stem", "branch"]},
+    "pillar": {
+      "type": "object",
+      "required": ["ganzhi", "stem", "branch"],
+      "properties": {
+        "stemInfo": {"$ref": "#/$defs/pillarElementInfo"},
+        "branchInfo": {"$ref": "#/$defs/pillarElementInfo"}
+      }
+    },
+    "pillarElementInfo": {
+      "type": ["object", "null"],
+      "required": ["char", "element", "yinYang", "yinYangLabel", "label"],
+      "properties": {
+        "id": {"type": "string"},
+        "char": {"type": "string", "minLength": 1},
+        "pinyin": {"type": "string"},
+        "element": {"type": "string", "enum": ["木", "火", "土", "金", "水"]},
+        "yinYang": {"type": "string", "enum": ["yin", "yang"]},
+        "yinYangLabel": {"type": "string", "enum": ["陰", "陽"]},
+        "label": {"type": "string"},
+        "zodiac": {"type": "string"}
+      }
+    },
     "qiSnapshot": {
       "type": "object",
       "required": ["modelId", "version", "distribution", "totalScore", "evidence"],

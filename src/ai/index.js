@@ -6,6 +6,7 @@
 // 專供大型語言模型 (LLM) 作為 system prompt 或 context 注入，嚴禁直接讓 LLM 自行猜算八字。
 
 import { calculateXunKong, groupShenShaByPillar } from '../shensha/index.js';
+import { getPillarMetadata } from '../core/constants/pillar-metadata.js';
 
 function buildShenShaItem(item, options = {}) {
   const { includeRules = true, includeEvidence = true } = options;
@@ -106,6 +107,7 @@ function buildPillarContext(result, pillarKey, options = {}) {
     ganzhi: pillar.ganzhi,
     stem: pillar.stem,
     branch: pillar.branch,
+    ...getPillarMetadata(pillar.stem, pillar.branch),
     sexagenaryIndex: pillar.sexagenaryIndex,
     tenGod: pillarKey === 'day' ? '日主（元神）' : result.tenGods.stems[pillarKey] ? result.tenGods.stems[pillarKey].full : null,
     nayin: result.nayin[pillarKey],
@@ -125,6 +127,7 @@ function buildTransitPillarContext(result, pillarKey, options = {}) {
     ganzhi: pillar.ganzhi,
     stem: pillar.stem,
     branch: pillar.branch,
+    ...getPillarMetadata(pillar.stem, pillar.branch),
     sexagenaryIndex: pillar.sexagenaryIndex,
     tenGod: pillar.tenGod || null,
     stage: pillar.stage || null,

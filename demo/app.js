@@ -573,7 +573,7 @@ function renderResponsivePreview(result, options) {
     return `<article class="responsive-pillar">
       <header>${displayText(col.title)}</header>
       <div class="responsive-pillar-primary"><span>主星</span><strong>${primaryTenGod ? renderInfoTooltip(primaryTenGod, col.tenGod.interpretation, `ten-god:primary:${col.key}:${col.tenGod.id}`) : '—'}</strong></div>
-      <div class="responsive-pillar-characters"><div><span>天干</span><strong>${available ? displayText(col.data.stem) : '？'}</strong></div><div><span>地支</span><strong>${available ? displayText(col.data.branch) : '？'}</strong></div></div>
+      <div class="responsive-pillar-characters"><div><span>天干</span><strong>${available ? displayText(col.data.stem) : '？'}</strong><small>${available ? displayText(col.data.stemInfo && col.data.stemInfo.label, '') : ''}</small></div><div><span>地支</span><strong>${available ? displayText(col.data.branch) : '？'}</strong><small>${available ? displayText(col.data.branchInfo && col.data.branchInfo.label, '') : ''}</small></div></div>
       <div class="responsive-pillar-field">${renderInfoTooltip('藏幹', '藏幹是地支內含的天干，會依本氣、中氣、餘氣標示層級，並可換算對應十神。', `hidden-label:${col.key}`)}<ul>${hidden || '<li>—</li>'}</ul></div>
       <div class="responsive-pillar-meta"><div><span>地勢</span>${displayText(col.stage && col.stage.name)}</div><div><span>自坐</span>${displayText(col.selfStage && col.selfStage.name)}</div><div><span>空亡</span>${displayText(xunkong)}</div><div><span>納音</span>${displayText(col.nayin)}</div></div>
       <div class="responsive-pillar-shensha"><h5>神煞（${shensha.length}）</h5>${renderPillarShenSha(shensha)}</div>

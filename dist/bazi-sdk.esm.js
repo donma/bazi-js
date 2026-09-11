@@ -5990,6 +5990,57 @@ __export(ai_exports, {
   toShenShaContext: () => toShenShaContext,
   toSpecialRulesContext: () => toSpecialRulesContext
 });
+
+// src/core/constants/pillar-metadata.js
+var pillar_metadata_exports = {};
+__export(pillar_metadata_exports, {
+  getBranchInfo: () => getBranchInfo,
+  getPillarMetadata: () => getPillarMetadata,
+  getStemInfo: () => getStemInfo
+});
+var YIN_YANG_LABELS = Object.freeze({
+  yin: "\u9670",
+  yang: "\u967D"
+});
+function buildLabel(item) {
+  if (!item) return null;
+  return `${YIN_YANG_LABELS[item.yinYang] || item.yinYang || ""}${item.element || ""}`;
+}
+function getStemInfo(stemChar) {
+  const item = STEMS[STEM_INDEX[stemChar]];
+  if (!item) return null;
+  return {
+    id: item.id,
+    char: item.char,
+    pinyin: item.pinyin,
+    element: item.element,
+    yinYang: item.yinYang,
+    yinYangLabel: YIN_YANG_LABELS[item.yinYang] || item.yinYang,
+    label: buildLabel(item)
+  };
+}
+function getBranchInfo(branchChar) {
+  const item = BRANCHES[BRANCH_INDEX[branchChar]];
+  if (!item) return null;
+  return {
+    id: item.id,
+    char: item.char,
+    pinyin: item.pinyin,
+    element: item.element,
+    yinYang: item.yinYang,
+    yinYangLabel: YIN_YANG_LABELS[item.yinYang] || item.yinYang,
+    label: buildLabel(item),
+    zodiac: item.zodiac
+  };
+}
+function getPillarMetadata(stemChar, branchChar) {
+  return {
+    stemInfo: getStemInfo(stemChar),
+    branchInfo: getBranchInfo(branchChar)
+  };
+}
+
+// src/ai/index.js
 function buildShenShaItem(item, options = {}) {
   const { includeRules = true, includeEvidence = true } = options;
   return {
@@ -6085,6 +6136,7 @@ function buildPillarContext(result, pillarKey, options = {}) {
     ganzhi: pillar.ganzhi,
     stem: pillar.stem,
     branch: pillar.branch,
+    ...getPillarMetadata(pillar.stem, pillar.branch),
     sexagenaryIndex: pillar.sexagenaryIndex,
     tenGod: pillarKey === "day" ? "\u65E5\u4E3B\uFF08\u5143\u795E\uFF09" : result.tenGods.stems[pillarKey] ? result.tenGods.stems[pillarKey].full : null,
     nayin: result.nayin[pillarKey],
@@ -6103,6 +6155,7 @@ function buildTransitPillarContext(result, pillarKey, options = {}) {
     ganzhi: pillar.ganzhi,
     stem: pillar.stem,
     branch: pillar.branch,
+    ...getPillarMetadata(pillar.stem, pillar.branch),
     sexagenaryIndex: pillar.sexagenaryIndex,
     tenGod: pillar.tenGod || null,
     stage: pillar.stage || null,
@@ -7086,6 +7139,16 @@ function formatTimezoneOffset2(offsetHours) {
   const minutes = Math.round((absolute - hours) * 60);
   return `${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
+function toPublicPillar(pillar, extra = {}) {
+  return {
+    ...extra,
+    ganzhi: pillar.ganzhi,
+    stem: pillar.stem,
+    branch: pillar.branch,
+    sexagenaryIndex: pillar.sexagenaryIndex,
+    ...getPillarMetadata(pillar.stem, pillar.branch)
+  };
+}
 function calculate(input, options = {}) {
   validateInput(input);
   const profileId = input.profile || options.profile || "canonical";
@@ -7327,37 +7390,19 @@ function calculate(input, options = {}) {
       }
     },
     pillars: {
-      year: {
-        ganzhi: pillars.year.ganzhi,
-        stem: pillars.year.stem,
-        branch: pillars.year.branch,
-        sexagenaryIndex: pillars.year.sexagenaryIndex
-      },
-      month: {
-        ganzhi: pillars.month.ganzhi,
-        stem: pillars.month.stem,
-        branch: pillars.month.branch,
-        sexagenaryIndex: pillars.month.sexagenaryIndex
-      },
-      day: {
-        ganzhi: pillars.day.ganzhi,
-        stem: pillars.day.stem,
-        branch: pillars.day.branch,
-        sexagenaryIndex: pillars.day.sexagenaryIndex,
-        switchedNextDay: pillars.day.switchedNextDay
-      },
+      year: toPublicPillar(pillars.year),
+      month: toPublicPillar(pillars.month),
+      day: toPublicPillar(pillars.day, { switchedNextDay: pillars.day.switchedNextDay }),
       hour: pillars.hour.available ? {
-        available: true,
-        ganzhi: pillars.hour.ganzhi,
-        stem: pillars.hour.stem,
-        branch: pillars.hour.branch,
-        sexagenaryIndex: pillars.hour.sexagenaryIndex
+        ...toPublicPillar(pillars.hour, { available: true })
       } : {
         available: false,
         ganzhi: null,
         stem: null,
         branch: null,
-        sexagenaryIndex: null
+        sexagenaryIndex: null,
+        stemInfo: null,
+        branchInfo: null
       }
     },
     tenGods,
@@ -9001,8 +9046,10 @@ function renderPillar(result, col, shenSha, width, theme) {
   nodes.push(`<g class="character-box"><rect x="0" y="${y - 20}" width="${width}" height="78" rx="6" fill="${theme.gridBg}" stroke="${theme.border}" />`);
   nodes.push(textNode(24, y, "\u5929\u5E72", "label"));
   nodes.push(textNode(132, y + 6, stem, "character"));
+  nodes.push(textNode(24, y + 31, col.data.stemInfo && col.data.stemInfo.label || "", "meta"));
   nodes.push(textNode(width / 2 + 24, y, "\u5730\u652F", "label"));
   nodes.push(textNode(width / 2 + 132, y + 6, branch, "character"));
+  nodes.push(textNode(width / 2 + 24, y + 31, col.data.branchInfo && col.data.branchInfo.label || "", "meta"));
   nodes.push("</g>");
   y += 75;
   nodes.push(textNode(0, y, "\u85CF\u5E79", "label"));
@@ -9457,7 +9504,8 @@ var Bazi = {
   ValidationData: validation_exports2,
   Errors: errors_exports,
   Reference: reference_exports,
-  Constants: stems_exports
+  Constants: stems_exports,
+  PillarMetadata: pillar_metadata_exports
 };
 var index_default = Bazi;
 export {
@@ -9473,6 +9521,7 @@ export {
   luck_exports as Luck,
   lunar_exports as Lunar,
   patterns_exports as Patterns,
+  pillar_metadata_exports as PillarMetadata,
   reference_exports as Reference,
   Renderer,
   rule_registry_exports as Rules,

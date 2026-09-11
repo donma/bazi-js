@@ -1,6 +1,7 @@
 # CHANGELOG
 
 # [Unreleased] - 2026-09-10
+- 四柱公開輸出新增 `stemInfo`／`branchInfo`，同步納入 AI Context、Demo 與 SVG；固定抽樣 12 組 1984–1995 年份，與線上干支五行／陰陽表一致。
 - 版本契約對齊：`package.json`／`package-lock.json` 統一為 `bazijs@1.0.2`、Apache-2.0 與 `esbuild ^0.28.2`；新增 [`VERSIONS.md`](VERSIONS.md) 說明 package、engine、API 與規則版本的責任邊界。
 - 強弱引擎新增可追溯氣數層：`rawQi`、`effectiveQi`、`transformations`、`assessment`、`decision` 與 `layers`；既有 `score`、`level`、`distribution` 與喜忌結果維持不變。合局／會局先列為轉化候選，不在 canonical 中自動化氣。
 - 新增多模型用神 resolver 與流年多層 graph：`result.analysis.useGodResolver` 保留扶抑、格局、調候、通關與從化研究 candidate／conflict；`result.transits.transitGraph` 保留原局／大運／流年／流月／流日／流時節點、時間層連線與可機器核對的歲運事件，兩者都不新增未驗證斷語。

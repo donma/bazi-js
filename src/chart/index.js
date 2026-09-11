@@ -33,6 +33,7 @@ import { buildClassicalSummary } from '../summary/index.js';
 import { buildAnalysisResult } from '../analysis/index.js';
 import { calculatePatterns } from '../patterns/index.js';
 import { VALIDATION_MANIFEST_VERSION } from '../validation/index.js';
+import { getPillarMetadata } from '../core/constants/pillar-metadata.js';
 
 function formatTimezoneOffset(offsetHours) {
   const sign = offsetHours < 0 ? '-' : '+';
@@ -40,6 +41,17 @@ function formatTimezoneOffset(offsetHours) {
   const hours = Math.floor(absolute);
   const minutes = Math.round((absolute - hours) * 60);
   return `${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+function toPublicPillar(pillar, extra = {}) {
+  return {
+    ...extra,
+    ganzhi: pillar.ganzhi,
+    stem: pillar.stem,
+    branch: pillar.branch,
+    sexagenaryIndex: pillar.sexagenaryIndex,
+    ...getPillarMetadata(pillar.stem, pillar.branch)
+  };
 }
 
 // 主計算函數
@@ -331,37 +343,19 @@ export function calculate(input, options = {}) {
     },
 
     pillars: {
-      year: {
-        ganzhi: pillars.year.ganzhi,
-        stem: pillars.year.stem,
-        branch: pillars.year.branch,
-        sexagenaryIndex: pillars.year.sexagenaryIndex
-      },
-      month: {
-        ganzhi: pillars.month.ganzhi,
-        stem: pillars.month.stem,
-        branch: pillars.month.branch,
-        sexagenaryIndex: pillars.month.sexagenaryIndex
-      },
-      day: {
-        ganzhi: pillars.day.ganzhi,
-        stem: pillars.day.stem,
-        branch: pillars.day.branch,
-        sexagenaryIndex: pillars.day.sexagenaryIndex,
-        switchedNextDay: pillars.day.switchedNextDay
-      },
+      year: toPublicPillar(pillars.year),
+      month: toPublicPillar(pillars.month),
+      day: toPublicPillar(pillars.day, { switchedNextDay: pillars.day.switchedNextDay }),
       hour: pillars.hour.available ? {
-        available: true,
-        ganzhi: pillars.hour.ganzhi,
-        stem: pillars.hour.stem,
-        branch: pillars.hour.branch,
-        sexagenaryIndex: pillars.hour.sexagenaryIndex
+        ...toPublicPillar(pillars.hour, { available: true })
       } : {
         available: false,
         ganzhi: null,
         stem: null,
         branch: null,
-        sexagenaryIndex: null
+        sexagenaryIndex: null,
+        stemInfo: null,
+        branchInfo: null
       }
     },
 

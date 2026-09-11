@@ -77,6 +77,12 @@ async function runUnit() {
   // AI Context 結構
   const ctx = Bazi.AI.toContext(d1, { compact: false });
   assert(ctx.pillars && ctx.pillars.day.ganzhi === '戊午' && ctx.metadata.profileId === 'canonical', 'UT-AI-CONTEXT', '');
+  const xinYouChart = Bazi.calculate({ birthDate: '1981-12-12', birthTime: '12:00', gender: 'male', yearBoundary: 'lunar_new_year' });
+  assert(xinYouChart.pillars.year.ganzhi === '辛酉'
+    && xinYouChart.pillars.year.stemInfo?.label === '陰金'
+    && xinYouChart.pillars.year.branchInfo?.label === '陰金', 'UT-PILLAR-METADATA-XIN-YOU', JSON.stringify(xinYouChart.pillars.year));
+  assert(ctx.pillars.year.stemInfo?.label && ctx.pillars.year.branchInfo?.label, 'UT-AI-PILLAR-METADATA', JSON.stringify(ctx.pillars.year));
+  assert(Object.values(xinYouChart.pillars).filter((pillar) => pillar.available !== false).every((pillar) => pillar.stemInfo?.label && pillar.branchInfo?.label), 'UT-ALL-PILLARS-METADATA', JSON.stringify(xinYouChart.pillars));
   assert(ctx.dayMaster.fiveCategory && ctx.auxiliary.mingGua && ctx.luckCyclesSummary.variants.length === 2, 'UT-AI-NEW-SYSTEMS', 'AI Context 必須保留五分類、命卦與起運方法 variants');
   assert(d1.meta.apiVersion === '1.0.0' && d1.meta.governanceVersion === '1.0.0', 'UT-API-GOVERNANCE-VERSIONS', JSON.stringify(d1.meta));
   assert(d1.meta.strengthQiLayerVersion === '1.1.0' && Bazi.rules.strength.qiLayerVersion === '1.1.0', 'UT-STRENGTH-QI-VERSION', JSON.stringify(d1.meta));
@@ -154,6 +160,8 @@ async function runUnit() {
   // Renderer SVG 可產出
   const svg = Bazi.Renderer.render(d1, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
   assert(typeof svg === 'string' && svg.includes('<svg'), 'UT-RENDER-SVG', '');
+  const xinYouSvg = Bazi.Renderer.render(xinYouChart, { format: 'svg', preset: 'full', theme: 'modern-oriental' });
+  assert(xinYouSvg.includes('陰金'), 'UT-RENDER-PILLAR-METADATA', 'SVG 應與 API 使用同一份干支五行陰陽資料');
   const publicDemoSource = fs.readFileSync(new URL('../demo/app.js', import.meta.url), 'utf8');
   assert(!/sample1/i.test(publicDemoSource) && !/sample1/i.test(svg), 'UT-PUBLIC-NO-INTERNAL-SAMPLE1', '公開畫面與 SVG 不應顯示內部比對檔名');
   const demoPillarSource = publicDemoSource.slice(publicDemoSource.indexOf('const pillarCols = ['));

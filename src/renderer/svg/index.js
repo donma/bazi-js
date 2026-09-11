@@ -173,8 +173,10 @@ function renderPillar(result, col, shenSha, width, theme) {
   nodes.push(`<g class="character-box"><rect x="0" y="${y - 20}" width="${width}" height="78" rx="6" fill="${theme.gridBg}" stroke="${theme.border}" />`);
   nodes.push(textNode(24, y, '天干', 'label'));
   nodes.push(textNode(132, y + 6, stem, 'character'));
+  nodes.push(textNode(24, y + 31, col.data.stemInfo && col.data.stemInfo.label || '', 'meta'));
   nodes.push(textNode(width / 2 + 24, y, '地支', 'label'));
   nodes.push(textNode(width / 2 + 132, y + 6, branch, 'character'));
+  nodes.push(textNode(width / 2 + 24, y + 31, col.data.branchInfo && col.data.branchInfo.label || '', 'meta'));
   nodes.push('</g>');
   y += 75;
 

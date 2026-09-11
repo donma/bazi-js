@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "bazi-js-online-pillar-metadata-round-06",
+  "capturedAt": "2026-09-11",
+  "purpose": "以線上公開天干、地支與五行資料抽樣驗證公開 stemInfo／branchInfo 標籤。",
+  "policy": "線上資料只作外部採樣與證據來源；測試固定使用本檔，避免 CI 自己驗證自己或受網站改版影響。",
+  "sources": [
+    {
+      "sourceId": "wikipedia-tiangan-yinyang-wuxing",
+      "title": "天干：陰陽五行表",
+      "url": "https://zh.wikipedia.org/wiki/天干",
+      "independence": "external",
+      "locator": "天干與陰陽五行、五方；天干陰陽五行表"
+    },
+    {
+      "sourceId": "wikipedia-dizhi-wuxing",
+      "title": "地支：干支與五行資料",
+      "url": "https://zh.wikipedia.org/wiki/地支",
+      "independence": "external",
+      "locator": "地支組合與十二地支資料"
+    },
+    {
+      "sourceId": "wikipedia-wuxing-ganzhi",
+      "title": "五行：干支對應表",
+      "url": "https://zh.wikipedia.org/wiki/五行",
+      "independence": "external",
+      "locator": "干支；甲乙寅卯木、丙丁巳午火、戊己四季土、庚辛申酉金、壬癸亥子水"
+    }
+  ],
+  "cases": [
+    {"caseId":"PILLAR-META-1984-JIA-ZI","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1984-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"甲子","stemLabel":"陽木","branchLabel":"陽水"}},
+    {"caseId":"PILLAR-META-1985-YI-CHOU","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1985-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"乙丑","stemLabel":"陰木","branchLabel":"陰土"}},
+    {"caseId":"PILLAR-META-1986-BING-YIN","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1986-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"丙寅","stemLabel":"陽火","branchLabel":"陽木"}},
+    {"caseId":"PILLAR-META-1987-DING-MAO","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1987-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"丁卯","stemLabel":"陰火","branchLabel":"陰木"}},
+    {"caseId":"PILLAR-META-1988-WU-CHEN","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1988-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"戊辰","stemLabel":"陽土","branchLabel":"陽土"}},
+    {"caseId":"PILLAR-META-1989-JI-SI","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1989-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"己巳","stemLabel":"陰土","branchLabel":"陰火"}},
+    {"caseId":"PILLAR-META-1990-GENG-WU","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1990-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"庚午","stemLabel":"陽金","branchLabel":"陽火"}},
+    {"caseId":"PILLAR-META-1991-XIN-WEI","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1991-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"辛未","stemLabel":"陰金","branchLabel":"陰土"}},
+    {"caseId":"PILLAR-META-1992-REN-SHEN","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1992-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"壬申","stemLabel":"陽水","branchLabel":"陽金"}},
+    {"caseId":"PILLAR-META-1993-GUI-YOU","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1993-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"癸酉","stemLabel":"陰水","branchLabel":"陰金"}},
+    {"caseId":"PILLAR-META-1994-JIA-XU","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1994-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"甲戌","stemLabel":"陽木","branchLabel":"陽土"}},
+    {"caseId":"PILLAR-META-1995-YI-HAI","sourceId":"wikipedia-wuxing-ganzhi","input":{"birthDate":"1995-12-12","birthTime":"12:00","gender":"male","yearBoundary":"lunar_new_year"},"expected":{"ganzhi":"乙亥","stemLabel":"陰木","branchLabel":"陰水"}}
+  ]
+}

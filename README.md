@@ -191,6 +191,7 @@ if (response.success) {
 - `stem`：天干
 - `branch`：地支
 - `sexagenaryIndex`：六十甲子索引
+- `stemInfo`／`branchInfo`：天干／地支的五行、陰陽與可讀標籤，例如 `辛`／`酉` 都會標示為 `陰金`；這不是納音
 - `available`：是否有這柱資料；未知時間的時柱為 `false`
 
 ```js
@@ -205,6 +206,9 @@ for (const [key, label] of Object.entries(labels)) {
   const pillar = result.pillars[key];
   console.log(label, pillar.available === false ? '未知' : pillar.ganzhi);
 }
+
+console.log(result.pillars.year.stemInfo.label);   // 陰金
+console.log(result.pillars.year.branchInfo.label);  // 陰金
 ```
 
 ### 讀取農曆、節氣與生肖

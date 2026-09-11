@@ -12,6 +12,25 @@ const ANCHORS = [
 ];
 
 let fail = 0;
+
+// Round 06：線上公開天干／地支五行陰陽表的獨立抽樣。
+// 資料採擷自外部頁面後固定保存，CI 不即時抓站，避免來源改版造成不可重現。
+const pillarMetadataRound = JSON.parse(fs.readFileSync(new URL('../validation/external/round-06-pillar-metadata.json', import.meta.url), 'utf8'));
+const pillarMetadataSourceIds = new Set(pillarMetadataRound.sources.map((source) => source.sourceId));
+for (const source of pillarMetadataRound.sources) {
+  if (!/^https:\/\//.test(source.url) || source.independence !== 'external') fail++;
+}
+for (const sample of pillarMetadataRound.cases) {
+  const result = Bazi.calculate(sample.input);
+  const year = result.pillars.year;
+  const ok = pillarMetadataSourceIds.has(sample.sourceId)
+    && year.ganzhi === sample.expected.ganzhi
+    && year.stemInfo?.label === sample.expected.stemLabel
+    && year.branchInfo?.label === sample.expected.branchLabel;
+  console.log(`${ok ? 'PASS' : 'FAIL'} ${sample.caseId} ${year.ganzhi} ${year.stemInfo?.label || '—'}/${year.branchInfo?.label || '—'}`);
+  if (!ok) fail++;
+}
+
 for (const a of ANCHORS) {
   const r = Bazi.calculate(a.input);
   const got = [r.pillars.year.ganzhi, r.pillars.month.ganzhi, r.pillars.day.ganzhi, r.pillars.hour.ganzhi];

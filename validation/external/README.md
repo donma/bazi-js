@@ -11,3 +11,5 @@
 `round-03-boundary-samples.json` 是第一輪跨邊界獨立抽樣：共 34 組，涵蓋一般日期、不同時區、夏令時間、子時換日、節氣切界與真太陽時。外部來源與差異解讀見 [`validation/reports/round-03-boundary-cross-validation.md`](../reports/round-03-boundary-cross-validation.md)。
 
 `round-04-second-engine.json` 是第二個獨立引擎抽樣：共 16 組，使用固定 commit 的 `baziflow-core`，涵蓋 12 組民用日期與 4 組真太陽時。它沒有 timezone／DST／子時換日 API，所以這些維度不在本輪宣稱範圍；與 round-03 合計 50 組。詳細範圍與重現方式見 [`validation/reports/round-04-second-engine.md`](../reports/round-04-second-engine.md)。
+
+`round-06-pillar-metadata.json` 是公開干支五行／陰陽標籤抽樣：12 組 1984–1995 年份，覆蓋子至亥十二地支，並使用線上天干、地支與五行表核對 `stemInfo.label`／`branchInfo.label`。來源與限制見 [`validation/reports/round-06-pillar-metadata.md`](../reports/round-06-pillar-metadata.md)。

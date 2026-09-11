@@ -487,6 +487,13 @@ input:focus, select:focus {
   line-height: 1.15;
 }
 
+.responsive-pillar-characters small {
+  color: var(--responsive-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 .responsive-pillar ul {
   min-height: 54px;
   padding: 7px 0;

@@ -25,6 +25,7 @@ import * as ValidationData from './validation/index.js';
 import * as Errors from './core/errors/index.js';
 import * as Reference from './reference/index.js';
 import * as Constants from './core/constants/stems.js';
+import * as PillarMetadata from './core/constants/pillar-metadata.js';
 import { Renderer } from './renderer/index.js';
 import { VERSIONS } from './rules/versions.js';
 
@@ -59,6 +60,7 @@ export {
   Errors,
   Reference,
   Constants,
+  PillarMetadata,
   VERSIONS
 };
 
@@ -112,7 +114,8 @@ const Bazi = {
   ValidationData,
   Errors,
   Reference,
-  Constants
+  Constants,
+  PillarMetadata
 };
 
 export default Bazi;
