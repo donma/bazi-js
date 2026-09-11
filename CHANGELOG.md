@@ -10,6 +10,7 @@
 - 建立 Reference ontology 與 API，統一 `shensha`、`special-rule`、`pattern/regular`、`pattern/special` 分類；68 條規則與 68 個概念可連到 6 個來源，提供規則／來源雙向查詢、variants、coverage 與 AI reference context。
 - 新增概念、taxonomy、來源、evidence、variant、coverage schemas，以及生成式概念文件與 CI gate；這批是資料與治理層，不改變 `Bazi.calculate()` 的 canonical 結果或 Demo 畫面。
 - 新增 `sources/variants.json`，把 Profile／算法差異改成可查詢的 first-class 資料，並加入 variants catalog schema 與測試。
+- 將 Calendar、TenGod、HiddenStem、Interactions、Strength、Luck、Transit、UseGod 升格為 8 個系統級 Reference Concept；Reference 索引擴為 76 條 rule／76 個概念，保留 API、輸出欄位、版本與「古籍來源尚待補齊」狀態。
 - 全系統輸入契約強化：實際日期、時區、經緯度、規則值與時辰地支均在計算前驗證。
 - 真正支援 `lunar_new_year` 年界與 `lunar_month` 月界，並將實際 ruleId 寫入 `result.rules.applied`。
 - 流年解析支援 UTC、負時區、半時區與明確 invalid Date 錯誤。

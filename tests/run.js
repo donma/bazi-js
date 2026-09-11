@@ -286,7 +286,7 @@ async function runUnit() {
 
   // Reference taxonomy / API：概念、規則、來源與變體可雙向追溯，且不把研究格局當成已完成判斷。
   const referenceCheck = Bazi.Reference.validateReferenceIndex();
-  assert(referenceCheck.valid && referenceCheck.counts.rules === 68 && referenceCheck.counts.sources >= 6, 'UT-REFERENCE-INDEX-VALID', JSON.stringify(referenceCheck));
+  assert(referenceCheck.valid && referenceCheck.counts.rules === 76 && referenceCheck.counts.concepts === 76 && referenceCheck.counts.sources >= 6, 'UT-REFERENCE-INDEX-VALID', JSON.stringify(referenceCheck));
   const regularConcept = Bazi.Reference.getConcept('pattern.zheng-guan');
   assert(regularConcept?.conceptType === 'pattern' && regularConcept.patternType === 'regular' && regularConcept.status === 'candidate-only', 'UT-REFERENCE-REGULAR-TAXONOMY', JSON.stringify(regularConcept));
   assert(Bazi.Reference.findConcept('正官格').some((concept) => concept.conceptId === 'pattern.zheng-guan'), 'UT-REFERENCE-ALIAS-LOOKUP', '正官格應可由 alias 查到');
@@ -299,6 +299,12 @@ async function runUnit() {
   const referenceContext = Bazi.Reference.toContext({ conceptIds: ['pattern.zheng-guan'], includeExamples: true });
   assert(referenceContext.contextType === 'bazi-js-reference-context' && referenceContext.claimPolicy.mustCiteSource.includes('PT_REGULAR_ZHENGGUAN_001') && JSON.stringify(referenceContext).length > 100, 'UT-REFERENCE-AI-CONTEXT', 'Reference Context 必須可供 AI / SDK 使用');
   assert(Bazi.Reference.getCoverage('pattern').dimensions.external.status === 'not-collected', 'UT-REFERENCE-COVERAGE-NOT-ACCURACY', '未建立外部矩陣時不得宣稱準確率');
+  const systemConceptIds = ['calendar.engine', 'ten-god.relation', 'hidden-stem.registry', 'interaction.chart-relationships', 'strength.engine', 'luck.cycles', 'transit.graph', 'use-god.resolver'];
+  assert(systemConceptIds.every((conceptId) => Bazi.Reference.getConcept(conceptId)?.status === 'implemented'), 'UT-REFERENCE-SYSTEM-CONCEPTS', systemConceptIds.join(','));
+  assert(Bazi.Reference.getConcept('Transit')?.conceptId === 'transit.graph', 'UT-REFERENCE-SYSTEM-ALIAS', 'Transit 應可由 alias 查詢');
+  const strengthConcept = Bazi.Reference.getConcept('strength.engine');
+  assert(strengthConcept?.conceptType === 'strength' && strengthConcept.rules[0]?.implementation?.api.includes('Bazi.Strength') && strengthConcept.rules[0]?.outputFields.includes('strength.rawQi'), 'UT-REFERENCE-SYSTEM-CONTRACT', JSON.stringify(strengthConcept));
+  assert(Bazi.Reference.getRule('USE_GOD_RESOLVER_001')?.conceptType === 'use-god' && Bazi.Reference.getRule('LUCK_CYCLES_ENGINE_001')?.conceptType === 'luck', 'UT-REFERENCE-SYSTEM-RULES', '系統概念應可用 ruleId 查詢');
 
   // 大運 / 流年神煞結構（v1.0.1）
   assert(Array.isArray(d1.luckCycles.cycles[0].shenSha), 'UT-LUCK-SHENSHATYPE', '');
@@ -552,6 +558,7 @@ async function runDataContracts() {
     assert(errors.length === 0, `UT-REFERENCE-VARIANT-SCHEMA-${variant.variantId}`, errors.join('; '));
   }
   assert(fs.existsSync(new URL('../docs/reference/generated/index.md', import.meta.url)), 'UT-REFERENCE-DOCS-GENERATED', 'Reference 文件索引不存在');
+  assert(fs.existsSync(new URL('../docs/reference/generated/calendar--engine.md', import.meta.url)), 'UT-REFERENCE-SYSTEM-DOCS', '系統概念文件不存在');
   assert(fs.existsSync(new URL('../validation/coverage/coverage.json', import.meta.url)), 'UT-COVERAGE-GENERATED', 'coverage artifact 不存在');
 
   const profileSchema = readJson('../schemas/profile.schema.json');

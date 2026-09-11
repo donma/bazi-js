@@ -131,6 +131,7 @@ Profile 的差異是有意義的輸入契約；不能用畫面上的標籤取代
 - P0 核心：新增 `src/reference/taxonomy.js`，統一 `shensha`、`special-rule`、`pattern/regular`、`pattern/special`，並保留舊 runtime 分類作相容。
 - P1 證據索引：現有 6 個來源、古籍 evidence ledger 與 9 組可查詢 variants；未知頁碼仍保留 `null`，沒有虛構版本資訊。
 - P2／P5 API：新增 `Bazi.Reference` 的概念、規則、來源、變體、coverage 與 AI context 查詢；Profile 差異集中於 `sources/variants.json`。
+- 系統級索引：Calendar、TenGod、HiddenStem、Interactions、Strength、Luck、Transit、UseGod 已各自建立 Reference Concept；這些是 SDK 功能契約，不會被誤分類為 ShenSha 或特殊格。
 - P3／P4：新增 coverage artifact、生成式概念文件與對應 Schema；文件由 registry／sources 生成，不手工複製規則內容。
 - P13：GitHub Actions 改由 `npm run ci` 執行測試、外部 ledger、taxonomy、Reference、coverage、bundle 與 Demo 檢查。
 

@@ -3,8 +3,8 @@
 > 此目錄由 `src/reference` 與 `sources/` 生成，作為規則、概念與來源的可追溯索引；不是準確率或命理斷語排名。
 
 - taxonomy: `0.1.0`
-- concepts: 68
-- rules: 68
+- concepts: 76
+- rules: 76
 
 | 名稱 | conceptId | 類型 | 狀態 | 來源數 |
 |---|---|---|---|---:|
@@ -76,3 +76,11 @@
 | [拱祿](pattern--gong-lu.md) | `pattern.gong-lu` | `pattern` / special | research-only | 3 |
 | [拱貴](pattern--gong-gui.md) | `pattern.gong-gui` | `pattern` / special | research-only | 3 |
 | [福德秀氣](pattern--fu-de-xiu-qi.md) | `pattern.fu-de-xiu-qi` | `pattern` / special | research-only | 3 |
+| [曆法與節氣](calendar--engine.md) | `calendar.engine` | `calendar` | implemented | 0 |
+| [十神關係](ten-god--relation.md) | `ten-god.relation` | `ten-god` | implemented | 0 |
+| [地支藏干](hidden-stem--registry.md) | `hidden-stem.registry` | `hidden-stem` | implemented | 0 |
+| [天干地支互動](interaction--chart-relationships.md) | `interaction.chart-relationships` | `interaction` | implemented | 0 |
+| [五行強弱與氣數](strength--engine.md) | `strength.engine` | `strength` | implemented | 1 |
+| [大運與起運](luck--cycles.md) | `luck.cycles` | `luck` | implemented | 1 |
+| [流年與時間運](transit--graph.md) | `transit.graph` | `transit` | implemented | 0 |
+| [用神模型與候選解析](use-god--resolver.md) | `use-god.resolver` | `use-god` | implemented | 1 |

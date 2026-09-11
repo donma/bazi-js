@@ -6,6 +6,8 @@ export const GOVERNANCE_VERSION = '1.0.0';
 export const VALIDATION_MANIFEST_VERSION = '1.0.0';
 export const RULE_SET_VERSION = '2026.09';
 export const CALENDAR_RULE_VERSION = '1.0.0';
+export const TEN_GOD_RULE_VERSION = '1.0.0';
+export const HIDDEN_STEM_RULE_VERSION = '1.0.0';
 export const SHENSHA_RULE_VERSION = '2.1.0';
 export const SPECIAL_RULE_VERSION = '1.0.0';
 export const PATTERN_RULE_VERSION = '0.1.0';
@@ -32,6 +34,8 @@ export const VERSIONS = {
   validationManifestVersion: VALIDATION_MANIFEST_VERSION,
   ruleSetVersion: RULE_SET_VERSION,
   calendarRuleVersion: CALENDAR_RULE_VERSION,
+  tenGodRuleVersion: TEN_GOD_RULE_VERSION,
+  hiddenStemRuleVersion: HIDDEN_STEM_RULE_VERSION,
   shenShaRuleVersion: SHENSHA_RULE_VERSION,
   specialRuleVersion: SPECIAL_RULE_VERSION,
   patternRuleVersion: PATTERN_RULE_VERSION,

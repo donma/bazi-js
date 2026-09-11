@@ -7,26 +7,26 @@
 
 | scope | concepts | rules | source linked | locator backed | variants | implemented | tests | external |
 |---|---:|---:|---:|---:|---:|---:|---|---|
-| all | 68 | 68 | 100% | 100% | 32.4% | 89.7% | not-collected | not-collected |
-| calendar | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
+| all | 76 | 76 | 93.4% | 93.4% | 28.9% | 90.8% | not-collected | not-collected |
+| calendar | 1 | 1 | 0% | 0% | 0% | 100% | not-collected | not-collected |
 | pillar | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
 | stem-branch | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
 | five-element | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
-| ten-god | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
-| hidden-stem | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
+| ten-god | 1 | 1 | 0% | 0% | 0% | 100% | not-collected | not-collected |
+| hidden-stem | 1 | 1 | 0% | 0% | 0% | 100% | not-collected | not-collected |
 | nayin | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
 | twelve-stage | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
 | kongwang | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
-| interaction | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
-| strength | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
+| interaction | 1 | 1 | 0% | 0% | 0% | 100% | not-collected | not-collected |
+| strength | 1 | 1 | 100% | 100% | 0% | 100% | not-collected | not-collected |
 | month-commander | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
 | pattern | 17 | 17 | 100% | 100% | 52.9% | 58.8% | not-collected | not-collected |
-| use-god | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
+| use-god | 1 | 1 | 100% | 100% | 0% | 100% | not-collected | not-collected |
 | shensha | 40 | 40 | 100% | 100% | 5% | 100% | not-collected | not-collected |
 | special-rule | 11 | 11 | 100% | 100% | 100% | 100% | not-collected | not-collected |
 | auxiliary | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
-| luck | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
-| transit | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
+| luck | 1 | 1 | 100% | 100% | 0% | 100% | not-collected | not-collected |
+| transit | 1 | 1 | 0% | 0% | 0% | 100% | not-collected | not-collected |
 | profile | 0 | 0 | 0% | 0% | 0% | 0% | not-collected | not-collected |
 
 ## 維度定義

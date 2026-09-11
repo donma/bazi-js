@@ -490,9 +490,16 @@ const context = Bazi.Reference.toContext({
   includeSources: true,
   includeVariants: true
 });
+
+// 現有 SDK 功能也可作為系統級 Concept 查詢
+const strength = Bazi.Reference.getConcept('strength.engine');
+console.log(strength.rules[0].implementation.api);
+console.log(strength.rules[0].outputFields);
 ```
 
 分類的重點是：`shensha` 是一般神煞；`special-rule` 是固定柱位／季節條件；`pattern` 再用 `regular` 或 `special` 區分正格候選與特殊格研究架構。`candidate-only`、`research-only` 不代表已完成成格或跨流派定論；請讀 `status`、`variants`、`researchNotes` 與 `claimPolicy`。概念總表見 [`docs/reference/generated/`](docs/reference/generated/)，覆蓋率見 [`docs/coverage/coverage-matrix.md`](docs/coverage/coverage-matrix.md)。
+
+現有系統功能也有獨立 Concept：`calendar.engine`、`ten-god.relation`、`hidden-stem.registry`、`interaction.chart-relationships`、`strength.engine`、`luck.cycles`、`transit.graph`、`use-god.resolver`。這些描述的是 SDK API、版本與輸出契約，不會把功能名稱誤當成新的神煞或古籍格局。
 
 需要在自己的工具查看證據索引時：
 
@@ -620,7 +627,8 @@ console.log(result.accuracy.trueSolarTimeUsed);
 - 本批未實作完整從格／專旺、調候、通關與歲運多層轉化；它們仍依治理規範留在 Patterns／研究模型，待獨立條件與驗證資料完成後再升級。
 - 新增 `src/patterns/regular.js` 的十個正格結構候選（正官、七殺、正財、偏財、正印、偏印、食神、傷官、建祿、月刃），只辨識月令／祿刃結構，不直接宣告成格；特殊格仍維持獨立 `research-only`。
 - 新增 `validation/interpretation/` 與 `schemas/interpretation-validation.schema.json`，明確把「計算驗證」與「命理解讀校核」分開；目前維持 `protocol-only`，沒有自行製造解讀 expected value。
-- 建立 Reference ontology 與查詢 API：`Bazi.Reference.getConcept()`、`getRule()`、`getSourcesForRule()`、`getRulesFromSource()`、`getVariants()`、`getCoverage()` 與 `toContext()`；68 條既有規則、68 個概念與 6 個來源可雙向追溯，且不改變 `Bazi.calculate()` 或 Demo 主畫面。
+- 建立 Reference ontology 與查詢 API：`Bazi.Reference.getConcept()`、`getRule()`、`getSourcesForRule()`、`getRulesFromSource()`、`getVariants()`、`getCoverage()` 與 `toContext()`；既有 68 條規則加上 8 個系統級 Concept，共 76 條 Reference rule、76 個概念與 6 個來源可雙向追溯，且不改變 `Bazi.calculate()` 或 Demo 主畫面。
+- 將 Calendar、TenGod、HiddenStem、Interactions、Strength、Luck、Transit、UseGod 升格為系統級 Reference Concept；每項保留模組、公開 API、輸出欄位、版本與 sourceCoverage，沒有古籍定位的功能明確標示為 `sdk-contract-only`。
 - 正格候選改以 `pattern/regular` 表達，壬騎龍背等全局格局以 `pattern/special/research-only` 表達；舊 runtime 分類仍保留相容欄位，避免將特殊格混入 ShenSha。
 - 新增 `schemas/concept.schema.json`、`taxonomy.schema.json`、`source.schema.json`、`evidence.schema.json`、`variant.schema.json`、`coverage.schema.json`；新增自動生成的 [`Reference 概念文件`](docs/reference/generated/index.md) 與 [`Coverage Matrix`](docs/coverage/coverage-matrix.md)。
 - 新增 [`sources/variants.json`](sources/variants.json) 與 `variants-catalog.schema.json`，將 Profile 與算法差異提升為可查詢資料；包含年界、月界、子時、真太陽時、起運、命宮、人元分日、神煞查法與用神模型。

@@ -18,6 +18,9 @@
     "version": {"type": "string"},
     "ruleFamily": {"type": "array", "items": {"type": "string"}},
     "confidence": {"type": "array", "items": {"type": "string"}},
+    "api": {"type": "array", "items": {"type": "string"}},
+    "outputFields": {"type": "array", "items": {"type": "string"}},
+    "evidenceStatus": {"type": "array", "items": {"type": "string"}},
     "implementation": {"type": "object"}
   }
 }

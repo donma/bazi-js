@@ -16,6 +16,7 @@
 | reference taxonomy | `0.1.0` | `src/reference/taxonomy.js`；概念類型、patternType、狀態與 legacy mapping |
 | reference index | `0.1.0` | `src/reference/index.js`；概念／規則／來源／variants／AI Context 查詢 |
 | reference coverage | `0.1.0` | `validation/coverage/coverage.json`；分開記錄來源、定位、變體、實作與驗證覆蓋 |
+| system concepts | `0.1.0` | `src/reference/system-concepts.js`；Calendar／TenGod／HiddenStem／Interactions／Strength／Luck／Transit／UseGod 的 SDK 契約 |
 
 ## 對齊規則
 

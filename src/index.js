@@ -67,6 +67,8 @@ const Bazi = {
   rules: {
     version: VERSIONS.ruleSetVersion,
     shenSha: { version: VERSIONS.shenShaRuleVersion },
+    tenGod: { version: VERSIONS.tenGodRuleVersion },
+    hiddenStem: { version: VERSIONS.hiddenStemRuleVersion },
     specialRules: { version: VERSIONS.specialRuleVersion },
     patterns: { version: VERSIONS.patternRuleVersion, regularVersion: VERSIONS.regularPatternRuleVersion },
     strength: { version: VERSIONS.strengthRuleVersion, qiLayerVersion: VERSIONS.strengthQiLayerVersion, fiveCategoryVersion: VERSIONS.fiveCategoryRuleVersion },
@@ -74,6 +76,9 @@ const Bazi = {
     classicalSummary: { version: VERSIONS.classicalSummaryRuleVersion },
     analysis: { version: VERSIONS.analysisRuleVersion },
     luck: { version: VERSIONS.luckRuleVersion },
+    interactions: { version: VERSIONS.interactionRuleVersion },
+    transit: { version: VERSIONS.transitGraphVersion },
+    useGod: { version: VERSIONS.useGodResolverVersion },
     reference: {
       taxonomyVersion: VERSIONS.referenceTaxonomyVersion,
       indexVersion: VERSIONS.referenceIndexVersion,

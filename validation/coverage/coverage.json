@@ -8,49 +8,49 @@
       "catalogVersion": "2026.09",
       "scope": "all",
       "totals": {
-        "concepts": 68,
-        "rules": 68
+        "concepts": 76,
+        "rules": 76
       },
       "dimensions": {
         "sourceLinked": {
-          "covered": 68,
-          "total": 68,
-          "percent": 100
+          "covered": 71,
+          "total": 76,
+          "percent": 93.4
         },
         "locatorBacked": {
-          "covered": 68,
-          "total": 68,
-          "percent": 100
+          "covered": 71,
+          "total": 76,
+          "percent": 93.4
         },
         "variantsDocumented": {
           "covered": 22,
-          "total": 68,
-          "percent": 32.4
+          "total": 76,
+          "percent": 28.9
         },
         "machineReadable": {
-          "covered": 68,
-          "total": 68,
+          "covered": 76,
+          "total": 76,
           "percent": 100
         },
         "implemented": {
-          "covered": 61,
-          "total": 68,
-          "percent": 89.7
+          "covered": 69,
+          "total": 76,
+          "percent": 90.8
         },
         "tests": {
           "covered": 0,
-          "total": 68,
+          "total": 76,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 68,
+          "total": 76,
           "status": "not-collected"
         },
         "documentation": {
-          "covered": 68,
-          "total": 68,
-          "percent": 100
+          "covered": 71,
+          "total": 76,
+          "percent": 93.4
         }
       },
       "entries": [
@@ -937,6 +937,110 @@
           "implemented": false,
           "testStatus": "not-collected",
           "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "calendar.engine",
+          "conceptType": "calendar",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "ten-god.relation",
+          "conceptType": "ten-god",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "hidden-stem.registry",
+          "conceptType": "hidden-stem",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "interaction.chart-relationships",
+          "conceptType": "interaction",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "strength.engine",
+          "conceptType": "strength",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "luck.cycles",
+          "conceptType": "luck",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "transit.graph",
+          "conceptType": "transit",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        },
+        {
+          "conceptId": "use-god.resolver",
+          "conceptType": "use-god",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
         }
       ]
     },
@@ -945,52 +1049,66 @@
       "catalogVersion": "2026.09",
       "scope": "calendar",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "locatorBacked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "calendar.engine",
+          "conceptType": "calendar",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",
@@ -1153,104 +1271,132 @@
       "catalogVersion": "2026.09",
       "scope": "ten-god",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "locatorBacked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "ten-god.relation",
+          "conceptType": "ten-god",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",
       "catalogVersion": "2026.09",
       "scope": "hidden-stem",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "locatorBacked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "hidden-stem.registry",
+          "conceptType": "hidden-stem",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",
@@ -1413,104 +1559,132 @@
       "catalogVersion": "2026.09",
       "scope": "interaction",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "locatorBacked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "interaction.chart-relationships",
+          "conceptType": "interaction",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",
       "catalogVersion": "2026.09",
       "scope": "strength",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "locatorBacked": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "strength.engine",
+          "conceptType": "strength",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",
@@ -1843,52 +2017,66 @@
       "catalogVersion": "2026.09",
       "scope": "use-god",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "locatorBacked": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "use-god.resolver",
+          "conceptType": "use-god",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",
@@ -2716,104 +2904,132 @@
       "catalogVersion": "2026.09",
       "scope": "luck",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "locatorBacked": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "luck.cycles",
+          "conceptType": "luck",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": true,
+          "locatorBacked": true,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",
       "catalogVersion": "2026.09",
       "scope": "transit",
       "totals": {
-        "concepts": 0,
-        "rules": 0
+        "concepts": 1,
+        "rules": 1
       },
       "dimensions": {
         "sourceLinked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "locatorBacked": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "variantsDocumented": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         },
         "machineReadable": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "implemented": {
-          "covered": 0,
-          "total": 0,
-          "percent": 0
+          "covered": 1,
+          "total": 1,
+          "percent": 100
         },
         "tests": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "external": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "status": "not-collected"
         },
         "documentation": {
           "covered": 0,
-          "total": 0,
+          "total": 1,
           "percent": 0
         }
       },
-      "entries": []
+      "entries": [
+        {
+          "conceptId": "transit.graph",
+          "conceptType": "transit",
+          "status": "implemented",
+          "ruleCount": 1,
+          "sourceLinked": false,
+          "locatorBacked": false,
+          "variantsDocumented": false,
+          "machineReadable": true,
+          "implemented": true,
+          "testStatus": "not-collected",
+          "externalStatus": "not-collected"
+        }
+      ]
     },
     {
       "coverageVersion": "0.1.0",

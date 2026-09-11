@@ -8,6 +8,7 @@ import { SHENSHA_REGISTRY } from '../shensha/registry.js';
 import { SPECIAL_RULE_REGISTRY } from '../special-rules/registry.js';
 import { SPECIAL_PATTERN_REGISTRY } from '../patterns/registry.js';
 import { REGULAR_PATTERN_REGISTRY } from '../patterns/regular.js';
+import { SYSTEM_CONCEPTS } from './system-concepts.js';
 import {
   CONCEPT_TYPES,
   TAXONOMY_VERSION,
@@ -127,7 +128,41 @@ function canonicalRule(rule) {
   });
 }
 
-const CANONICAL_RULES = Object.freeze(RULES.map(canonicalRule));
+function canonicalSystemRule(concept) {
+  return clone({
+    id: concept.conceptId,
+    ruleId: concept.ruleId,
+    conceptId: concept.conceptId,
+    name: concept.name,
+    displayName: concept.displayName || concept.name,
+    aliases: concept.aliases || [],
+    tradition: concept.tradition,
+    conceptType: concept.conceptType,
+    ruleFamily: concept.ruleFamily,
+    baseOn: concept.baseOn || [],
+    scope: concept.scope,
+    category: concept.category || 'neutral',
+    confidence: concept.confidence,
+    status: concept.status,
+    version: concept.version,
+    sourceIds: concept.sourceIds || [],
+    references: concept.references || [],
+    description: concept.description || '',
+    variants: concept.variants || [],
+    researchNotes: concept.researchNotes || {},
+    evidence: concept.evidence || [],
+    referenceKind: 'system-concept',
+    api: concept.implementation?.api || [],
+    outputFields: concept.implementation?.outputFields || [],
+    implementation: {
+      ...(concept.implementation || {}),
+      runtimeRegistry: true
+    }
+  });
+}
+
+const SYSTEM_RULES = Object.freeze(SYSTEM_CONCEPTS.map(canonicalSystemRule));
+const CANONICAL_RULES = Object.freeze([...RULES.map(canonicalRule), ...SYSTEM_RULES]);
 const RULE_BY_ID = new Map(CANONICAL_RULES.flatMap((rule) => [[rule.ruleId, rule], [rule.id, rule]]));
 
 function conceptDescription(rules) {
@@ -152,6 +187,9 @@ function buildConcept(rules) {
     version: [...new Set(rules.map((rule) => rule.version).filter(Boolean))].join(', '),
     ruleFamily: [...new Set(rules.map((rule) => rule.ruleFamily).filter(Boolean))],
     confidence: [...new Set(rules.map((rule) => rule.confidence).filter(Boolean))],
+    api: [...new Set(rules.flatMap((rule) => rule.api || []))],
+    outputFields: [...new Set(rules.flatMap((rule) => rule.outputFields || []))],
+    evidenceStatus: [...new Set(rules.map((rule) => rule.evidence?.status).filter(Boolean))],
     implementation: {
       status: rules.every((rule) => rule.implementation?.status === 'not-implemented') ? 'not-implemented' : 'registered',
       modules: [...new Set(rules.map((rule) => rule.implementation?.module).filter(Boolean))]
@@ -283,7 +321,12 @@ function coverageEntry(concept) {
     ruleCount: rules.length,
     sourceLinked: hasSource,
     locatorBacked: hasLocator,
-    variantsDocumented: rules.some((rule) => (rule.variants || []).length > 0 || rule.evidence?.some((item) => (item.variants || []).length > 0)),
+    variantsDocumented: rules.some((rule) => {
+      const evidenceVariants = Array.isArray(rule.evidence)
+        ? rule.evidence.some((item) => (item.variants || []).length > 0)
+        : false;
+      return (rule.variants || []).length > 0 || evidenceVariants;
+    }),
     machineReadable: true,
     implemented: rules.some((rule) => rule.implementation?.status === 'implemented'),
     testStatus: 'not-collected',
@@ -359,7 +402,7 @@ function validateReferenceIndex() {
   for (const rule of CANONICAL_RULES) {
     if (ruleIds.has(rule.ruleId)) errors.push(`duplicate ruleId: ${rule.ruleId}`);
     ruleIds.add(rule.ruleId);
-    if (!rule.sourceIds.length) errors.push(`${rule.ruleId}: no linked source`);
+    if (!rule.sourceIds.length && rule.referenceKind !== 'system-concept') errors.push(`${rule.ruleId}: no linked source`);
     for (const sourceId of rule.sourceIds) if (!sourceMap.has(sourceId)) errors.push(`${rule.ruleId}: unknown source ${sourceId}`);
     if (!CONCEPT_TYPES.includes(rule.conceptType)) errors.push(`${rule.ruleId}: invalid canonical conceptType`);
     if (rule.conceptType === 'pattern' && !rule.patternType) errors.push(`${rule.ruleId}: patternType is required`);
@@ -385,6 +428,7 @@ function validateReferenceIndex() {
 
 export {
   CANONICAL_RULES,
+  SYSTEM_CONCEPTS,
   CONCEPTS,
   RULES,
   getConcept,

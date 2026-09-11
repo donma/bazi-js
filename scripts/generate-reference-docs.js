@@ -40,6 +40,7 @@ const indexRows = concepts.map((concept) => {
     '## 判定範圍',
     '',
     ...rules.map((rule) => `- ${rule.ruleId}: ${rule.baseOn.join('、')}（scope: ${rule.scope}；ruleFamily: ${rule.ruleFamily}）`),
+    ...(rules.some((rule) => rule.api?.length) ? ['', '## SDK API 與輸出', '', `- API：${[...new Set(rules.flatMap((rule) => rule.api || []))].map((item) => `\`${item}\``).join('、')}`, `- 輸出欄位：${[...new Set(rules.flatMap((rule) => rule.outputFields || []))].map((item) => `\`${item}\``).join('、')}`] : []),
     '',
     '## 來源與變體',
     '',

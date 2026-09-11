@@ -1974,6 +1974,8 @@ var Bazi = (() => {
   var VALIDATION_MANIFEST_VERSION = "1.0.0";
   var RULE_SET_VERSION = "2026.09";
   var CALENDAR_RULE_VERSION = "1.0.0";
+  var TEN_GOD_RULE_VERSION = "1.0.0";
+  var HIDDEN_STEM_RULE_VERSION = "1.0.0";
   var SHENSHA_RULE_VERSION = "2.1.0";
   var SPECIAL_RULE_VERSION = "1.0.0";
   var PATTERN_RULE_VERSION = "0.1.0";
@@ -1999,6 +2001,8 @@ var Bazi = (() => {
     validationManifestVersion: VALIDATION_MANIFEST_VERSION,
     ruleSetVersion: RULE_SET_VERSION,
     calendarRuleVersion: CALENDAR_RULE_VERSION,
+    tenGodRuleVersion: TEN_GOD_RULE_VERSION,
+    hiddenStemRuleVersion: HIDDEN_STEM_RULE_VERSION,
     shenShaRuleVersion: SHENSHA_RULE_VERSION,
     specialRuleVersion: SPECIAL_RULE_VERSION,
     patternRuleVersion: PATTERN_RULE_VERSION,
@@ -7497,6 +7501,7 @@ var Bazi = (() => {
     CANONICAL_RULES: () => CANONICAL_RULES,
     CONCEPTS: () => CONCEPTS,
     RULES: () => RULES,
+    SYSTEM_CONCEPTS: () => SYSTEM_CONCEPTS,
     findConcept: () => findConcept,
     getConcept: () => getConcept,
     getCoverage: () => getCoverage,
@@ -8039,6 +8044,197 @@ var Bazi = (() => {
     ]
   };
 
+  // src/reference/system-concepts.js
+  var sdkReference = (module, note) => ({
+    type: "sdk",
+    module,
+    locator: module,
+    note
+  });
+  var feature = ({
+    conceptId,
+    name,
+    aliases,
+    conceptType,
+    ruleId,
+    version,
+    ruleFamily,
+    baseOn,
+    scope,
+    description,
+    module,
+    api,
+    outputFields,
+    sourceIds = [],
+    references = [],
+    evidence,
+    variants = []
+  }) => ({
+    conceptId,
+    ruleId,
+    name,
+    displayName: name,
+    aliases,
+    tradition: "bazi-js-sdk",
+    conceptType,
+    ruleFamily,
+    baseOn,
+    scope,
+    category: "neutral",
+    confidence: "implemented-contract",
+    status: "implemented",
+    version,
+    sourceIds,
+    references: references.length ? references : [sdkReference(module, "\u529F\u80FD\u5951\u7D04\u8207\u5BE6\u4F5C\u4F4D\u7F6E\uFF1B\u4E0D\u7B49\u540C\u53E4\u7C4D\u539F\u6587\u8B49\u64DA\u3002")],
+    description,
+    variants,
+    researchNotes: {
+      sourceCoverage: sourceIds.length ? "classical-source-linked" : "sdk-contract-only",
+      note: sourceIds.length ? "\u529F\u80FD\u5DF2\u6709\u76F8\u95DC\u53E4\u7C4D\u4F86\u6E90\u7D22\u5F15\uFF0C\u4F46\u5BE6\u969B SDK \u7B97\u6CD5\u4ECD\u4EE5\u8F38\u51FA evidence \u8207\u7248\u672C\u5951\u7D04\u70BA\u6E96\u3002" : "\u76EE\u524D\u5DF2\u5347\u683C\u70BA\u53EF\u67E5\u8A62\u7684\u5BE6\u4F5C\u6982\u5FF5\uFF1B\u5C08\u5C6C\u53E4\u7C4D\u7248\u672C\u3001\u9801\u78BC\u8207\u539F\u6587\u4ECD\u5F85\u88DC\u9F4A\u3002"
+    },
+    evidence: {
+      kind: "implementation-contract",
+      matched: true,
+      basedOn: ["module", "version", "public-api", "output-schema"],
+      status: evidence?.status || "implemented",
+      note: evidence?.note || "\u6B64\u6982\u5FF5\u63CF\u8FF0\u5DF2\u5B58\u5728\u7684 SDK \u529F\u80FD\uFF0C\u4E0D\u5BA3\u7A31\u984D\u5916\u547D\u7406\u7D50\u8AD6\u3002"
+    },
+    implementation: {
+      status: "implemented",
+      module,
+      api,
+      outputFields
+    }
+  });
+  var SYSTEM_CONCEPTS = Object.freeze([
+    feature({
+      conceptId: "calendar.engine",
+      name: "\u66C6\u6CD5\u8207\u7BC0\u6C23",
+      aliases: ["Calendar", "Calendar Engine", "\u7BC0\u6C23\u8A08\u7B97"],
+      conceptType: "calendar",
+      ruleId: "CALENDAR_ENGINE_001",
+      version: VERSIONS.calendarRuleVersion,
+      ruleFamily: "calendar-and-solar-terms",
+      baseOn: ["birthDate", "birthTime", "timezone", "solarTerms"],
+      scope: "calendar",
+      module: "src/calendar",
+      api: ["Bazi.Calendar", "Bazi.Solar", "Bazi.Lunar", "Bazi.TrueSolarTime"],
+      outputFields: ["calendar.solar", "calendar.lunar", "calendar.solarTerms", "calendar.time", "accuracy.precision"],
+      description: "\u8655\u7406\u516C\u66C6\u3001\u8FB2\u66C6\u3001\u5112\u7565\u65E5\u3001\u7BC0\u6C23\u3001\u751F\u8096\u3001\u661F\u5EA7\u8207\u771F\u592A\u967D\u6642\u4FEE\u6B63\uFF0C\u4E26\u628A\u6642\u9593\u7CBE\u5EA6\u8207\u5047\u8A2D\u7559\u5728\u7D50\u679C\u4E2D\u3002"
+    }),
+    feature({
+      conceptId: "ten-god.relation",
+      name: "\u5341\u795E\u95DC\u4FC2",
+      aliases: ["TenGod", "Ten Gods", "\u5341\u795E\u8A08\u7B97"],
+      conceptType: "ten-god",
+      ruleId: "TENGOD_RELATION_001",
+      version: VERSIONS.tenGodRuleVersion,
+      ruleFamily: "day-master-relation",
+      baseOn: ["dayMaster", "stems", "hiddenStems"],
+      scope: "natal",
+      module: "src/tengods",
+      api: ["Bazi.TenGods"],
+      outputFields: ["tenGods.dayMaster", "tenGods.stems", "tenGods.hidden"],
+      description: "\u4EE5\u65E5\u4E3B\u5929\u5E72\u70BA\u57FA\u6E96\uFF0C\u8A08\u7B97\u56DB\u67F1\u5929\u5E72\u8207\u5730\u652F\u85CF\u5E72\u7684\u5341\u795E\u95DC\u4FC2\uFF0C\u4E26\u4FDD\u7559\u89D2\u8272\u8207\u89E3\u91CB\u6B04\u4F4D\u3002"
+    }),
+    feature({
+      conceptId: "hidden-stem.registry",
+      name: "\u5730\u652F\u85CF\u5E72",
+      aliases: ["HiddenStem", "Hidden Stems", "\u85CF\u5E72"],
+      conceptType: "hidden-stem",
+      ruleId: "HIDDEN_STEM_REGISTRY_001",
+      version: VERSIONS.hiddenStemRuleVersion,
+      ruleFamily: "branch-hidden-stems",
+      baseOn: ["branch"],
+      scope: "pillar",
+      module: "src/core/constants/hidden-stems-data.js",
+      api: ["Bazi.TenGods", "Bazi.calculate"],
+      outputFields: ["hiddenStems.year", "hiddenStems.month", "hiddenStems.day", "hiddenStems.hour", "tenGods.hidden"],
+      description: "\u63D0\u4F9B\u6BCF\u500B\u5730\u652F\u6240\u85CF\u5929\u5E72\u3001\u672C\u6C23\uFF0F\u4E2D\u6C23\uFF0F\u9918\u6C23\u89D2\u8272\u3001\u65E5\u6578\u8207\u6BD4\u4F8B\uFF1B\u4E0D\u628A\u85CF\u5E72\u672C\u8EAB\u8AA4\u7576\u6210\u900F\u5E72\u3002"
+    }),
+    feature({
+      conceptId: "interaction.chart-relationships",
+      name: "\u5929\u5E72\u5730\u652F\u4E92\u52D5",
+      aliases: ["Interactions", "Interactions Engine", "\u5408\u6C96\u5211\u5BB3\u7834"],
+      conceptType: "interaction",
+      ruleId: "INTERACTIONS_ENGINE_001",
+      version: VERSIONS.interactionRuleVersion,
+      ruleFamily: "chart-relationship",
+      baseOn: ["pillars", "stemPairs", "branchGroups"],
+      scope: "whole-chart",
+      module: "src/interactions",
+      api: ["Bazi.Interactions"],
+      outputFields: ["interactions.stems", "interactions.branches", "interactions.formation", "interactions.transformability", "interactions.evidence"],
+      description: "\u8FA8\u8B58\u5929\u5E72\u4E94\u5408\uFF0F\u76F8\u6C96\u8207\u5730\u652F\u5408\u3001\u6C96\u3001\u5211\u3001\u5BB3\u3001\u7834\u3001\u4E09\u5408\u3001\u4E09\u6703\u3001\u534A\u5408\u3001\u62F1\u5408\uFF0C\u4E26\u5C07\u89C0\u6E2C\u5230\u7684\u7D50\u69CB\u8207\u6210\u5316\u5019\u9078\u5206\u958B\u3002"
+    }),
+    feature({
+      conceptId: "strength.engine",
+      name: "\u4E94\u884C\u5F37\u5F31\u8207\u6C23\u6578",
+      aliases: ["Strength", "Strength Engine", "\u6276\u6291\u5F37\u5F31"],
+      conceptType: "strength",
+      ruleId: "STRENGTH_ENGINE_001",
+      version: VERSIONS.strengthRuleVersion,
+      ruleFamily: "whole-chart-strength",
+      baseOn: ["dayMaster", "monthCommander", "hiddenStems", "interactions"],
+      scope: "whole-chart",
+      module: "src/strength",
+      api: ["Bazi.Strength", "Bazi.calculate"],
+      outputFields: ["strength.score", "strength.level", "strength.distribution", "strength.rawQi", "strength.effectiveQi", "strength.transformations", "strength.assessment", "strength.evidence"],
+      sourceIds: ["di-tian-sui-yan-wei"],
+      references: [{ type: "classical", sourceId: "di-tian-sui-yan-wei", title: "\u300A\u6EF4\u5929\u9AD3\u95E1\u5FAE\u300B", locator: "\u4EBA\u5143\u53F8\u4EE4\u3001\u6708\u4EE4\u8207\u5168\u5C40\u53D6\u7528\u76F8\u95DC\u6CE8\u89E3", url: "https://zh.wikisource.org/zh-hant/\u6EF4\u5929\u9AD3\u95E1\u5FAE" }],
+      description: "\u4EE5\u5F97\u4EE4\u3001\u5F97\u5730\u3001\u5F97\u52E2\u3001\u540C\u9EE8\u7570\u9EE8\u3001\u4E92\u52D5\u6298\u640D\u8207\u8F49\u5316\u5019\u9078\u5EFA\u7ACB\u53EF\u8FFD\u6EAF\u5F37\u5F31\u6A21\u578B\uFF1B\u5206\u6578\u662F SDK \u6A21\u578B\u8F38\u51FA\uFF0C\u4E0D\u662F\u79D1\u5B78\u6E2C\u91CF\u3002"
+    }),
+    feature({
+      conceptId: "luck.cycles",
+      name: "\u5927\u904B\u8207\u8D77\u904B",
+      aliases: ["Luck", "Luck Cycles", "\u5927\u904B"],
+      conceptType: "luck",
+      ruleId: "LUCK_CYCLES_ENGINE_001",
+      version: VERSIONS.luckRuleVersion,
+      ruleFamily: "luck-cycle-calculation",
+      baseOn: ["gender", "yearStem", "monthPillar", "solarTerms"],
+      scope: "natal-to-luck",
+      module: "src/luck",
+      api: ["Bazi.Luck", "Bazi.calculate"],
+      outputFields: ["luckCycles.direction", "luckCycles.startAge", "luckCycles.variants", "luckCycles.cycles", "luckCycles.cycles[].annuals"],
+      sourceIds: ["san-ming-tong-hui"],
+      references: [{ type: "classical", sourceId: "san-ming-tong-hui", title: "\u300A\u4E09\u547D\u901A\u6703\u300B", locator: "\u5377\u4E8C\u3008\u8AD6\u5927\u904B\u3009", url: "https://zh.wikisource.org/zh-hant/\u4E09\u547D\u901A\u6703/\u5377\u4E8C" }],
+      description: "\u4F9D Profile \u8207\u8D77\u904B\u65B9\u6CD5\u8A08\u7B97\u9806\u9006\u3001\u8D77\u904B\u6B72\u6578\u3001\u5927\u904B\u5E72\u652F\u8207\u53EF\u9078\u9010\u5E74\u8CC7\u6599\uFF0C\u4E26\u4FDD\u7559\u7CBE\u78BA\u7BC0\u6C23\u6CD5\u8207\u6574\u65E5\u6BD4\u8F03\u6CD5\u3002"
+    }),
+    feature({
+      conceptId: "transit.graph",
+      name: "\u6D41\u5E74\u8207\u6642\u9593\u904B",
+      aliases: ["Transit", "Transit Engine", "\u6D41\u5E74\u6D41\u6708\u6D41\u65E5\u6D41\u6642"],
+      conceptType: "transit",
+      ruleId: "TRANSIT_ENGINE_001",
+      version: VERSIONS.transitGraphVersion,
+      ruleFamily: "time-layer-transit",
+      baseOn: ["datetime", "timezone", "yearBoundary", "monthBoundary", "dayBoundary"],
+      scope: "time-layer",
+      module: "src/transit",
+      api: ["Bazi.Transit", "Bazi.calculate"],
+      outputFields: ["transits.year", "transits.month", "transits.day", "transits.hour", "transits.interactions", "transits.shenShaYear", "transits.transitGraph"],
+      description: "\u8A08\u7B97\u6307\u5B9A\u6642\u9593\u7684\u6D41\u5E74\u3001\u6D41\u6708\u3001\u6D41\u65E5\u3001\u6D41\u6642\uFF0C\u4E26\u4EE5 transit graph \u4FDD\u5B58\u6642\u9593\u5C64\u7BC0\u9EDE\u3001\u4E92\u52D5\u8207\u7D50\u69CB\u4E8B\u4EF6\uFF1B\u4E8B\u4EF6\u4E0D\u76F4\u63A5\u7B49\u540C\u5409\u51F6\u3002"
+    }),
+    feature({
+      conceptId: "use-god.resolver",
+      name: "\u7528\u795E\u6A21\u578B\u8207\u5019\u9078\u89E3\u6790",
+      aliases: ["UseGod", "Use God", "\u7528\u795E"],
+      conceptType: "use-god",
+      ruleId: "USE_GOD_RESOLVER_001",
+      version: VERSIONS.useGodResolverVersion,
+      ruleFamily: "multi-model-analysis",
+      baseOn: ["strength", "patterns", "profile"],
+      scope: "whole-chart-analysis",
+      module: "src/analysis",
+      api: ["Bazi.Analysis", "Bazi.AI", "Bazi.calculate"],
+      outputFields: ["analysis.useGodResolver.candidates", "analysis.useGodResolver.conflicts", "analysis.useGodResolver.finalDecision", "analysis.selected.useGod"],
+      sourceIds: ["di-tian-sui-yan-wei"],
+      references: [{ type: "classical", sourceId: "di-tian-sui-yan-wei", title: "\u300A\u6EF4\u5929\u9AD3\u95E1\u5FAE\u300B", locator: "\u7528\u795E\u3001\u559C\u795E\u3001\u5FCC\u795E\u3001\u4EC7\u795E\u3001\u9592\u795E\u76F8\u95DC\u6CE8\u89E3", url: "https://zh.wikisource.org/zh-hant/\u6EF4\u5929\u9AD3\u95E1\u5FAE" }],
+      description: "\u96C6\u4E2D\u4FDD\u5B58\u6276\u6291\u3001\u683C\u5C40\u3001\u8ABF\u5019\u3001\u901A\u95DC\u8207\u5F9E\u5316\u5019\u9078\uFF1B\u76EE\u524D\u53EA\u6709\u5DF2\u5BE6\u4F5C\u6A21\u578B\u53EF\u4F5C\u6C7A\u5B9A\uFF0C\u5176\u9918\u4FDD\u7559 research-only \u8207 conflict evidence\u3002"
+    })
+  ]);
+
   // src/reference/taxonomy.js
   var TAXONOMY_VERSION = "0.1.0";
   var TAXONOMY_ID = "bazi-js-reference-ontology";
@@ -8263,7 +8459,40 @@ var Bazi = (() => {
       }
     });
   }
-  var CANONICAL_RULES = Object.freeze(RULES.map(canonicalRule));
+  function canonicalSystemRule(concept) {
+    return clone3({
+      id: concept.conceptId,
+      ruleId: concept.ruleId,
+      conceptId: concept.conceptId,
+      name: concept.name,
+      displayName: concept.displayName || concept.name,
+      aliases: concept.aliases || [],
+      tradition: concept.tradition,
+      conceptType: concept.conceptType,
+      ruleFamily: concept.ruleFamily,
+      baseOn: concept.baseOn || [],
+      scope: concept.scope,
+      category: concept.category || "neutral",
+      confidence: concept.confidence,
+      status: concept.status,
+      version: concept.version,
+      sourceIds: concept.sourceIds || [],
+      references: concept.references || [],
+      description: concept.description || "",
+      variants: concept.variants || [],
+      researchNotes: concept.researchNotes || {},
+      evidence: concept.evidence || [],
+      referenceKind: "system-concept",
+      api: concept.implementation?.api || [],
+      outputFields: concept.implementation?.outputFields || [],
+      implementation: {
+        ...concept.implementation || {},
+        runtimeRegistry: true
+      }
+    });
+  }
+  var SYSTEM_RULES = Object.freeze(SYSTEM_CONCEPTS.map(canonicalSystemRule));
+  var CANONICAL_RULES = Object.freeze([...RULES.map(canonicalRule), ...SYSTEM_RULES]);
   var RULE_BY_ID = new Map(CANONICAL_RULES.flatMap((rule3) => [[rule3.ruleId, rule3], [rule3.id, rule3]]));
   function conceptDescription(rules) {
     return rules.find((rule3) => rule3.description)?.description || "";
@@ -8286,6 +8515,9 @@ var Bazi = (() => {
       version: [...new Set(rules.map((rule3) => rule3.version).filter(Boolean))].join(", "),
       ruleFamily: [...new Set(rules.map((rule3) => rule3.ruleFamily).filter(Boolean))],
       confidence: [...new Set(rules.map((rule3) => rule3.confidence).filter(Boolean))],
+      api: [...new Set(rules.flatMap((rule3) => rule3.api || []))],
+      outputFields: [...new Set(rules.flatMap((rule3) => rule3.outputFields || []))],
+      evidenceStatus: [...new Set(rules.map((rule3) => rule3.evidence?.status).filter(Boolean))],
       implementation: {
         status: rules.every((rule3) => rule3.implementation?.status === "not-implemented") ? "not-implemented" : "registered",
         modules: [...new Set(rules.map((rule3) => rule3.implementation?.module).filter(Boolean))]
@@ -8404,7 +8636,10 @@ var Bazi = (() => {
       ruleCount: rules.length,
       sourceLinked: hasSource,
       locatorBacked: hasLocator,
-      variantsDocumented: rules.some((rule3) => (rule3.variants || []).length > 0 || rule3.evidence?.some((item) => (item.variants || []).length > 0)),
+      variantsDocumented: rules.some((rule3) => {
+        const evidenceVariants = Array.isArray(rule3.evidence) ? rule3.evidence.some((item) => (item.variants || []).length > 0) : false;
+        return (rule3.variants || []).length > 0 || evidenceVariants;
+      }),
       machineReadable: true,
       implemented: rules.some((rule3) => rule3.implementation?.status === "implemented"),
       testStatus: "not-collected",
@@ -8473,7 +8708,7 @@ var Bazi = (() => {
     for (const rule3 of CANONICAL_RULES) {
       if (ruleIds.has(rule3.ruleId)) errors.push(`duplicate ruleId: ${rule3.ruleId}`);
       ruleIds.add(rule3.ruleId);
-      if (!rule3.sourceIds.length) errors.push(`${rule3.ruleId}: no linked source`);
+      if (!rule3.sourceIds.length && rule3.referenceKind !== "system-concept") errors.push(`${rule3.ruleId}: no linked source`);
       for (const sourceId of rule3.sourceIds) if (!sourceMap.has(sourceId)) errors.push(`${rule3.ruleId}: unknown source ${sourceId}`);
       if (!CONCEPT_TYPES.includes(rule3.conceptType)) errors.push(`${rule3.ruleId}: invalid canonical conceptType`);
       if (rule3.conceptType === "pattern" && !rule3.patternType) errors.push(`${rule3.ruleId}: patternType is required`);
@@ -9225,6 +9460,8 @@ var Bazi = (() => {
     rules: {
       version: VERSIONS.ruleSetVersion,
       shenSha: { version: VERSIONS.shenShaRuleVersion },
+      tenGod: { version: VERSIONS.tenGodRuleVersion },
+      hiddenStem: { version: VERSIONS.hiddenStemRuleVersion },
       specialRules: { version: VERSIONS.specialRuleVersion },
       patterns: { version: VERSIONS.patternRuleVersion, regularVersion: VERSIONS.regularPatternRuleVersion },
       strength: { version: VERSIONS.strengthRuleVersion, qiLayerVersion: VERSIONS.strengthQiLayerVersion, fiveCategoryVersion: VERSIONS.fiveCategoryRuleVersion },
@@ -9232,6 +9469,9 @@ var Bazi = (() => {
       classicalSummary: { version: VERSIONS.classicalSummaryRuleVersion },
       analysis: { version: VERSIONS.analysisRuleVersion },
       luck: { version: VERSIONS.luckRuleVersion },
+      interactions: { version: VERSIONS.interactionRuleVersion },
+      transit: { version: VERSIONS.transitGraphVersion },
+      useGod: { version: VERSIONS.useGodResolverVersion },
       reference: {
         taxonomyVersion: VERSIONS.referenceTaxonomyVersion,
         indexVersion: VERSIONS.referenceIndexVersion,
